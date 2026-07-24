@@ -24,7 +24,13 @@ type Executive = {
 
 const executives: Executive[] = [
   { slug:'omar-bah', name:'Omar Bah', role:'Chairman', status:'pending' },
-  { slug:'kaddy-bojang', name:'Kaddy Bojang', role:'Vice Chairperson', location:'Kanilai, The Gambia', occupation:'Homemaker', status:'pending' },
+  {
+    slug:'kaddy-bojang', name:'Kaddy Bojang', role:'Vice Chairperson', location:'Kanilai, The Gambia', occupation:'Homemaker',
+    bio:'Kaddy Bojang serves as Vice Chairperson of the SANGAJOR B.C.S Class of 2008 Association. A proud former student of SANGAJOR Basic Cycle School, she is committed to supporting the Association through cooperation, responsible leadership and service. As a homemaker, she values care, patience, unity and the strength of working together. In her leadership role, she is dedicated to supporting the Chairperson, encouraging member participation and helping create a welcoming Association in which every member feels respected, heard and valued.',
+    reason:'I accepted this leadership role because I want to serve our Association, support its members and contribute to the growth of the community that helped shape us. I believe leadership is an opportunity to listen, cooperate and help turn our shared goals into meaningful action.',
+    vision:'My vision is to help build a united, active and supportive Association that creates opportunities for members, gives back to our former school and contributes positively to the wider community. I hope to encourage cooperation, respect and meaningful participation throughout our tenure.',
+    status:'complete'
+  },
   {
     slug:'landing-bojang', name:'Landing Bojang', role:'Secretary General', location:'Kanfenda / Sanchaba Sulay Jobe, The Gambia', occupation:'Civil Servant', organisation:'The Gambia Police Force',
     bio:'Landing Bojang serves as Secretary General of the SANGAJOR B.C.S Class of 2008 Association. Born in Foni, he is a proud alumnus of SANGAJOR Basic Cycle School and an Economics graduate of the University of The Gambia. He brings experience in project management, organisational leadership, finance and education. Landing also serves as Assistant Auditor General of the Pan African Students Association and as a tutor in the Economics and Finance Department at the University of The Gambia. His service includes voluntary teaching and more than five years as Secretary General of his village football club.',
@@ -55,7 +61,13 @@ const executives: Executive[] = [
   },
   { slug:'saidou-jallow', name:'Saidou Jallow', role:'Auditor General', status:'pending' },
   { slug:'fatou-nyassi', name:'Fatou Nyassi', role:'Assistant Auditor General', status:'pending' },
-  { slug:'banna-bojang', name:'Banna Bojang', role:'Information & Public Relations Officer (IPRO)', occupation:'Chef | Founder, Elegant Empire AI Studio', status:'pending' },
+  {
+    slug:'banna-bojang', name:'Banna Bojang', role:'Information & Public Relations Officer (IPRO)', occupation:'Chef | Founder, Elegant Empire AI Studio',
+    bio:'Banna Bojang serves as the Information and Public Relations Officer of the SANGAJOR B.C.S Class of 2008 Association. She is a chef and the Founder of Elegant Empire AI Studio, where she combines creativity, communication and digital innovation to help businesses and organisations strengthen their public presence. In her role as IPRO, she is committed to improving communication, promoting transparency, documenting the Association’s journey and ensuring that members remain informed, connected and engaged.',
+    reason:'I accepted this leadership role because I believe communication can unite people, build trust and turn shared ideas into action. I want to use my skills to serve the Association, strengthen member engagement and help preserve the legacy of our class for future generations.',
+    vision:'My vision is to build a strong and reliable communication system that keeps members informed, promotes the Association’s work and preserves our history. I hope to strengthen our public image, encourage participation and use digital platforms to connect members in The Gambia and abroad.',
+    motto:'There is no problem that cannot be solved through communication.', skills:['Communication','Public Relations','Media','Technology','Writing','Graphic Design'], status:'complete'
+  },
   { slug:'tida-bojang', name:'Tida Bojang', role:'Assistant Information & Public Relations Officer', status:'pending' },
   {
     slug:'demba-jammeh', name:'Demba Jammeh', role:'Programme Officer', location:'Brikama Town, The Gambia', occupation:'Civil Servant', organisation:'The Gambia National Petroleum Corporation (GNPC)',
@@ -96,7 +108,6 @@ const reasonsToJoin = [
   { icon: HandHeart, title: 'Contribute', text: 'Use your experience, ideas and skills to support members, our school and the wider community.' },
   { icon: History, title: 'Preserve Our Legacy', text: 'Help document the memories, milestones and achievements of the Class of 2008.' },
 ];
-const values = ['Unity', 'Service', 'Education', 'Accountability', 'Community', 'Development'];
 const navItems = [['Home','#/'],['About','#/about'],['Leadership','#/leadership'],['Membership','#/membership'],['Focus Areas','#/focus'],['Updates','#/updates'],['Our Journey','#/journey'],['Contact','#/contact']];
 
 function useRoute(){const read=()=>window.location.hash.replace('#','')||'/';const[route,setRoute]=useState(read);useEffect(()=>{const handler=()=>{setRoute(read());window.scrollTo({top:0,behavior:'smooth'});};window.addEventListener('hashchange',handler);return()=>window.removeEventListener('hashchange',handler);},[]);return route;}
