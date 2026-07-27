@@ -6,23 +6,105 @@
   <meta name="theme-color" content="#123c31" />
   <title>MySANGAJOR Secure Portal</title>
   <style>
-    :root{font-family:Inter,Arial,sans-serif;color:#16231f;background:#f7f5ef;--green:#123c31;--green2:#1d5949;--gold:#c6a35d;--cream:#f7f5ef;--muted:#69766f;--line:rgba(18,60,49,.14)}*{box-sizing:border-box}body{margin:0;min-width:320px}button,input,select{font:inherit}button{cursor:pointer}.shell{min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at top right,rgba(198,163,93,.2),transparent 35%),var(--cream)}.card{width:min(100%,520px);background:#fff;border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:0 28px 80px rgba(18,60,49,.15)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:30px}.mark{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:var(--gold);font:700 25px Georgia}.brand strong,.brand small{display:block}.brand strong{letter-spacing:.14em;color:var(--green)}.brand small{color:var(--muted);margin-top:3px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--green2)}h1{font:700 38px/1.08 Georgia;margin:14px 0 10px}p{color:var(--muted);line-height:1.65}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#edf1ec;border-radius:14px;margin:24px 0}.tabs button{border:0;border-radius:10px;padding:12px;background:transparent;font-weight:700;color:var(--muted)}.tabs button.active{background:#fff;color:var(--green);box-shadow:0 5px 14px rgba(18,60,49,.09)}label{display:grid;gap:8px;font-size:13px;font-weight:700;margin-top:16px}input,select{width:100%;border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff;color:#16231f}.primary{width:100%;border:0;border-radius:999px;padding:15px;margin-top:22px;background:var(--green);color:#fff;font-weight:800}.secondary{border:0;background:transparent;color:var(--green);font-weight:700;margin:18px auto 0;display:block}.security{display:flex;gap:11px;align-items:flex-start;padding:15px;margin-top:22px;border-radius:14px;background:#edf1ec;color:var(--green);font-size:13px}.security strong,.security small{display:block}.security small{color:var(--muted);margin-top:3px}.demo{font-size:12px;text-align:center;margin:18px 0 0}.dashboard{min-height:100vh;background:#f4f6f3}.topbar{display:flex;justify-content:space-between;align-items:center;padding:20px clamp(20px,5vw,70px);background:#fff;border-bottom:1px solid var(--line)}.user{display:flex;gap:10px;align-items:center}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-weight:800}.logout{border:1px solid var(--line);border-radius:999px;background:#fff;padding:10px 15px;color:var(--green);font-weight:700}.content{padding:42px clamp(20px,6vw,80px)}.welcome{padding:28px;border-radius:24px;background:linear-gradient(135deg,var(--green),#0b2922);color:#fff}.welcome p{color:rgba(255,255,255,.72)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:20px}.metric,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.metric strong,.metric span{display:block}.metric strong{font-size:24px;color:var(--green);margin-bottom:6px}.metric span{font-size:12px;color:var(--muted)}.panel{margin-top:20px}.access{display:grid;gap:10px;margin-top:16px}.access span{padding:12px;border-radius:11px;background:#edf1ec;color:var(--green);font-size:13px}.restricted{background:#fff0ef!important;color:#a4312b!important}@media(max-width:720px){.card{padding:24px}.grid{grid-template-columns:1fr 1fr}.topbar{align-items:flex-start;gap:16px}.user{flex-wrap:wrap;justify-content:flex-end}}@media(max-width:460px){.grid{grid-template-columns:1fr}h1{font-size:32px}}
+    :root{font-family:Inter,Arial,sans-serif;color:#16231f;background:#f7f5ef;--green:#123c31;--green2:#1d5949;--gold:#c6a35d;--cream:#f7f5ef;--muted:#69766f;--line:rgba(18,60,49,.14);--danger:#a4312b;--success:#236b4f}*{box-sizing:border-box}body{margin:0;min-width:320px}button,input{font:inherit}button{cursor:pointer}.shell{min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at top right,rgba(198,163,93,.2),transparent 35%),var(--cream)}.card{width:min(100%,520px);background:#fff;border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:0 28px 80px rgba(18,60,49,.15)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:30px}.mark{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:var(--gold);font:700 25px Georgia}.brand strong,.brand small{display:block}.brand strong{letter-spacing:.14em;color:var(--green)}.brand small{color:var(--muted);margin-top:3px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--green2)}h1{font:700 38px/1.08 Georgia;margin:14px 0 10px}p{color:var(--muted);line-height:1.65}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#edf1ec;border-radius:14px;margin:24px 0}.tabs button{border:0;border-radius:10px;padding:12px;background:transparent;font-weight:700;color:var(--muted)}.tabs button.active{background:#fff;color:var(--green);box-shadow:0 5px 14px rgba(18,60,49,.09)}label{display:grid;gap:8px;font-size:13px;font-weight:700;margin-top:16px}input{width:100%;border:1px solid var(--line);border-radius:13px;padding:14px;background:#fff;color:#16231f}.primary{width:100%;border:0;border-radius:999px;padding:15px;margin-top:22px;background:var(--green);color:#fff;font-weight:800}.primary:disabled{opacity:.6;cursor:not-allowed}.secondary{border:0;background:transparent;color:var(--green);font-weight:700;margin:18px auto 0;display:block}.security{display:flex;gap:11px;align-items:flex-start;padding:15px;margin-top:22px;border-radius:14px;background:#edf1ec;color:var(--green);font-size:13px}.security strong,.security small{display:block}.security small{color:var(--muted);margin-top:3px}.notice{padding:12px 14px;border-radius:12px;margin:16px 0 0;font-size:13px;line-height:1.5}.notice.error{background:#fff0ef;color:var(--danger)}.notice.success{background:#eaf6ef;color:var(--success)}.dashboard{min-height:100vh;background:#f4f6f3}.topbar{display:flex;justify-content:space-between;align-items:center;padding:20px clamp(20px,5vw,70px);background:#fff;border-bottom:1px solid var(--line)}.user{display:flex;gap:10px;align-items:center}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-weight:800}.logout{border:1px solid var(--line);border-radius:999px;background:#fff;padding:10px 15px;color:var(--green);font-weight:700}.content{padding:42px clamp(20px,6vw,80px)}.welcome{padding:28px;border-radius:24px;background:linear-gradient(135deg,var(--green),#0b2922);color:#fff}.welcome p{color:rgba(255,255,255,.72)}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:20px}.metric,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px}.metric strong,.metric span{display:block}.metric strong{font-size:24px;color:var(--green);margin-bottom:6px}.metric span{font-size:12px;color:var(--muted)}.panel{margin-top:20px}.access{display:grid;gap:10px;margin-top:16px}.access span{padding:12px;border-radius:11px;background:#edf1ec;color:var(--green);font-size:13px}.restricted{background:#fff0ef!important;color:var(--danger)!important}@media(max-width:720px){.card{padding:24px}.grid{grid-template-columns:1fr 1fr}.topbar{align-items:flex-start;gap:16px}.user{flex-wrap:wrap;justify-content:flex-end}}@media(max-width:460px){.grid{grid-template-columns:1fr}h1{font-size:32px}}
   </style>
 </head>
 <body>
   <div id="app"></div>
-  <script>
-    const state={mode:'member',step:'identify',identifier:'',role:'ipro',session:null};
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const supabase = createClient(
+      'https://asdhaqogomuebvoyhavk.supabase.co',
+      'sb_publishable_yGFk--vN7MTi9ybR2z5Hyw_w9st7-r4'
+    );
+
+    const state={mode:'member',step:'identify',email:'',password:'',session:null,profile:null,role:'member',loading:true,message:'',messageType:''};
     const app=document.getElementById('app');
-    function render(){
-      if(state.session){const confidential=['chairman','secretary-general'].includes(state.session.role);const analytics=['ipro','chairman'].includes(state.session.role);app.innerHTML=`<div class="dashboard"><header class="topbar"><div class="brand" style="margin:0"><span class="mark">S</span><span><strong>SANGAJOR</strong><small>Digital Village</small></span></div><div class="user"><div class="avatar">${state.session.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div><div><strong>${state.session.name}</strong><small style="display:block;color:var(--muted)">${label(state.session.role)}</small></div><button class="logout" id="logout">Sign out</button></div></header><main class="content"><section class="welcome"><span class="eyebrow" style="color:#d8c79b">Welcome home</span><h1>Good evening, ${state.session.name.split(' ')[0]}.</h1><p>Here is what is happening in your community today.</p></section><section class="grid"><article class="metric"><strong>18 days</strong><span>Until Annual Reunion</span></article><article class="metric"><strong>2 new</strong><span>Announcements</span></article><article class="metric"><strong>Under review</strong><span>Member Care request</span></article><article class="metric"><strong>286</strong><span>Active members</span></article></section><section class="panel"><span class="eyebrow">Your access</span><h2>${label(state.session.role)}</h2><div class="access"><span>Secure authenticated session</span><span>Role-based permissions active</span><span class="${confidential?'':'restricted'}">Confidential Member Care: ${confidential?'Allowed':'Restricted'}</span>${analytics?'<span>Communications and platform analytics: Allowed</span>':''}</div></section></main></div>`;document.getElementById('logout').onclick=()=>{state.session=null;state.step='identify';render()};return;}
-      app.innerHTML=`<main class="shell"><section class="card"><div class="brand"><span class="mark">S</span><span><strong>SANGAJOR</strong><small>Secure Access</small></span></div><span class="eyebrow">${state.mode==='member'?'Member access':'Executive access'}</span><h1>${state.step==='otp'?'Enter verification code':state.mode==='member'?'Welcome to MySANGAJOR':'Executive Office sign in'}</h1><p>${state.step==='identify'?'Enter your registered email address or phone number.':state.step==='password'?'Enter your executive account password.':'We sent a six-digit code to your registered contact.'}</p>${state.step==='identify'?`<div class="tabs"><button id="memberTab" class="${state.mode==='member'?'active':''}">Member</button><button id="executiveTab" class="${state.mode==='executive'?'active':''}">Executive</button></div>`:''}<form id="form">${state.step==='identify'?'<label>Email or phone number<input id="identifier" required placeholder="name@example.com or +220..."></label>':''}${state.step==='password'?'<label>Password<input type="password" required placeholder="Enter your password"></label><label>Demo executive role<select id="role"><option value="ipro">IPRO</option><option value="chairman">Chairman</option><option value="secretary-general">Secretary General</option></select></label>':''}${state.step==='otp'?'<label>Six-digit code<input id="otp" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000"></label>':''}<button class="primary" type="submit">${state.step==='identify'?'Continue':state.step==='password'?'Verify password':'Sign in securely'}</button></form>${state.step!=='identify'?'<button class="secondary" id="back">Go back</button>':''}<div class="security"><span>🔐</span><span><strong>Protected access</strong><small>Members use passwordless OTP. Executives use password plus OTP.</small></span></div><p class="demo">Prototype mode: use any valid-looking details and any six-digit code.</p></section></main>`;
-      if(state.step==='identify'){document.getElementById('memberTab').onclick=()=>{state.mode='member';render()};document.getElementById('executiveTab').onclick=()=>{state.mode='executive';render()}}
-      document.getElementById('form').onsubmit=e=>{e.preventDefault();if(state.step==='identify'){state.identifier=document.getElementById('identifier').value;state.step=state.mode==='executive'?'password':'otp'}else if(state.step==='password'){state.role=document.getElementById('role').value;state.step='otp'}else{const role=state.mode==='member'?'member':state.role;state.session={role,name:role==='member'?'Omar Bah':role==='ipro'?'Banna Bojang':role==='chairman'?'Omar Bah':'Secretary General'}}render()};
-      const back=document.getElementById('back');if(back)back.onclick=()=>{state.step=state.step==='otp'&&state.mode==='executive'?'password':'identify';render()};
+
+    const escapeHtml=(value='')=>value.replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    const officeRole=(office='')=>{const value=office.toLowerCase();if(value.includes('chairman'))return 'chairman';if(value.includes('secretary general'))return 'secretary-general';if(value.includes('public relations')||value.includes('ipro'))return 'ipro';return 'executive'};
+    const label=role=>({member:'Member',ipro:'Information & Public Relations Officer',chairman:'Chairman','secretary-general':'Secretary General',executive:'Executive Member'})[role]||'Member';
+    const setMessage=(text='',type='')=>{state.message=text;state.messageType=type;};
+
+    async function loadProfile(user){
+      const {data,error}=await supabase.from('members').select('id,first_name,last_name,status,executive_roles(office,active)').eq('auth_user_id',user.id).maybeSingle();
+      if(error){console.error(error);return null;}
+      return data;
     }
-    function label(role){return({member:'Member',ipro:'Information & Public Relations Officer',chairman:'Chairman','secretary-general':'Secretary General'})[role]}
-    render();
+
+    async function establishSession(session){
+      if(!session){state.session=null;state.profile=null;state.role='member';return;}
+      state.session=session;
+      state.profile=await loadProfile(session.user);
+      const activeOffice=state.profile?.executive_roles?.find(item=>item.active);
+      state.role=activeOffice?officeRole(activeOffice.office):'member';
+    }
+
+    async function sendOtp(){
+      setMessage();state.loading=true;render();
+      const {error}=await supabase.auth.signInWithOtp({email:state.email,options:{shouldCreateUser:true}});
+      state.loading=false;
+      if(error){setMessage(error.message,'error');render();return;}
+      state.step='otp';setMessage('A six-digit verification code has been sent to your email.','success');render();
+    }
+
+    async function verifyOtp(code){
+      setMessage();state.loading=true;render();
+      const {data,error}=await supabase.auth.verifyOtp({email:state.email,token:code,type:'email'});
+      state.loading=false;
+      if(error){setMessage(error.message,'error');render();return;}
+      await establishSession(data.session);render();
+    }
+
+    async function executiveSignIn(){
+      setMessage();state.loading=true;render();
+      const {data,error}=await supabase.auth.signInWithPassword({email:state.email,password:state.password});
+      state.loading=false;
+      if(error){setMessage(error.message,'error');render();return;}
+      await establishSession(data.session);
+      if(state.role==='member'){
+        await supabase.auth.signOut();state.session=null;state.profile=null;
+        setMessage('This account does not currently have an active executive office.','error');render();return;
+      }
+      render();
+    }
+
+    async function logout(){await supabase.auth.signOut();state.session=null;state.profile=null;state.role='member';state.step='identify';state.password='';setMessage();render();}
+
+    function render(){
+      if(state.loading){app.innerHTML='<main class="shell"><section class="card"><div class="brand"><span class="mark">S</span><span><strong>SANGAJOR</strong><small>Secure Access</small></span></div><p>Loading secure portal…</p></section></main>';return;}
+      if(state.session){
+        const email=state.session.user.email||'';
+        const first=state.profile?.first_name||email.split('@')[0]||'Member';
+        const last=state.profile?.last_name||'';
+        const name=`${first} ${last}`.trim();
+        const confidential=['chairman','secretary-general'].includes(state.role);
+        const analytics=['ipro','chairman'].includes(state.role);
+        const pending=!state.profile;
+        app.innerHTML=`<div class="dashboard"><header class="topbar"><div class="brand" style="margin:0"><span class="mark">S</span><span><strong>SANGAJOR</strong><small>Digital Village</small></span></div><div class="user"><div class="avatar">${escapeHtml(name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><strong>${escapeHtml(name)}</strong><small style="display:block;color:var(--muted)">${label(state.role)}</small></div><button class="logout" id="logout">Sign out</button></div></header><main class="content"><section class="welcome"><span class="eyebrow" style="color:#d8c79b">Welcome home</span><h1>Welcome, ${escapeHtml(first)}.</h1><p>Your MySANGAJOR session is protected by Supabase Authentication.</p></section>${pending?'<div class="notice success" style="margin-top:20px">Your login is active. Your association profile is awaiting administrator approval and connection to your membership record.</div>':''}<section class="grid"><article class="metric"><strong>Secure</strong><span>Authenticated session</span></article><article class="metric"><strong>${escapeHtml(label(state.role))}</strong><span>Current access level</span></article><article class="metric"><strong>${confidential?'Allowed':'Restricted'}</strong><span>Confidential Member Care</span></article><article class="metric"><strong>${analytics?'Allowed':'Restricted'}</strong><span>Platform analytics</span></article></section><section class="panel"><span class="eyebrow">Your access</span><h2>${label(state.role)}</h2><div class="access"><span>Real Supabase authentication active</span><span>Role-based permissions active</span><span class="${confidential?'':'restricted'}">Confidential Member Care: ${confidential?'Allowed':'Restricted'}</span>${analytics?'<span>Communications and platform analytics: Allowed</span>':''}</div></section></main></div>`;
+        document.getElementById('logout').onclick=logout;return;
+      }
+
+      const notice=state.message?`<div class="notice ${state.messageType}">${escapeHtml(state.message)}</div>`:'';
+      app.innerHTML=`<main class="shell"><section class="card"><div class="brand"><span class="mark">S</span><span><strong>SANGAJOR</strong><small>Secure Access</small></span></div><span class="eyebrow">${state.mode==='member'?'Member access':'Executive access'}</span><h1>${state.step==='otp'?'Enter verification code':state.mode==='member'?'Welcome to MySANGAJOR':'Executive Office sign in'}</h1><p>${state.step==='otp'?'Enter the six-digit code sent by Supabase.':state.mode==='member'?'Use your registered email address to receive a secure one-time code.':'Executives sign in with their approved email address and password.'}</p>${state.step==='identify'?`<div class="tabs"><button id="memberTab" class="${state.mode==='member'?'active':''}">Member</button><button id="executiveTab" class="${state.mode==='executive'?'active':''}">Executive</button></div>`:''}${notice}<form id="form">${state.step==='identify'?`<label>Email address<input id="email" type="email" required value="${escapeHtml(state.email)}" placeholder="name@example.com" autocomplete="email"></label>${state.mode==='executive'?'<label>Password<input id="password" type="password" required placeholder="Enter your password" autocomplete="current-password"></label>':''}`:`<label>Six-digit code<input id="otp" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" autocomplete="one-time-code"></label>`}<button class="primary" type="submit" ${state.loading?'disabled':''}>${state.step==='otp'?'Verify and sign in':state.mode==='member'?'Send verification code':'Sign in securely'}</button></form>${state.step!=='identify'?'<button class="secondary" id="back">Use a different email</button>':''}<div class="security"><span>🔐</span><span><strong>Protected access</strong><small>Members use email OTP. Executives use password authentication and verified office permissions.</small></span></div></section></main>`;
+      if(state.step==='identify'){
+        document.getElementById('memberTab').onclick=()=>{state.mode='member';state.password='';setMessage();render()};
+        document.getElementById('executiveTab').onclick=()=>{state.mode='executive';setMessage();render()};
+      }
+      document.getElementById('form').onsubmit=async event=>{
+        event.preventDefault();
+        if(state.step==='otp'){await verifyOtp(document.getElementById('otp').value);return;}
+        state.email=document.getElementById('email').value.trim().toLowerCase();
+        if(state.mode==='member'){await sendOtp();return;}
+        state.password=document.getElementById('password').value;await executiveSignIn();
+      };
+      const back=document.getElementById('back');if(back)back.onclick=()=>{state.step='identify';setMessage();render()};
+    }
+
+    const {data:{session}}=await supabase.auth.getSession();
+    await establishSession(session);state.loading=false;render();
+    supabase.auth.onAuthStateChange(async(_event,newSession)=>{await establishSession(newSession);state.loading=false;render()});
   </script>
 </body>
 </html>
