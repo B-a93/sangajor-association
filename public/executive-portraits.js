@@ -1,7 +1,7 @@
 (() => {
-  const portraits = {
+  const directoryPortraits = {
     'Omar Bah': '/omar Bah-chairman Jul 28, 2026, 11_28_29 AM.png',
-    'Kaddy Bojang': '/kaddy bojang  Jul 23, 2026, 05_24_00 PM.png',
+    'Kaddy Bojang': '/Kaddy-Bojang-vice-chairlady-png.png',
     'Landing Bojang': '/landing-bojang sg24, 2026, 01_46_19 PM.png',
     'Lamin Bangura': '/Lamin-Bangura-Ass-SG Jul 27, 2026, 11_34_59 PM.png',
     'Mbaye Manga': '/mbaye-manga-Treasurer 28, 2026, 12_29_12 AM.png',
@@ -16,8 +16,14 @@
     'Yusupha Badjie': '/yusupha-badjie-adviser Jul 28, 2026, 12_15_22 AM.png'
   };
 
-  const makeImage = (name, className) => {
-    const src = portraits[name];
+  const profilePortraits = {
+    ...directoryPortraits,
+    'Kaddy Bojang': '/Kaddy-Bojang-vice-chairlady-full-png.png',
+    'Banna Bojang': '/Banna-Bojang-IPRO-Full-png.png'
+  };
+
+  const makeImage = (name, className, sourceMap) => {
+    const src = sourceMap[name];
     if (!src) return null;
     const img = document.createElement('img');
     img.src = src;
@@ -36,24 +42,31 @@
     document.querySelectorAll('.leader-card').forEach((card) => {
       const name = card.querySelector('h3')?.textContent?.trim();
       const holder = card.querySelector('.leader-portrait');
-      if (!name || !holder || !portraits[name] || holder.querySelector('img')) return;
-      const img = makeImage(name, 'executive-directory-image');
+      if (!name || !holder || !directoryPortraits[name]) return;
+      const current = holder.querySelector('img');
+      if (current?.getAttribute('src') === directoryPortraits[name]) return;
+      const img = makeImage(name, 'executive-directory-image', directoryPortraits);
       if (img) holder.replaceChildren(img);
     });
 
     document.querySelectorAll('.mini-leaders a').forEach((card) => {
       const name = card.querySelector('strong')?.textContent?.trim();
       const holder = card.querySelector(':scope > span');
-      if (!name || !holder || !portraits[name] || holder.querySelector('img')) return;
-      const img = makeImage(name, 'executive-preview-image');
+      if (!name || !holder || !directoryPortraits[name]) return;
+      const current = holder.querySelector('img');
+      if (current?.getAttribute('src') === directoryPortraits[name]) return;
+      const img = makeImage(name, 'executive-preview-image', directoryPortraits);
       if (img) holder.replaceChildren(img);
     });
 
     const profileName = document.querySelector('.executive-hero h1')?.textContent?.trim();
     const profileHolder = document.querySelector('.executive-photo');
-    if (profileName && profileHolder && portraits[profileName] && !profileHolder.querySelector('img')) {
-      const img = makeImage(profileName, 'executive-profile-image');
-      if (img) profileHolder.replaceChildren(img);
+    if (profileName && profileHolder && profilePortraits[profileName]) {
+      const current = profileHolder.querySelector('img');
+      if (current?.getAttribute('src') !== profilePortraits[profileName]) {
+        const img = makeImage(profileName, 'executive-profile-image', profilePortraits);
+        if (img) profileHolder.replaceChildren(img);
+      }
     }
   };
 
