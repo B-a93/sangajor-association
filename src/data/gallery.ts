@@ -10,7 +10,6 @@ export type GalleryAlbum = {
 };
 
 export const galleryCategories = [
-  { name: 'Executive Meetings', description: 'Leadership meetings, planning sessions and official engagements.' },
   { name: 'Community Service', description: 'Volunteer activities and projects serving our communities.' },
   { name: 'School Visits', description: 'Moments shared with students, teachers and SANGAJOR B.C.S.' },
   { name: 'Annual General Meetings', description: 'Key decisions, reports and milestones from our general meetings.' },
@@ -20,16 +19,6 @@ export const galleryCategories = [
 
 export const galleryAlbums: GalleryAlbum[] = [
   {
-    slug: 'executive-committee-inauguration',
-    title: 'Executive Committee Inauguration',
-    category: 'Executive Meetings',
-    date: '2026-07-01',
-    photoCount: 42,
-    description: 'The official inauguration of the Executive Committee and the beginning of a new chapter of service.',
-    accent: 'navy',
-    featured: true,
-  },
-  {
     slug: 'class-of-2008-reunion',
     title: 'Class of 2008 Reunion',
     category: 'Social Events',
@@ -37,6 +26,7 @@ export const galleryAlbums: GalleryAlbum[] = [
     photoCount: 28,
     description: 'Members reconnecting, sharing memories and renewing the friendships formed at school.',
     accent: 'green',
+    featured: true,
   },
   {
     slug: 'school-community-visit',

@@ -1,4 +1,4 @@
-import { GraduationCap, HandHeart, HeartHandshake, History, Leaf, Network, ShieldCheck, Users } from 'lucide-react';
+import { BriefcaseBusiness, GraduationCap, HandHeart, HeartHandshake, History, Leaf, Network, ShieldCheck, Sparkles, Users } from 'lucide-react';
 
 export const impactAreas = [
   { icon: GraduationCap, title: 'Education', text: 'Supporting learning opportunities and educational initiatives at SANGAJOR B.C.S and beyond.' },
@@ -10,9 +10,14 @@ export const impactAreas = [
 ];
 
 export const reasonsToJoin = [
-  { icon: Network, title: 'Reconnect', text: 'Strengthen friendships and professional connections formed during our school years.' },
-  { icon: HandHeart, title: 'Contribute', text: 'Use your experience, ideas and skills to support members, our school and the wider community.' },
-  { icon: History, title: 'Preserve Our Legacy', text: 'Help document the memories, milestones and achievements of the Class of 2008.' }
+  { icon: Network, title: 'Reconnect With Classmates', text: 'Renew friendships and strengthen the personal and professional relationships formed during our school years.' },
+  { icon: HeartHandshake, title: 'Member Welfare Support', text: 'Belong to a caring network that can respond during illness, bereavement, emergencies and other difficult moments.' },
+  { icon: BriefcaseBusiness, title: 'Professional & Business Network', text: 'Discover the experience, skills and businesses of fellow members through secure members-only services.' },
+  { icon: GraduationCap, title: 'Learning & Mentorship', text: 'Share knowledge, receive career guidance and support younger generations through education and mentorship.' },
+  { icon: HandHeart, title: 'Serve the Community', text: 'Take part in projects that support SANGAJOR B.C.S, our communities and meaningful social causes.' },
+  { icon: Sparkles, title: 'Events & Opportunities', text: 'Receive member announcements and access reunions, programmes, volunteer opportunities and Association activities.' },
+  { icon: Users, title: 'Have a Voice', text: 'Participate in discussions, contribute ideas and help shape the Association’s priorities and long-term direction.' },
+  { icon: History, title: 'Preserve Our Legacy', text: 'Help document the memories, milestones and achievements of the Class of 2008 for future generations.' }
 ];
 
-export const navItems = [['Home','#/'],['About','#/about'],['Leadership','#/leadership'],['Membership','#/membership'],['Members','#/members'],['Focus Areas','#/focus'],['Events','#/events'],['Gallery','#/gallery'],['News','#/updates'],['Our Journey','#/journey'],['Contact','#/contact']];
+export const navItems = [['Home','#/'],['About','#/about'],['Leadership','#/leadership'],['Membership','#/membership'],['Focus Areas','#/focus'],['Events','#/events'],['Gallery','#/gallery'],['News','#/updates'],['Our Journey','#/journey'],['Contact','#/contact']];
