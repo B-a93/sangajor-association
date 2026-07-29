@@ -8,6 +8,7 @@ import { Contact } from './pages/Contact';
 import { Events } from './pages/Events';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
 import { Focus } from './pages/Focus';
+import { Gallery } from './pages/Gallery';
 import { Home } from './pages/Home';
 import { Journey } from './pages/Journey';
 import { Leadership } from './pages/Leadership';
@@ -21,6 +22,7 @@ const pages: Record<string, ReactElement> = {
   '/membership': <Membership />,
   '/focus': <Focus />,
   '/events': <Events />,
+  '/gallery': <Gallery />,
   '/updates': <Updates />,
   '/journey': <Journey />,
   '/contact': <Contact />,
