@@ -3,6 +3,8 @@ import { CallToAction } from '../components/ui/CallToAction';
 import { executives } from '../data/executives';
 import { impactAreas } from '../data/site';
 
+const officialLogo = '/sangajorr-association-logo.png.jpeg';
+
 export function Home() {
   return (
     <>
@@ -11,6 +13,13 @@ export function Home() {
         <div className="hero-glow hero-glow-two" aria-hidden="true" />
 
         <div className="hero-content">
+          <img
+            src={officialLogo}
+            alt="Official logo of Sangajor B.C.S. Class of 2008 Association"
+            width="118"
+            height="118"
+            style={{ width: '118px', height: '118px', objectFit: 'contain', borderRadius: '50%', marginBottom: '24px', background: '#fff', padding: '6px', boxShadow: '0 18px 45px rgba(0,0,0,.22)' }}
+          />
           <span className="eyebrow">Welcome to our official digital platform</span>
           <h1>
             Sangajor B.C.S. Class of 2008 <em>Association</em>
