@@ -2,18 +2,7 @@ import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { navItems } from '../../data/site';
 
-function AssociationMark() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 64 64" role="img" aria-label="Sangajor B.C.S. Class of 2008 Association mark">
-      <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M18 24h28v18H18z" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path d="M16 23l16-10 16 10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M24 42V29h16v13" fill="none" stroke="currentColor" strokeWidth="2" />
-      <text x="32" y="37" textAnchor="middle" fontSize="8" fontWeight="800" fill="currentColor">2008</text>
-      <path d="M22 49h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
+const officialLogo = '/sangajorr-association-logo.png.jpeg';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,7 +10,15 @@ export function Header() {
   return (
     <header className="site-header">
       <a className="brand" href="#/" aria-label="Sangajor B.C.S. Class of 2008 Association homepage">
-        <div className="brand-mark"><AssociationMark /></div>
+        <div className="brand-mark">
+          <img
+            src={officialLogo}
+            alt="Sangajor B.C.S. Class of 2008 Association logo"
+            width="45"
+            height="45"
+            style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }}
+          />
+        </div>
         <div>
           <strong>Sangajor B.C.S.</strong>
           <span>Class of 2008 Association</span>
