@@ -15,4 +15,4 @@ export const reasonsToJoin = [
   { icon: History, title: 'Preserve Our Legacy', text: 'Help document the memories, milestones and achievements of the Class of 2008.' }
 ];
 
-export const navItems = [['Home','#/'],['About','#/about'],['Leadership','#/leadership'],['Membership','#/membership'],['Focus Areas','#/focus'],['Events','#/events'],['News','#/updates'],['Our Journey','#/journey'],['Contact','#/contact']];
+export const navItems = [['Home','#/'],['About','#/about'],['Leadership','#/leadership'],['Membership','#/membership'],['Focus Areas','#/focus'],['Events','#/events'],['Gallery','#/gallery'],['News','#/updates'],['Our Journey','#/journey'],['Contact','#/contact']];
