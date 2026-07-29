@@ -5,6 +5,7 @@ import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
+import { Events } from './pages/Events';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
 import { Focus } from './pages/Focus';
 import { Home } from './pages/Home';
@@ -19,6 +20,7 @@ const pages: Record<string, ReactElement> = {
   '/leadership': <Leadership />,
   '/membership': <Membership />,
   '/focus': <Focus />,
+  '/events': <Events />,
   '/updates': <Updates />,
   '/journey': <Journey />,
   '/contact': <Contact />,
