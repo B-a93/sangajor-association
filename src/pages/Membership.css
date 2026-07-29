@@ -1,0 +1,68 @@
+.membership-benefits-section {
+  display: grid;
+  gap: 2rem;
+}
+
+.membership-benefits-grid {
+  align-items: stretch;
+}
+
+.membership-private-note {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 2.5rem;
+  border-radius: 24px;
+  background: var(--color-navy, #102a43);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.membership-private-note h2,
+.membership-private-note p {
+  color: inherit;
+}
+
+.membership-private-note p {
+  max-width: 760px;
+  margin-bottom: 0;
+  opacity: 0.86;
+}
+
+.membership-join-card {
+  padding: 2.5rem;
+  border-radius: 24px;
+  background: var(--color-cream, #f7f3ea);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.membership-join-card p {
+  max-width: 720px;
+  margin-bottom: 0;
+}
+
+.membership-join-button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 760px) {
+  .membership-private-note,
+  .membership-join-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1.75rem;
+  }
+
+  .membership-join-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
