@@ -4,7 +4,7 @@ import { navItems } from '../../data/site';
 
 function AssociationMark() {
   return (
-    <svg viewBox="0 0 64 64" role="img" aria-label="Sangajor B.C.S. Class of 2008 Association mark">
+    <svg width="34" height="34" viewBox="0 0 64 64" role="img" aria-label="Sangajor B.C.S. Class of 2008 Association mark">
       <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" strokeWidth="2" />
       <path d="M18 24h28v18H18z" fill="none" stroke="currentColor" strokeWidth="2" />
       <path d="M16 23l16-10 16 10" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
