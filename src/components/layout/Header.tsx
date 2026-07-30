@@ -27,6 +27,7 @@ export function Header() {
 
       <nav className="desktop-nav" aria-label="Primary navigation">
         {navItems.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+        <a className="member-login-link" href="#/login">Member Login</a>
       </nav>
 
       <button
@@ -44,6 +45,7 @@ export function Header() {
           {navItems.map(([label, href]) => (
             <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
           ))}
+          <a href="#/login" onClick={() => setMenuOpen(false)}>Member Login</a>
         </nav>
       )}
     </header>
