@@ -1,13 +1,17 @@
 .member-directory-page,
-.directory-loading {
+.directory-loading,
+.member-profile-page,
+.member-profile-loading {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
   padding: 4rem 0;
 }
 
-.directory-loading { min-height: 45vh; }
+.directory-loading,
+.member-profile-loading { min-height: 45vh; }
 
-.directory-header {
+.directory-header,
+.member-profile-header {
   display: flex;
   justify-content: space-between;
   gap: 2rem;
@@ -15,7 +19,8 @@
   margin-bottom: 2rem;
 }
 
-.directory-header h1 { margin: .35rem 0 .75rem; }
+.directory-header h1,
+.member-profile-header h1 { margin: .35rem 0 .75rem; }
 .directory-header p { max-width: 720px; }
 
 .directory-toolbar {
@@ -74,7 +79,8 @@
 }
 
 .directory-member-card img { object-fit: cover; }
-.directory-member-initials {
+.directory-member-initials,
+.member-profile-initials {
   display: grid;
   place-items: center;
   background: linear-gradient(145deg, #165b46, #c8a85c);
@@ -86,7 +92,9 @@
 .directory-member-card h2 { margin: .35rem 0; font-size: 1.2rem; }
 .directory-member-card p { margin: 0 0 .25rem; color: #4d625b; }
 .directory-member-card small { color: #71807b; }
-.directory-member-number {
+.directory-member-content { min-width: 0; }
+.directory-member-number,
+.member-profile-number {
   display: inline-block;
   color: #165b46;
   font-size: .75rem;
@@ -95,7 +103,17 @@
   text-transform: uppercase;
 }
 
-.directory-empty {
+.directory-profile-link {
+  display: inline-flex;
+  margin-top: .85rem;
+  color: #165b46;
+  font-weight: 800;
+  text-decoration: none;
+}
+.directory-profile-link:hover { text-decoration: underline; }
+
+.directory-empty,
+.member-profile-state {
   margin-top: 2rem;
   padding: 4rem 1rem;
   text-align: center;
@@ -103,14 +121,63 @@
   background: #f3f7f5;
 }
 
+.member-profile-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+  gap: 2.5rem;
+  padding: 2rem;
+  border: 1px solid rgba(18, 77, 60, .12);
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 18px 45px rgba(19, 57, 46, .08);
+}
+
+.member-profile-photo-wrap { display: flex; justify-content: center; }
+.member-profile-photo,
+.member-profile-initials {
+  width: min(260px, 100%);
+  aspect-ratio: 1;
+  border-radius: 1.25rem;
+}
+.member-profile-photo { object-fit: cover; }
+.member-profile-initials { font-size: 3.5rem; }
+.member-profile-details h2 { margin: .5rem 0; font-size: clamp(2rem, 5vw, 3rem); }
+.member-profile-occupation { margin: 0; color: #4d625b; font-size: 1.1rem; }
+
+.member-profile-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem 0 0;
+}
+.member-profile-list div {
+  padding: 1rem;
+  border-radius: .9rem;
+  background: #f3f7f5;
+}
+.member-profile-list dt { color: #71807b; font-size: .8rem; font-weight: 800; text-transform: uppercase; }
+.member-profile-list dd { margin: .35rem 0 0; font-weight: 700; }
+.member-status-badge {
+  display: inline-flex;
+  padding: .35rem .65rem;
+  border-radius: 999px;
+  background: #dff3e9;
+  color: #165b46;
+  text-transform: capitalize;
+}
+
 @media (max-width: 980px) {
   .directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 680px) {
-  .directory-header { display: block; }
-  .directory-header .secondary-button { display: inline-flex; margin-top: 1rem; }
+  .directory-header,
+  .member-profile-header { display: block; }
+  .directory-header .secondary-button,
+  .member-profile-header .secondary-button { display: inline-flex; margin-top: 1rem; }
   .directory-toolbar { grid-template-columns: 1fr; }
   .directory-toolbar label { grid-column: auto; }
   .directory-grid { grid-template-columns: 1fr; }
+  .member-profile-card { grid-template-columns: 1fr; padding: 1.25rem; }
+  .member-profile-list { grid-template-columns: 1fr; }
 }
