@@ -22,6 +22,8 @@ import { FinanceAdministration } from './pages/FinanceAdministration';
 import { Gallery } from './pages/Gallery';
 import { Home } from './pages/Home';
 import { Journey } from './pages/Journey';
+import { KnowledgeCenter } from './pages/KnowledgeCenter';
+import { DocumentAdministration } from './pages/DocumentAdministration';
 import { Leadership } from './pages/Leadership';
 import { MemberDashboard } from './pages/MemberDashboard';
 import { MemberEvents } from './pages/MemberEvents';
@@ -151,6 +153,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/events/manage': <EventAdministration />,
   '/dashboard/communications': <CommunicationCenter />,
   '/dashboard/communications/manage': <CommunicationAdministration />,
+  '/dashboard/documents': <KnowledgeCenter />,
+  '/dashboard/documents/manage': <DocumentAdministration />,
 };
 
 export default function App() {
