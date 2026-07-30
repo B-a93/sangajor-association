@@ -9,6 +9,7 @@ import { About } from './pages/About';
 import { Auth } from './pages/Auth';
 import { InvitationAcceptance } from './pages/InvitationAcceptance';
 import { MemberInvitations } from './pages/MemberInvitations';
+import { MemberAdministration } from './pages/MemberAdministration';
 import { Contact } from './pages/Contact';
 import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
@@ -137,6 +138,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/profile': <EditMemberProfile />,
   '/dashboard/members': <MemberDirectory />,
   '/dashboard/invitations': <MemberInvitations />,
+  '/dashboard/administration': <MemberAdministration />,
 };
 
 export default function App() {
