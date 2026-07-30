@@ -23,6 +23,7 @@
 }
 
 .dashboard-grid article {
+  position: relative;
   display: grid;
   gap: 0.8rem;
   min-height: 180px;
@@ -31,6 +32,21 @@
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 10px 30px rgba(15, 76, 129, 0.08);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  min-width: 1.75rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  color: #fff;
+  background: #b42318;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
 }
 
 .dashboard-grid article > span:first-child {

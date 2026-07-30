@@ -26,3 +26,17 @@ test('member and officer portals expose announcement and publishing workflows', 
   assert.match(administration, /Communication Management/);
   assert.match(administration, /set_announcement_status/);
 });
+
+test('notification badges and bulk read acknowledgement are secured and exposed', async () => {
+  const migration = await read('supabase/migrations/202607300031_announcement_notifications.sql');
+  const dashboard = await read('src/pages/MemberDashboard.tsx');
+  const center = await read('src/pages/CommunicationCenter.tsx');
+  assert.match(migration, /unread_announcement_count/);
+  assert.match(migration, /where public\.can_view_announcement\(item\)/);
+  assert.match(migration, /mark_all_announcements_read/);
+  assert.match(migration, /on conflict do nothing/);
+  assert.match(migration, /grant execute .* to authenticated/);
+  assert.match(dashboard, /notification-badge/);
+  assert.match(center, /member-announcement-notifications/);
+  assert.match(center, /Mark all read/);
+});
