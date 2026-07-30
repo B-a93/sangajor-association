@@ -107,11 +107,12 @@ export function MemberDirectory() {
                 ) : (
                   <div className="directory-member-initials" aria-hidden="true">{initials}</div>
                 )}
-                <div>
+                <div className="directory-member-content">
                   <span className="directory-member-number">{member.membership_number || 'Membership number pending'}</span>
                   <h2>{fullName}</h2>
                   <p>{member.occupation || 'Occupation not provided'}</p>
                   <small>{member.country || 'Country not provided'}</small>
+                  <a className="directory-profile-link" href={`#/dashboard/members/${member.id}`}>View profile</a>
                 </div>
               </article>
             );
