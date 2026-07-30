@@ -6,6 +6,7 @@ import { useHashRoute } from './hooks/useHashRoute';
 import { About } from './pages/About';
 import { Auth } from './pages/Auth';
 import { Contact } from './pages/Contact';
+import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
 import { Focus } from './pages/Focus';
@@ -30,6 +31,7 @@ const pages: Record<string, ReactElement> = {
   '/contact': <Contact />,
   '/login': <Auth />,
   '/dashboard': <MemberDashboard />,
+  '/dashboard/profile': <EditMemberProfile />,
 };
 
 export default function App() {
