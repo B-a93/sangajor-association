@@ -4,6 +4,7 @@ import { Header } from './components/layout/Header';
 import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { About } from './pages/About';
+import { Auth } from './pages/Auth';
 import { Contact } from './pages/Contact';
 import { Events } from './pages/Events';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
@@ -12,6 +13,7 @@ import { Gallery } from './pages/Gallery';
 import { Home } from './pages/Home';
 import { Journey } from './pages/Journey';
 import { Leadership } from './pages/Leadership';
+import { MemberDashboard } from './pages/MemberDashboard';
 import { Membership } from './pages/Membership';
 import { Updates } from './pages/Updates';
 
@@ -26,6 +28,8 @@ const pages: Record<string, ReactElement> = {
   '/updates': <Updates />,
   '/journey': <Journey />,
   '/contact': <Contact />,
+  '/login': <Auth />,
+  '/dashboard': <MemberDashboard />,
 };
 
 export default function App() {
