@@ -15,6 +15,7 @@ import { Home } from './pages/Home';
 import { Journey } from './pages/Journey';
 import { Leadership } from './pages/Leadership';
 import { MemberDashboard } from './pages/MemberDashboard';
+import { MemberDirectory } from './pages/MemberDirectory';
 import { Membership } from './pages/Membership';
 import { Updates } from './pages/Updates';
 
@@ -32,6 +33,7 @@ const pages: Record<string, ReactElement> = {
   '/login': <Auth />,
   '/dashboard': <MemberDashboard />,
   '/dashboard/profile': <EditMemberProfile />,
+  '/dashboard/members': <MemberDirectory />,
 };
 
 export default function App() {
