@@ -7,12 +7,14 @@ export function MemberDashboard() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [canInvite, setCanInvite] = useState(false);
+  const [canManage, setCanManage] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       if (data.session) {
         void supabase.rpc('is_executive').then(({ data: authorized }) => setCanInvite(Boolean(authorized)));
+        void supabase.rpc('can_manage_members').then(({ data: authorized }) => setCanManage(Boolean(authorized)));
       }
       setLoading(false);
       if (!data.session) window.location.hash = '/login';
@@ -53,6 +55,7 @@ export function MemberDashboard() {
         <article><span>Events</span><strong>View upcoming Association events</strong><a href="#/events">View events</a></article>
         <article><span>Directory</span><strong>Connect with fellow members</strong><a href="#/dashboard/members">Browse members</a></article>
         {canInvite && <article><span>Executive</span><strong>Invite and manage Association members</strong><a href="#/dashboard/invitations">Member invitations</a></article>}
+        {canManage && <article><span>Administration</span><strong>Manage member access and executive roles</strong><a href="#/dashboard/administration">Member management</a></article>}
         <article><span>Contributions</span><strong>Track your payment history</strong><span>Coming soon</span></article>
       </div>
     </section>
