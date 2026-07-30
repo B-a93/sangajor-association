@@ -1,0 +1,26 @@
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { supabase } from '../lib/supabase';
+import type { Announcement, AnnouncementAudience, AnnouncementPriority, AnnouncementStatus } from '../types/announcement';
+import './CommunicationCenter.css';
+
+const blank = { title: '', body: '', audience: 'all_members' as AnnouncementAudience, priority: 'normal' as AnnouncementPriority, expires: '' };
+export function CommunicationAdministration() {
+  const [allowed, setAllowed] = useState<boolean | null>(null); const [items, setItems] = useState<Announcement[]>([]); const [readCounts, setReadCounts] = useState<Record<string, number>>({});
+  const [form, setForm] = useState(blank); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
+  const load = useCallback(async () => {
+    const { data: authorized } = await supabase.rpc('can_manage_announcements'); setAllowed(Boolean(authorized)); if (!authorized) return;
+    const [announcements, reads] = await Promise.all([supabase.from('announcements').select('*').order('created_at', { ascending: false }), supabase.from('announcement_reads').select('announcement_id')]);
+    if (announcements.error || reads.error) setMessage('Communication records could not be loaded.'); else { setItems((announcements.data ?? []) as Announcement[]); const counts: Record<string, number> = {}; (reads.data ?? []).forEach(({ announcement_id }) => { counts[announcement_id] = (counts[announcement_id] ?? 0) + 1; }); setReadCounts(counts); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+  async function create(event: FormEvent) { event.preventDefault(); setBusy(true); setMessage(''); const { data: auth } = await supabase.auth.getUser(); const { error } = await supabase.from('announcements').insert({ title: form.title.trim(), body: form.body.trim(), audience: form.audience, priority: form.priority, expires_at: form.expires ? new Date(form.expires).toISOString() : null, created_by: auth.user?.id }); setBusy(false); if (error) setMessage(error.message); else { setForm(blank); setMessage('Announcement saved as a draft.'); void load(); } }
+  async function setStatus(id: string, status: AnnouncementStatus) { setBusy(true); const { error } = await supabase.rpc('set_announcement_status', { target_announcement_id: id, new_status: status }); setBusy(false); setMessage(error ? error.message : `Announcement ${status}.`); if (!error) void load(); }
+  if (allowed === null) return <section className="communication-state">Checking communication access…</section>;
+  if (!allowed) return <section className="communication-state"><div><h1>Access denied</h1><p>The Communication Centre is restricted to authorized officers.</p><a href="#/dashboard">Return to dashboard</a></div></section>;
+  return <section className="communication-page"><header className="communication-header"><div><p className="eyebrow">Executive administration</p><h1>Communication Management</h1><p>Create targeted notices, publish updates and monitor readership.</p></div><a className="secondary-button" href="#/dashboard">Back to dashboard</a></header>
+    {message && <p className="communication-message" role="status">{message}</p>}
+    <form className="announcement-form" onSubmit={create}><h2>New announcement</h2><div className="announcement-form-grid"><label>Title<input required minLength={3} maxLength={160} value={form.title} onChange={(e) => setForm({...form,title:e.target.value})}/></label><label>Audience<select value={form.audience} onChange={(e) => setForm({...form,audience:e.target.value as AnnouncementAudience})}><option value="all_members">All members</option><option value="executives">Executives only</option></select></label><label>Priority<select value={form.priority} onChange={(e) => setForm({...form,priority:e.target.value as AnnouncementPriority})}><option value="normal">Normal</option><option value="important">Important</option><option value="urgent">Urgent</option></select></label><label>Expires (optional)<input type="datetime-local" value={form.expires} onChange={(e) => setForm({...form,expires:e.target.value})}/></label></div><label>Message<textarea required minLength={3} maxLength={8000} rows={5} value={form.body} onChange={(e) => setForm({...form,body:e.target.value})}/></label><button className="primary-button" disabled={busy}>Save draft</button></form>
+    <h2 className="communication-section-title">Announcements</h2><div className="management-list">{items.map((item) => <article key={item.id}><div><span className={`status-pill ${item.status}`}>{item.status}</span><span className="priority-label">{item.priority}</span><h3>{item.title}</h3><p>{item.audience === 'executives' ? 'Executives only' : 'All members'} · {readCounts[item.id] ?? 0} read receipt(s)</p></div><div className="management-actions">{item.status === 'draft' && <button disabled={busy} onClick={() => setStatus(item.id,'published')}>Publish</button>}{item.status === 'published' && <button disabled={busy} onClick={() => setStatus(item.id,'archived')}>Archive</button>}</div></article>)}</div>
+    {!items.length && <div className="communication-empty">No announcements have been created.</div>}
+  </section>;
+}

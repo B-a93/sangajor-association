@@ -10,6 +10,7 @@ export function MemberDashboard() {
   const [canManage, setCanManage] = useState(false);
   const [canManageFinances, setCanManageFinances] = useState(false);
   const [canManageEvents, setCanManageEvents] = useState(false);
+  const [canManageCommunications, setCanManageCommunications] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -19,6 +20,7 @@ export function MemberDashboard() {
         void supabase.rpc('can_manage_members').then(({ data: authorized }) => setCanManage(Boolean(authorized)));
         void supabase.rpc('can_manage_finances').then(({ data: authorized }) => setCanManageFinances(Boolean(authorized)));
         void supabase.rpc('can_manage_events').then(({ data: authorized }) => setCanManageEvents(Boolean(authorized)));
+        void supabase.rpc('can_manage_announcements').then(({ data: authorized }) => setCanManageCommunications(Boolean(authorized)));
       }
       setLoading(false);
       if (!data.session) window.location.hash = '/login';
@@ -58,11 +60,13 @@ export function MemberDashboard() {
         <article><span>Profile</span><strong>Complete or update your member profile</strong><a href="#/dashboard/profile">Open profile</a></article>
         <article><span>Events</span><strong>RSVP and review your attendance</strong><a href="#/dashboard/events">View member events</a></article>
         <article><span>Directory</span><strong>Connect with fellow members</strong><a href="#/dashboard/members">Browse members</a></article>
+        <article><span>Communication</span><strong>Read official member announcements</strong><a href="#/dashboard/communications">Open communication centre</a></article>
         {canInvite && <article><span>Executive</span><strong>Invite and manage Association members</strong><a href="#/dashboard/invitations">Member invitations</a></article>}
         {canManage && <article><span>Administration</span><strong>Manage member access and executive roles</strong><a href="#/dashboard/administration">Member management</a></article>}
         <article><span>Contributions</span><strong>Track your dues and payment history</strong><a href="#/dashboard/dues">View my dues</a></article>
         {canManageFinances && <article><span>Finance</span><strong>Manage dues periods, receipts and reporting</strong><a href="#/dashboard/finance">Financial management</a></article>}
         {canManageEvents && <article><span>Programme</span><strong>Publish events and manage attendance</strong><a href="#/dashboard/events/manage">Event management</a></article>}
+        {canManageCommunications && <article><span>Communications</span><strong>Publish notices and monitor readership</strong><a href="#/dashboard/communications/manage">Manage communications</a></article>}
       </div>
     </section>
   );

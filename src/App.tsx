@@ -11,6 +11,8 @@ import { InvitationAcceptance } from './pages/InvitationAcceptance';
 import { MemberInvitations } from './pages/MemberInvitations';
 import { MemberAdministration } from './pages/MemberAdministration';
 import { Contact } from './pages/Contact';
+import { CommunicationAdministration } from './pages/CommunicationAdministration';
+import { CommunicationCenter } from './pages/CommunicationCenter';
 import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
 import { EventAdministration } from './pages/EventAdministration';
@@ -147,6 +149,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/finance': <FinanceAdministration />,
   '/dashboard/events': <MemberEvents />,
   '/dashboard/events/manage': <EventAdministration />,
+  '/dashboard/communications': <CommunicationCenter />,
+  '/dashboard/communications/manage': <CommunicationAdministration />,
 };
 
 export default function App() {
