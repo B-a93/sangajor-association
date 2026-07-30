@@ -15,12 +15,14 @@ import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
 import { Focus } from './pages/Focus';
+import { FinanceAdministration } from './pages/FinanceAdministration';
 import { Gallery } from './pages/Gallery';
 import { Home } from './pages/Home';
 import { Journey } from './pages/Journey';
 import { Leadership } from './pages/Leadership';
 import { MemberDashboard } from './pages/MemberDashboard';
 import { MemberDirectory } from './pages/MemberDirectory';
+import { MemberDues } from './pages/MemberDues';
 import { Membership } from './pages/Membership';
 import { Updates } from './pages/Updates';
 import './pages/MemberDirectory.css';
@@ -139,6 +141,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/members': <MemberDirectory />,
   '/dashboard/invitations': <MemberInvitations />,
   '/dashboard/administration': <MemberAdministration />,
+  '/dashboard/dues': <MemberDues />,
+  '/dashboard/finance': <FinanceAdministration />,
 };
 
 export default function App() {
