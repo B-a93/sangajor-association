@@ -45,7 +45,7 @@ export function MemberDashboard() {
       </div>
 
       <div className="dashboard-grid">
-        <article><span>Profile</span><strong>Complete your member profile</strong><a href="#/dashboard">Open profile</a></article>
+        <article><span>Profile</span><strong>Complete or update your member profile</strong><a href="#/dashboard/profile">Open profile</a></article>
         <article><span>Events</span><strong>View upcoming Association events</strong><a href="#/events">View events</a></article>
         <article><span>Directory</span><strong>Connect with fellow members</strong><span>Coming next</span></article>
         <article><span>Contributions</span><strong>Track your payment history</strong><span>Coming soon</span></article>
