@@ -1,0 +1,12 @@
+# Public Auth API registration is disabled. Accounts are created only by the
+# accept-invitation Edge Function with the service role after token validation.
+[auth]
+enable_signup = false
+
+[functions.manage-invitation]
+verify_jwt = true
+
+# Invitation acceptance is intentionally public; the 256-bit, single-use token
+# is validated against its SHA-256 digest inside the function.
+[functions.accept-invitation]
+verify_jwt = false
