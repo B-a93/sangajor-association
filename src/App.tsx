@@ -13,6 +13,7 @@ import { MemberAdministration } from './pages/MemberAdministration';
 import { Contact } from './pages/Contact';
 import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
+import { EventAdministration } from './pages/EventAdministration';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
 import { Focus } from './pages/Focus';
 import { FinanceAdministration } from './pages/FinanceAdministration';
@@ -21,6 +22,7 @@ import { Home } from './pages/Home';
 import { Journey } from './pages/Journey';
 import { Leadership } from './pages/Leadership';
 import { MemberDashboard } from './pages/MemberDashboard';
+import { MemberEvents } from './pages/MemberEvents';
 import { MemberDirectory } from './pages/MemberDirectory';
 import { MemberDues } from './pages/MemberDues';
 import { Membership } from './pages/Membership';
@@ -143,6 +145,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/administration': <MemberAdministration />,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,
+  '/dashboard/events': <MemberEvents />,
+  '/dashboard/events/manage': <EventAdministration />,
 };
 
 export default function App() {
