@@ -1,131 +1,123 @@
-import { BriefcaseBusiness, HandHeart, MapPin, Search, ShieldCheck, Users } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { PageHero } from '../components/ui/PageHero';
-import { members } from '../data/members';
+import { useEffect, useMemo, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import './MemberDirectory.css';
 
+type DirectoryMember = {
+  id: string;
+  membership_number: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  country: string | null;
+  occupation: string | null;
+  profile_photo: string | null;
+  status: string | null;
+};
+
 export function MemberDirectory() {
-  const [query, setQuery] = useState('');
-  const [memberType, setMemberType] = useState('All');
-  const [helpArea, setHelpArea] = useState('All');
+  const [session, setSession] = useState<Session | null>(null);
+  const [members, setMembers] = useState<DirectoryMember[]>([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
 
-  const helpAreas = useMemo(
-    () => Array.from(new Set(members.flatMap((member) => member.canHelpWith))).sort(),
-    [],
-  );
+  useEffect(() => {
+    async function loadDirectory() {
+      const { data: authData } = await supabase.auth.getSession();
+      const currentSession = authData.session;
 
-  const filteredMembers = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    return members.filter((member) => {
-      const searchable = [
-        member.fullName,
-        member.occupation,
-        member.organisation,
-        member.country,
-        member.region,
-        ...member.skills,
-        ...member.canHelpWith,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
+      if (!currentSession) {
+        window.location.hash = '/login';
+        return;
+      }
 
-      return (
-        (!normalizedQuery || searchable.includes(normalizedQuery)) &&
-        (memberType === 'All' || member.memberType === memberType) &&
-        (helpArea === 'All' || member.canHelpWith.includes(helpArea))
-      );
-    });
-  }, [helpArea, memberType, query]);
+      setSession(currentSession);
 
-  const countries = new Set(members.map((member) => member.country)).size;
-  const executives = members.filter((member) => member.memberType === 'Executive').length;
-  const helpers = members.filter((member) => member.canHelpWith.length > 0).length;
+      const { data, error } = await supabase
+        .from('members')
+        .select('id, membership_number, first_name, last_name, country, occupation, profile_photo, status')
+        .eq('status', 'active')
+        .order('first_name', { ascending: true })
+        .order('last_name', { ascending: true });
+
+      if (error) setMessage('The member directory could not be loaded. Please try again.');
+      else setMembers(data ?? []);
+
+      setLoading(false);
+    }
+
+    void loadDirectory();
+  }, []);
+
+  const visibleMembers = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return members;
+
+    return members.filter((member) => [
+      member.membership_number,
+      member.first_name,
+      member.last_name,
+      member.country,
+      member.occupation,
+    ].filter(Boolean).join(' ').toLowerCase().includes(term));
+  }, [members, search]);
+
+  if (loading || !session) return <section className="directory-loading">Loading the member directory…</section>;
 
   return (
-    <>
-      <PageHero
-        eyebrow="Member Directory"
-        title="Connect with the people who make our community stronger."
-        text="Discover members by profession, skills, location and the support they are willing to offer. Personal contact details are only shown when a member has given consent."
-      />
-
-      <section className="section member-directory-section">
-        <div className="member-stats-grid" aria-label="Member directory statistics">
-          <article><Users size={24} /><strong>{members.length}</strong><span>Listed members</span></article>
-          <article><ShieldCheck size={24} /><strong>{executives}</strong><span>Executive members</span></article>
-          <article><MapPin size={24} /><strong>{countries}</strong><span>Countries represented</span></article>
-          <article><HandHeart size={24} /><strong>{helpers}</strong><span>Members offering help</span></article>
+    <section className="member-directory-page">
+      <div className="directory-header">
+        <div>
+          <p className="eyebrow">MySANGAJOR Digital Village</p>
+          <h1>Member Directory</h1>
+          <p>Find and connect with active members of the SANGAJOR B.C.S. Class of 2008 Association.</p>
         </div>
+        <a className="secondary-button" href="#/dashboard">Back to dashboard</a>
+      </div>
 
-        <div className="directory-tools">
-          <label className="directory-search">
-            <Search size={20} />
-            <span className="sr-only">Search members</span>
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by name, profession, skill or country"
-            />
-          </label>
+      <div className="directory-toolbar">
+        <label htmlFor="member-search">Search members</label>
+        <input
+          id="member-search"
+          type="search"
+          placeholder="Search by name, country, occupation or membership number"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        <span>{visibleMembers.length} member{visibleMembers.length === 1 ? '' : 's'} found</span>
+      </div>
 
-          <select value={memberType} onChange={(event) => setMemberType(event.target.value)} aria-label="Filter by member type">
-            <option value="All">All members</option>
-            <option value="Executive">Executive Committee</option>
-            <option value="Member">General members</option>
-          </select>
+      {message && <p className="directory-message" role="alert">{message}</p>}
 
-          <select value={helpArea} onChange={(event) => setHelpArea(event.target.value)} aria-label="Filter by how members can help">
-            <option value="All">All help areas</option>
-            {helpAreas.map((area) => <option key={area} value={area}>{area}</option>)}
-          </select>
+      {!message && visibleMembers.length === 0 ? (
+        <div className="directory-empty">
+          <h2>No members found</h2>
+          <p>{search ? 'Try a different search term.' : 'Active members will appear here once their profiles are available.'}</p>
         </div>
+      ) : (
+        <div className="directory-grid">
+          {visibleMembers.map((member) => {
+            const fullName = `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim() || 'Association member';
+            const initials = `${member.first_name?.[0] ?? ''}${member.last_name?.[0] ?? ''}`.toUpperCase() || 'SM';
 
-        <div className="directory-results-heading">
-          <div>
-            <span className="eyebrow">Community Network</span>
-            <h2>{filteredMembers.length} member{filteredMembers.length === 1 ? '' : 's'} found</h2>
-          </div>
-          <p>Sample profiles will be replaced with approved information submitted by members.</p>
-        </div>
-
-        {filteredMembers.length > 0 ? (
-          <div className="member-card-grid">
-            {filteredMembers.map((member) => (
-              <article className="member-card" key={member.id}>
-                <div className="member-avatar" aria-hidden="true">{member.initials}</div>
-                <div className="member-card-copy">
-                  <div className="member-card-topline">
-                    <span>{member.memberType === 'Executive' ? member.executivePosition : 'Association Member'}</span>
-                    <span>{member.country}</span>
-                  </div>
-                  <h3>{member.fullName}</h3>
-                  <p className="member-occupation"><BriefcaseBusiness size={17} />{member.occupation}{member.organisation ? ` · ${member.organisation}` : ''}</p>
-                  <p>{member.bio}</p>
-
-                  <div className="member-tags" aria-label={`${member.fullName} skills`}>
-                    {member.skills.slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}
-                  </div>
-
-                  <div className="member-help-box">
-                    <strong><HandHeart size={17} />How I can help</strong>
-                    <p>{member.canHelpWith.join(' · ')}</p>
-                  </div>
-
-                  <a className="button button-secondary" href={`#/members/${member.slug}`}>View profile</a>
+            return (
+              <article className="directory-member-card" key={member.id}>
+                {member.profile_photo ? (
+                  <img src={member.profile_photo} alt={`${fullName} profile`} />
+                ) : (
+                  <div className="directory-member-initials" aria-hidden="true">{initials}</div>
+                )}
+                <div>
+                  <span className="directory-member-number">{member.membership_number || 'Membership number pending'}</span>
+                  <h2>{fullName}</h2>
+                  <p>{member.occupation || 'Occupation not provided'}</p>
+                  <small>{member.country || 'Country not provided'}</small>
                 </div>
               </article>
-            ))}
-          </div>
-        ) : (
-          <div className="directory-empty-state">
-            <Search size={34} />
-            <h3>No matching members found</h3>
-            <p>Try a different name, profession, skill, country or help area.</p>
-          </div>
-        )}
-      </section>
-    </>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
