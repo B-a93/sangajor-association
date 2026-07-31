@@ -26,12 +26,22 @@ export function MemberDashboard() {
     supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
       if (data.session) {
-        // Profile roles are authoritative; Auth metadata is deliberately not used for authorization.
-        const result = await supabase.from('profiles').select('id, full_name, role, is_active').eq('id', data.session.user.id).maybeSingle();
+        // The existing Members row is authoritative; Auth metadata is deliberately not used for authorization.
+        const result = await supabase.from('Members')
+          .select('id, first_name, last_name, email, membership_number, role, status')
+          .eq('auth_user_id', data.session.user.id).maybeSingle();
         if (result.error || !result.data) {
           setProfileError('Your Association profile could not be loaded. Executive tools are unavailable until your profile is verified.');
         } else {
-          const currentProfile = result.data as AuthenticatedProfile;
+          const member = result.data;
+          const currentProfile: AuthenticatedProfile = {
+            id: String(member.id),
+            full_name: [member.first_name, member.last_name].filter(Boolean).join(' ').trim(),
+            email: member.email,
+            membership_number: member.membership_number,
+            role: member.role as AuthenticatedProfile['role'],
+            is_active: member.status === 'active',
+          };
           setProfile(currentProfile);
           setCanInvite(isActiveExecutive(currentProfile));
         }

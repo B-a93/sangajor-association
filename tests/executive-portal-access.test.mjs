@@ -6,7 +6,9 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 test('dashboard loads the authenticated public profile and gates the executive portal', async () => {
   const dashboard = await read('src/pages/MemberDashboard.tsx');
   const access = await read('src/lib/executiveAccess.ts');
-  assert.match(dashboard, /from\('profiles'\)\.select\('id, full_name, role, is_active'\)\.eq\('id', data\.session\.user\.id\)/);
+  assert.match(dashboard, /from\('Members'\)/);
+  assert.match(dashboard, /eq\('auth_user_id', data\.session\.user\.id\)/);
+  assert.match(dashboard, /member\.status === 'active'/);
   assert.match(dashboard, /isActiveExecutive\(profile\)/);
   assert.match(dashboard, /isExecutive && <section className="executive-portal"/);
   assert.match(dashboard, /Executive Portal/);
