@@ -12,6 +12,7 @@ export function MemberDashboard() {
   const [canManageEvents, setCanManageEvents] = useState(false);
   const [canManageCommunications, setCanManageCommunications] = useState(false);
   const [canManageDocuments, setCanManageDocuments] = useState(false);
+  const [canManageVolunteers, setCanManageVolunteers] = useState(false);
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export function MemberDashboard() {
         void supabase.rpc('can_manage_events').then(({ data: authorized }) => setCanManageEvents(Boolean(authorized)));
         void supabase.rpc('can_manage_announcements').then(({ data: authorized }) => setCanManageCommunications(Boolean(authorized)));
         void supabase.rpc('can_manage_documents').then(({ data: authorized }) => setCanManageDocuments(Boolean(authorized)));
+        void supabase.rpc('can_manage_volunteers').then(({ data: authorized }) => setCanManageVolunteers(Boolean(authorized)));
         void supabase.rpc('unread_announcement_count').then(({ data: count }) => setUnreadAnnouncements(Number(count ?? 0)));
       }
       setLoading(false);
@@ -66,6 +68,7 @@ export function MemberDashboard() {
         <article><span>Directory</span><strong>Connect with fellow members</strong><a href="#/dashboard/members">Browse members</a></article>
         <article><span>Communication</span>{unreadAnnouncements > 0 && <span className="notification-badge" aria-label={`${unreadAnnouncements} unread announcements`}>{unreadAnnouncements > 99 ? '99+' : unreadAnnouncements}</span>}<strong>Read official member announcements</strong><a href="#/dashboard/communications">Open communication centre</a></article>
         <article><span>Knowledge</span><strong>Browse minutes, policies, forms and resources</strong><a href="#/dashboard/documents">Open Knowledge Centre</a></article>
+        <article><span>Service</span><strong>Join committees and volunteer for Association projects</strong><a href="#/dashboard/volunteering">Explore opportunities</a></article>
         {canInvite && <article><span>Executive</span><strong>Invite and manage Association members</strong><a href="#/dashboard/invitations">Member invitations</a></article>}
         {canManage && <article><span>Administration</span><strong>Manage member access and executive roles</strong><a href="#/dashboard/administration">Member management</a></article>}
         <article><span>Contributions</span><strong>Track your dues and payment history</strong><a href="#/dashboard/dues">View my dues</a></article>
@@ -73,6 +76,7 @@ export function MemberDashboard() {
         {canManageEvents && <article><span>Programme</span><strong>Publish events and manage attendance</strong><a href="#/dashboard/events/manage">Event management</a></article>}
         {canManageCommunications && <article><span>Communications</span><strong>Publish notices and monitor readership</strong><a href="#/dashboard/communications/manage">Manage communications</a></article>}
         {canManageDocuments && <article><span>Documents</span><strong>Upload, version and publish Association files</strong><a href="#/dashboard/documents/manage">Manage documents</a></article>}
+        {canManageVolunteers && <article><span>Volunteers</span><strong>Manage committees, applications and service hours</strong><a href="#/dashboard/volunteering/manage">Manage volunteers</a></article>}
       </div>
     </section>
   );
