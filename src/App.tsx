@@ -13,6 +13,7 @@ import { MemberAdministration } from './pages/MemberAdministration';
 import { Contact } from './pages/Contact';
 import { CommunicationAdministration } from './pages/CommunicationAdministration';
 import { CommunicationCenter } from './pages/CommunicationCenter';
+import { CommitteesVolunteering } from './pages/CommitteesVolunteering';
 import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
 import { EventAdministration } from './pages/EventAdministration';
@@ -31,6 +32,7 @@ import { MemberDirectory } from './pages/MemberDirectory';
 import { MemberDues } from './pages/MemberDues';
 import { Membership } from './pages/Membership';
 import { Updates } from './pages/Updates';
+import { VolunteerAdministration } from './pages/VolunteerAdministration';
 import './pages/MemberDirectory.css';
 
 type MemberProfileRecord = {
@@ -155,6 +157,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/communications/manage': <CommunicationAdministration />,
   '/dashboard/documents': <KnowledgeCenter />,
   '/dashboard/documents/manage': <DocumentAdministration />,
+  '/dashboard/volunteering': <CommitteesVolunteering />,
+  '/dashboard/volunteering/manage': <VolunteerAdministration />,
 };
 
 export default function App() {
