@@ -19,6 +19,7 @@ import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
 import { EventAdministration } from './pages/EventAdministration';
 import { ExecutiveProfile } from './pages/ExecutiveProfile';
+import { ExecutiveAnalytics } from './pages/ExecutiveAnalytics';
 import { Focus } from './pages/Focus';
 import { FinanceAdministration } from './pages/FinanceAdministration';
 import { Gallery } from './pages/Gallery';
@@ -152,6 +153,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/members': <MemberDirectory />,
   '/dashboard/invitations': <MemberInvitations />,
   '/dashboard/administration': <MemberAdministration />,
+  '/dashboard/analytics': <ExecutiveAnalytics />,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,
   '/dashboard/events': <MemberEvents />,
