@@ -1,6 +1,6 @@
 // Bump this when replacing assets at an existing public URL so active clients
 // discard stale responses (including executive portraits) during activation.
-const CACHE = 'mysangajor-v3';
+const CACHE = 'mysangajor-v4';
 const APP_SHELL = ['/', '/index.html', '/offline.html', '/manifest.webmanifest', '/sangajorr-association-logo.png.jpeg'];
 
 self.addEventListener('install', (event) => {
