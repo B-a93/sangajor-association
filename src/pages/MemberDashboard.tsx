@@ -63,6 +63,7 @@ export function MemberDashboard() {
       </div>
 
       <div className="dashboard-grid">
+        <article><span>Village Square</span><strong>Share updates and celebrate our community</strong><a href="#/dashboard/village">Enter the Village Square</a></article>
         <article><span>Profile</span><strong>Complete or update your member profile</strong><a href="#/dashboard/profile">Open profile</a></article>
         <article><span>Events</span><strong>RSVP and review your attendance</strong><a href="#/dashboard/events">View member events</a></article>
         <article><span>Directory</span><strong>Connect with fellow members</strong><a href="#/dashboard/members">Browse members</a></article>
