@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
 
 const executiveData = await readFile(new URL('../src/data/executives.ts', import.meta.url), 'utf8');
@@ -8,6 +8,26 @@ const index = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const footer = await readFile(new URL('../src/components/layout/Footer.tsx', import.meta.url), 'utf8');
 const footerStyles = await readFile(new URL('../src/components/layout/Footer.css', import.meta.url), 'utf8');
 const globalStyles = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8');
+const leadership = await readFile(new URL('../src/pages/Leadership.tsx', import.meta.url), 'utf8');
+const executiveProfile = await readFile(new URL('../src/pages/ExecutiveProfile.tsx', import.meta.url), 'utf8');
+const serviceWorker = await readFile(new URL('../public/sw.js', import.meta.url), 'utf8');
+
+const repositoryRoot = new URL('..', import.meta.url);
+
+async function collectTextFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'dist') continue;
+
+    const url = new URL(`${entry.name}${entry.isDirectory() ? '/' : ''}`, directory);
+    if (entry.isDirectory()) files.push(...await collectTextFiles(url));
+    else if (!entry.name.endsWith('.png') && !entry.name.endsWith('.jpeg')) files.push(url);
+  }
+
+  return files;
+}
 
 test('Mbaye Manga has the requested profile details without Facebook', () => {
   const profile = executiveData.match(/slug:'mbaye-manga'[\s\S]*?status:'complete'/)?.[0];
@@ -34,7 +54,31 @@ test('Tida and Banna use their cropped portraits from the executive data', async
     await access(new URL(`../public${image}`, import.meta.url));
   }
 
-  assert.doesNotMatch(executiveData, /Banna-Bojang-IPRO-Full|Banna Bojang-IPRO|Tida-Bojang-ASS-IPRO/);
+  assert.doesNotMatch(executiveData, /Banna-Bojang-IPRO-Full|Banna Bojang-IPRO/);
+});
+
+test('Tida portrait has no legacy reference and reaches every executive surface', async () => {
+  const expectedPortrait = '/Tida-Bojang-Assi-IPRO-crop.png';
+  const legacyPortrait = ['Tida-Bojang', 'ASS-IPRO Jul 28, 2026, 12_25_48 PM.png'].join('-');
+  const tidaProfile = executiveData.match(/slug:'tida-bojang'[\s\S]*?status:'complete'/)?.[0];
+
+  assert.ok(tidaProfile, 'Tida Bojang profile should exist');
+  assert.match(tidaProfile, /image:'\/Tida-Bojang-Assi-IPRO-crop\.png'/);
+  await access(new URL(`../public${expectedPortrait}`, import.meta.url));
+
+  assert.match(homepage, /homepageLeadershipSlugs[\s\S]*'tida-bojang'/);
+  assert.match(homepage, /executive\.image \? <img src=\{executive\.image\}/);
+  assert.match(leadership, /executive\.image \? <img src=\{executive\.image\}/);
+  assert.match(executiveProfile, /executive\.image \? <img src=\{executive\.image\}/);
+
+  for (const file of await collectTextFiles(repositoryRoot)) {
+    const contents = await readFile(file, 'utf8');
+    assert.doesNotMatch(contents, new RegExp(legacyPortrait.replaceAll('.', '\\.')), `legacy Tida portrait found in ${file.pathname}`);
+  }
+
+  const publicEntries = await readdir(new URL('../public/', import.meta.url));
+  assert.ok(!publicEntries.includes(legacyPortrait), 'legacy Tida portrait file should be removed');
+  assert.match(serviceWorker, /const CACHE = 'mysangajor-v2'/);
 });
 
 test('the homepage uses executive data without the legacy portrait override script', () => {
