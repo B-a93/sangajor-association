@@ -70,5 +70,5 @@ export function ConnectionHub() {
 }
 
 function Avatar({ profile }: { profile: ConnectionProfile }) {
-  return profile.avatar_url ? <img className="connection-avatar" src={profile.avatar_url} alt=""/> : <span className="connection-avatar fallback" aria-hidden="true">{profile.full_name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span>;
+  return profile.avatar_url ? <img className="connection-avatar" src={profile.avatar_url} alt="" loading="lazy" decoding="async"/> : <span className="connection-avatar fallback" aria-hidden="true">{profile.full_name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase()}</span>;
 }

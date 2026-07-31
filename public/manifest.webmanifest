@@ -1,0 +1,30 @@
+{
+  "name": "SANGAJOR B.C.S. Class of 2008 Association",
+  "short_name": "MySANGAJOR",
+  "description": "The digital home of the SANGAJOR B.C.S. Class of 2008 Association.",
+  "start_url": "/#/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#082f49",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/sangajorr-association-logo.png.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/sangajorr-association-logo.png.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Member dashboard", "short_name": "Dashboard", "url": "/#/dashboard" },
+    { "name": "Association events", "short_name": "Events", "url": "/#/events" },
+    { "name": "Member login", "short_name": "Login", "url": "/#/login" }
+  ]
+}

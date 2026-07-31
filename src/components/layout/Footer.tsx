@@ -14,6 +14,8 @@ export function Footer() {
                 alt="Sangajor B.C.S. Class of 2008 Association logo"
                 width="54"
                 height="54"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div>

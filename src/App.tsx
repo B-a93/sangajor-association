@@ -1,43 +1,46 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactElement } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { Footer } from './components/layout/Footer';
 import { Header } from './components/layout/Header';
+import { PWAExperience } from './components/pwa/PWAExperience';
 import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { supabase } from './lib/supabase';
-import { About } from './pages/About';
-import { Auth } from './pages/Auth';
-import { InvitationAcceptance } from './pages/InvitationAcceptance';
-import { MemberInvitations } from './pages/MemberInvitations';
-import { MemberAdministration } from './pages/MemberAdministration';
-import { Contact } from './pages/Contact';
-import { CommunicationAdministration } from './pages/CommunicationAdministration';
-import { CommunicationCenter } from './pages/CommunicationCenter';
-import { CommitteesVolunteering } from './pages/CommitteesVolunteering';
-import { ConnectionHub } from './pages/ConnectionHub';
-import { EditMemberProfile } from './pages/EditMemberProfile';
-import { Events } from './pages/Events';
-import { EventAdministration } from './pages/EventAdministration';
-import { ExecutiveProfile } from './pages/ExecutiveProfile';
-import { ExecutiveAnalytics } from './pages/ExecutiveAnalytics';
-import { Focus } from './pages/Focus';
-import { FinanceAdministration } from './pages/FinanceAdministration';
-import { Gallery } from './pages/Gallery';
-import { Home } from './pages/Home';
-import { Journey } from './pages/Journey';
-import { KnowledgeCenter } from './pages/KnowledgeCenter';
-import { DocumentAdministration } from './pages/DocumentAdministration';
-import { Leadership } from './pages/Leadership';
-import { MemberDashboard } from './pages/MemberDashboard';
-import { MemberEvents } from './pages/MemberEvents';
-import { MemberDirectory } from './pages/MemberDirectory';
-import { MemberDues } from './pages/MemberDues';
-import { Membership } from './pages/Membership';
-import { Updates } from './pages/Updates';
-import { VolunteerAdministration } from './pages/VolunteerAdministration';
-import { VillageSquare } from './pages/VillageSquare';
-import { VillageModeration } from './pages/VillageModeration';
 import './pages/MemberDirectory.css';
+
+// Pages are loaded on demand so mobile visitors only download the route they open.
+const About = lazy(() => import('./pages/About').then((module) => ({ default: module.About })));
+const Auth = lazy(() => import('./pages/Auth').then((module) => ({ default: module.Auth })));
+const InvitationAcceptance = lazy(() => import('./pages/InvitationAcceptance').then((module) => ({ default: module.InvitationAcceptance })));
+const MemberInvitations = lazy(() => import('./pages/MemberInvitations').then((module) => ({ default: module.MemberInvitations })));
+const MemberAdministration = lazy(() => import('./pages/MemberAdministration').then((module) => ({ default: module.MemberAdministration })));
+const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })));
+const CommunicationAdministration = lazy(() => import('./pages/CommunicationAdministration').then((module) => ({ default: module.CommunicationAdministration })));
+const CommunicationCenter = lazy(() => import('./pages/CommunicationCenter').then((module) => ({ default: module.CommunicationCenter })));
+const CommitteesVolunteering = lazy(() => import('./pages/CommitteesVolunteering').then((module) => ({ default: module.CommitteesVolunteering })));
+const ConnectionHub = lazy(() => import('./pages/ConnectionHub').then((module) => ({ default: module.ConnectionHub })));
+const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
+const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
+const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
+const ExecutiveProfile = lazy(() => import('./pages/ExecutiveProfile').then((module) => ({ default: module.ExecutiveProfile })));
+const ExecutiveAnalytics = lazy(() => import('./pages/ExecutiveAnalytics').then((module) => ({ default: module.ExecutiveAnalytics })));
+const Focus = lazy(() => import('./pages/Focus').then((module) => ({ default: module.Focus })));
+const FinanceAdministration = lazy(() => import('./pages/FinanceAdministration').then((module) => ({ default: module.FinanceAdministration })));
+const Gallery = lazy(() => import('./pages/Gallery').then((module) => ({ default: module.Gallery })));
+const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })));
+const Journey = lazy(() => import('./pages/Journey').then((module) => ({ default: module.Journey })));
+const KnowledgeCenter = lazy(() => import('./pages/KnowledgeCenter').then((module) => ({ default: module.KnowledgeCenter })));
+const DocumentAdministration = lazy(() => import('./pages/DocumentAdministration').then((module) => ({ default: module.DocumentAdministration })));
+const Leadership = lazy(() => import('./pages/Leadership').then((module) => ({ default: module.Leadership })));
+const MemberDashboard = lazy(() => import('./pages/MemberDashboard').then((module) => ({ default: module.MemberDashboard })));
+const MemberEvents = lazy(() => import('./pages/MemberEvents').then((module) => ({ default: module.MemberEvents })));
+const MemberDirectory = lazy(() => import('./pages/MemberDirectory').then((module) => ({ default: module.MemberDirectory })));
+const MemberDues = lazy(() => import('./pages/MemberDues').then((module) => ({ default: module.MemberDues })));
+const Membership = lazy(() => import('./pages/Membership').then((module) => ({ default: module.Membership })));
+const Updates = lazy(() => import('./pages/Updates').then((module) => ({ default: module.Updates })));
+const VolunteerAdministration = lazy(() => import('./pages/VolunteerAdministration').then((module) => ({ default: module.VolunteerAdministration })));
+const VillageSquare = lazy(() => import('./pages/VillageSquare').then((module) => ({ default: module.VillageSquare })));
+const VillageModeration = lazy(() => import('./pages/VillageModeration').then((module) => ({ default: module.VillageModeration })));
 
 type MemberProfileRecord = {
   id: string;
@@ -115,7 +118,7 @@ function MemberProfile({ memberId }: { memberId: string }) {
       <article className="member-profile-card">
         <div className="member-profile-photo-wrap">
           {member.profile_photo ? (
-            <img className="member-profile-photo" src={member.profile_photo} alt={`${fullName} profile`} />
+            <img className="member-profile-photo" src={member.profile_photo} alt={`${fullName} profile`} decoding="async" />
           ) : (
             <div className="member-profile-initials" aria-hidden="true">{initials}</div>
           )}
@@ -187,7 +190,8 @@ export default function App() {
   return (
     <div className="site-shell">
       <Header />
-      <main id="top">{page}</main>
+      <PWAExperience />
+      <main id="top"><Suspense fallback={<div className="route-loading" role="status">Loading…</div>}>{page}</Suspense></main>
       <Footer />
     </div>
   );
