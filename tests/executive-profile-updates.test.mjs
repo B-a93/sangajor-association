@@ -42,7 +42,7 @@ test('Mbaye Manga has the requested profile details without Facebook', () => {
 
 test('Tida and Banna use their cropped portraits from the executive data', async () => {
   const portraits = {
-    'Tida Bojang': '/tida-bojang-assistant-ipro-portrait-v2.png',
+    'Tida Bojang': '/Tida-Bojang-Assi-IPRO-crop-png.png',
     'Banna Bojang': '/Banna-Bojang-IPRO-png.png',
   };
 
@@ -60,7 +60,7 @@ test('Tida and Banna use their cropped portraits from the executive data', async
 });
 
 test('Tida portrait has no legacy reference and reaches every executive surface', async () => {
-  const expectedPortrait = '/tida-bojang-assistant-ipro-portrait-v2.png';
+  const expectedPortrait = '/Tida-Bojang-Assi-IPRO-crop-png.png';
   const legacyPortraits = [
     ['Tida-Bojang', 'ASS-IPRO Jul 28, 2026, 12_25_48 PM.png'].join('-'),
     ['Tida-Bojang', 'Assi-IPRO-crop.png'].join('-'),
@@ -68,7 +68,7 @@ test('Tida portrait has no legacy reference and reaches every executive surface'
   const tidaProfile = executiveData.match(/slug:'tida-bojang'[\s\S]*?status:'complete'/)?.[0];
 
   assert.ok(tidaProfile, 'Tida Bojang profile should exist');
-  assert.match(tidaProfile, /image:'\/tida-bojang-assistant-ipro-portrait-v2\.png'/);
+  assert.match(tidaProfile, /image:'\/Tida-Bojang-Assi-IPRO-crop-png\.png'/);
   await access(new URL(`../public${expectedPortrait}`, import.meta.url));
 
   assert.match(homepage, /homepageLeadershipSlugs[\s\S]*'tida-bojang'/);
@@ -87,7 +87,7 @@ test('Tida portrait has no legacy reference and reaches every executive surface'
   for (const legacyPortrait of legacyPortraits) {
     assert.ok(!publicEntries.includes(legacyPortrait), 'legacy Tida portrait file should be removed');
   }
-  assert.match(serviceWorker, /const CACHE = 'mysangajor-v3'/);
+  assert.match(serviceWorker, /const CACHE = 'mysangajor-v4'/);
 });
 
 test('the homepage uses executive data without the legacy portrait override script', () => {
