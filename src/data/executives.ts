@@ -101,6 +101,12 @@ export const executives: Executive[] = [
     vision:'My vision is to see a united and well-organised Association that makes thoughtful decisions, supports its members and delivers meaningful initiatives for our former school and community.',
     motto:'Unity, Wisdom and Service.', skills:['Advisory Support','Leadership','Teamwork','Community Development','Strategic Guidance'], status:'complete'
   },
-  { slug:'mariama-sibo-bojang', name:'Mariama Sibo Bojang', role:'Adviser', status:'pending' },
+  {
+    slug:'mariama-sibo-bojang', name:'Mariama Sibo Bojang', role:'Adviser', image:'/mariama-sibo-bojang-adviser-png.png',
+    bio:'Mariama Sibo Bojang serves as an Adviser of the SANGAJOR B.C.S Class of 2008 Association. She supports the executive team with thoughtful guidance and a strong commitment to unity, service and the continued development of the Association. As a proud member of the Class of 2008, she is dedicated to helping the Association make sound decisions and create meaningful opportunities for its members and the wider community.',
+    reason:'I accepted this role because I value the bond we share as former classmates and believe that, through service and cooperation, we can turn that bond into lasting progress for our members, our former school and our community.',
+    vision:'My vision is to see a united, inclusive and well-organised Association in which every member is encouraged to contribute and our shared efforts create a positive legacy for future generations.',
+    motto:'Together in Unity and Service.', skills:['Advisory Support','Leadership','Teamwork','Community Development'], status:'complete'
+  },
   { slug:'mr-bojang', name:'Mr. Bojang', role:'Patron Adviser (Former Teacher)', status:'pending' }
 ];

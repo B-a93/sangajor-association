@@ -114,14 +114,6 @@ blockquote { margin: 0; padding: 48px; color: var(--navy); background: var(--cre
 .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 .button-light { background: white; color: var(--green); }
 .button-outline-light { background: transparent; border: 1px solid rgba(255,255,255,.6); }
-footer { padding: 80px 7vw 28px; color: #b9c9d4; background: var(--deep-navy); }
-.footer-grid { display: grid; grid-template-columns: 1.5fr .6fr .8fr; gap: 70px; }
-.footer-brand strong { color: white; }
-.footer-grid h3 { color: white; font-size: .9rem; }
-.footer-grid a, .footer-grid span { display: block; margin: 12px 0; font-size: .84rem; }
-.footer-grid p { margin-top: 24px; }
-.footer-bottom { margin-top: 60px; padding-top: 24px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid rgba(255,255,255,.12); font-size: .75rem; }
-
 /* About page */
 .about-story { margin-top: 0; align-items: center; }
 .mission-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
@@ -247,7 +239,6 @@ footer { padding: 80px 7vw 28px; color: #b9c9d4; background: var(--deep-navy); }
   .timeline div { padding-bottom: 15px; }
   .cta-section { padding: 65px 6vw; }
   .cta-actions, .cta-actions .button { width: 100%; }
-  .footer-bottom { flex-direction: column; }
   .mission-grid, .about-values-grid, .objectives-layout, .chairman-section, .school-grid, .about-timeline { grid-template-columns: 1fr; }
   .mission-card { padding: 32px; }
   .legacy-pillars { grid-template-columns: 1fr; }

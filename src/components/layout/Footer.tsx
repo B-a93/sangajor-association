@@ -4,7 +4,7 @@ const officialLogo = '/sangajorr-association-logo.png.jpeg';
 
 export function Footer() {
   return (
-    <footer>
+    <footer className="site-footer">
       <div className="footer-grid">
         <div>
           <div className="brand footer-brand">
@@ -26,23 +26,23 @@ export function Footer() {
           <p>Together since childhood. United for life.</p>
         </div>
 
-        <div>
+        <nav aria-label="Footer — Explore">
           <h3>Explore</h3>
           <a href="#/about">Our Story</a>
           <a href="#/leadership">Leadership</a>
           <a href="#/membership">Membership</a>
           <a href="#/focus">Focus Areas</a>
           <a href="#/journey">Our Journey</a>
-        </div>
+        </nav>
 
-        <div>
+        <nav aria-label="Footer — News and media">
           <h3>News & Media</h3>
           <a href="#/updates">Latest News</a>
           <a href="#/events">Events</a>
           <a href="#/gallery">Gallery</a>
-        </div>
+        </nav>
 
-        <div>
+        <div className="footer-contact">
           <h3>Connect</h3>
           <a href="mailto:info@sangajor08.org">info@sangajor08.org</a>
           <span>The Gambia and beyond</span>
@@ -51,7 +51,7 @@ export function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span>© 2026 Sangajor B.C.S. Class of 2008 Association. All Rights Reserved.</span>
+        <span>© 2026 Sangajor B.C.S. Class of 2008 Association. All rights reserved.</span>
         <span className="studio-credit">Designed &amp; developed by Elegant Empire AI Studio.</span>
       </div>
     </footer>
