@@ -3,8 +3,8 @@ import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const executiveData = await readFile(new URL('../src/data/executives.ts', import.meta.url), 'utf8');
-const portraitOverrides = await readFile(new URL('../public/executive-portraits.js', import.meta.url), 'utf8');
 const homepage = await readFile(new URL('../src/pages/Home.tsx', import.meta.url), 'utf8');
+const index = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
 test('Mbaye Manga has the requested profile details without Facebook', () => {
   const profile = executiveData.match(/slug:'mbaye-manga'[\s\S]*?status:'complete'/)?.[0];
@@ -15,7 +15,7 @@ test('Mbaye Manga has the requested profile details without Facebook', () => {
   assert.doesNotMatch(profile, /facebook:/);
 });
 
-test('Tida and Banna use their cropped portraits everywhere', async () => {
+test('Tida and Banna use their cropped portraits from the executive data', async () => {
   const portraits = {
     'Tida Bojang': '/Tida-Bojang-Assi-IPRO-crop.png',
     'Banna Bojang': '/Banna-Bojang-IPRO-png.png',
@@ -27,10 +27,15 @@ test('Tida and Banna use their cropped portraits everywhere', async () => {
 
     assert.ok(profile, `${name} profile should exist`);
     assert.match(profile, new RegExp(`image:'${image.replaceAll('.', '\\.')}'`));
-    assert.match(portraitOverrides, new RegExp(`'${name}': '${image.replaceAll('.', '\\.')}'`));
     assert.match(homepage, new RegExp(`'${slug}'`));
     await access(new URL(`../public${image}`, import.meta.url));
   }
 
-  assert.doesNotMatch(portraitOverrides, /Banna-Bojang-IPRO-Full|Banna Bojang-IPRO|Tida-Bojang-ASS-IPRO/);
+  assert.doesNotMatch(executiveData, /Banna-Bojang-IPRO-Full|Banna Bojang-IPRO|Tida-Bojang-ASS-IPRO/);
+});
+
+test('the homepage uses executive data without the legacy portrait override script', () => {
+  assert.match(homepage, /import \{ executives \} from '\.\.\/data\/executives';/);
+  assert.match(homepage, /executives\.filter\(/);
+  assert.doesNotMatch(index, /executive-portraits\.js/);
 });
