@@ -5,6 +5,8 @@ import { impactAreas } from '../data/site';
 import './Home.css';
 
 const officialLogo = '/sangajorr-association-logo.png.jpeg';
+const homepageLeadershipSlugs = new Set(['omar-bah', 'kaddy-bojang', 'banna-bojang', 'tida-bojang']);
+const homepageLeaders = executives.filter((executive) => executive.status === 'complete' && homepageLeadershipSlugs.has(executive.slug));
 
 export function Home() {
   const chairman = executives.find((executive) => executive.slug === 'omar-bah');
@@ -106,7 +108,7 @@ export function Home() {
           <a className="text-link" href="#/leadership">Explore our leadership <ArrowRight size={17} /></a>
         </div>
         <div className="mini-leaders">
-          {executives.filter((executive) => executive.status === 'complete').slice(0, 4).map((executive) => (
+          {homepageLeaders.map((executive) => (
             <a href={`#/leadership/${executive.slug}`} key={executive.slug}>
               <span>{executive.image ? <img src={executive.image} alt="" loading="lazy" /> : executive.name.split(' ').map((name) => name[0]).join('')}</span>
               <div>
