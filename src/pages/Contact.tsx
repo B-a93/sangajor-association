@@ -1,6 +1,7 @@
 import { Clock3, Mail, MapPin, Users } from 'lucide-react';
 import { PageHero } from '../components/ui/PageHero';
 import './Contact.css';
+import { associationEmail } from '../config/site';
 
 export function Contact() {
   return (
@@ -16,7 +17,7 @@ export function Contact() {
           <article>
             <Mail />
             <h3>Email</h3>
-            <a href="mailto:info@sangajor08.org">info@sangajor08.org</a>
+            <a href={`mailto:${associationEmail}`}>{associationEmail}</a>
           </article>
           <article>
             <MapPin />
