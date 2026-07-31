@@ -34,6 +34,7 @@ import { MemberDues } from './pages/MemberDues';
 import { Membership } from './pages/Membership';
 import { Updates } from './pages/Updates';
 import { VolunteerAdministration } from './pages/VolunteerAdministration';
+import { VillageSquare } from './pages/VillageSquare';
 import './pages/MemberDirectory.css';
 
 type MemberProfileRecord = {
@@ -161,6 +162,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/volunteering': <CommitteesVolunteering />,
   '/dashboard/volunteering/manage': <VolunteerAdministration />,
   '/dashboard/connections': <ConnectionHub />,
+  '/dashboard/village': <VillageSquare />,
 };
 
 export default function App() {
