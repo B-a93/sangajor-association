@@ -1,11 +1,20 @@
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { navItems } from '../../data/site';
 
 const officialLogo = '/sangajorr-association-logo.png.jpeg';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
 
   return (
     <header className="site-header">
@@ -16,6 +25,7 @@ export function Header() {
             alt="Sangajor B.C.S. Class of 2008 Association logo"
             width="45"
             height="45"
+            decoding="async"
             style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '50%' }}
           />
         </div>
@@ -35,13 +45,14 @@ export function Header() {
         type="button"
         aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
         aria-expanded={menuOpen}
+        aria-controls="mobile-navigation"
         onClick={() => setMenuOpen((open) => !open)}
       >
         {menuOpen ? <X /> : <Menu />}
       </button>
 
       {menuOpen && (
-        <nav className="mobile-nav" aria-label="Mobile navigation">
+        <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
           {navItems.map(([label, href]) => (
             <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
           ))}

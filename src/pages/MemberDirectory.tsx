@@ -103,7 +103,7 @@ export function MemberDirectory() {
             return (
               <article className="directory-member-card" key={member.id}>
                 {member.profile_photo ? (
-                  <img src={member.profile_photo} alt={`${fullName} profile`} />
+                  <img src={member.profile_photo} alt={`${fullName} profile`} loading="lazy" decoding="async" />
                 ) : (
                   <div className="directory-member-initials" aria-hidden="true">{initials}</div>
                 )}

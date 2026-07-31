@@ -52,6 +52,8 @@ export function Home() {
             alt="Official logo of Sangajor B.C.S. Class of 2008 Association"
             width="118"
             height="118"
+            fetchPriority="high"
+            decoding="async"
             style={{ width: '118px', height: '118px', objectFit: 'contain', borderRadius: '50%', marginBottom: '24px', background: '#fff', padding: '6px', boxShadow: '0 18px 45px rgba(0,0,0,.22)' }}
           />
           <span className="eyebrow">Welcome to our official digital platform</span>
