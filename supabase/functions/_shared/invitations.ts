@@ -40,7 +40,7 @@ export async function deliverInvitation(email: string, fullName: string, url: st
   const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({
     from: Deno.env.get('INVITATION_FROM_EMAIL') ?? 'SANGAJOR Association <info@sangajorbcs8.org>',
     to: [email], subject: 'Your SANGAJOR member invitation',
-    html: `<p>Hello ${fullName.replaceAll('<', '&lt;')},</p><p>An Association executive invited you to MySANGAJOR Digital Village.</p><p><a href="${url}">Accept your invitation</a></p><p>This single-use link expires in 7 days.</p>`,
+    html: `<p>Hello ${fullName.replaceAll('<', '&lt;')},</p><p>An Association executive invited you to MySANGAJOR Digital Village.</p><p><a href="${url}">Accept your invitation</a></p><p>This single-use link expires in 7 days.</p><p>Visit the Association at <a href="https://sangajorbcs8.org">sangajorbcs8.org</a>.</p>`,
   }) });
   return response.ok;
 }
