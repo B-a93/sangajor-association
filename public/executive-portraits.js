@@ -7,8 +7,8 @@
     'Bakary Bojang': '/Bakary-Bojang-ASS-Treasurer Jul 28, 2026, 12_20_02 PM.png',
     'Saidou Jallow': '/Saidou-Jallow-Auditor-general Jul 25, 2026, 09_43_31 PM.png',
     'Fatou Nyassi': '/Fatou-Nyassi-ASSI-auditor-general Jul 28, 2026, 12_27_07 PM.png',
-    'Banna Bojang': '/Banna Bojang-IPRO  Jul 28, 2026, 12_38_24 PM.png',
-    'Tida Bojang': '/Tida-Bojang-ASS-IPRO Jul 28, 2026, 12_25_48 PM.png',
+    'Banna Bojang': '/Banna-Bojang-IPRO-png.png',
+    'Tida Bojang': '/Tida-Bojang-Assi-IPRO-crop.png',
     'Demba Jammeh': '/DEMBA-Jammeh-programme- officerJul 28, 2026, 12_17_40 PM.png',
     'Bakary Colley': '/Bakary-colley-assi-programme officer.png',
     'Ismaila Manga': '/ismaila-manga-adviser Jul 28, 2026, 12_34_15 PM.png',
@@ -17,8 +17,7 @@
 
   const profilePortraits = {
     ...directoryPortraits,
-    'Kaddy Bojang': '/Kaddy-Bojang-vice-chairlady-full-png.png',
-    'Banna Bojang': '/Banna-Bojang-IPRO-Full-png.png'
+    'Kaddy Bojang': '/Kaddy-Bojang-vice-chairlady-full-png.png'
   };
 
   const makeImage = (name, className, sourceMap) => {
