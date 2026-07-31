@@ -10,8 +10,8 @@ Deno.serve(async (request) => {
     const authorization = request.headers.get('Authorization');
     if (!authorization) return json({ error: 'Authentication required' }, 401);
     const client = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authorization } } });
-    const { data: { user } } = await client.auth.getUser();
-    if (!user) return json({ error: 'Authentication required' }, 401);
+    const { data: { user }, error: authenticationError } = await client.auth.getUser();
+    if (authenticationError || !user) return json({ error: 'Authentication required' }, 401);
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== 'object') return json({ error: 'A JSON request body is required' }, 400);
     const message = String(body.message ?? '').trim().slice(0, 500);

@@ -13,8 +13,15 @@ test('assistant data is private, scoped and opt-in', async () => {
 });
 
 test('assistant function authenticates, grounds replies and limits input', async () => {
-  const fn = await read('supabase/functions/member-assistant/index.ts');
+  const [fn, config] = await Promise.all([
+    read('supabase/functions/member-assistant/index.ts'),
+    read('supabase/config.toml'),
+  ]);
+  // The Edge gateway's legacy verifier rejects JWTs from asymmetric signing
+  // keys. Requests must reach the function, which validates them with getUser.
+  assert.match(config, /\[functions\.member-assistant\][\s\S]*?verify_jwt = false/);
   assert.match(fn, /client\.auth\.getUser\(\)/);
+  assert.match(fn, /authenticationError \|\| !user/);
   assert.match(fn, /\.slice\(0, 500\)/);
   assert.match(fn, /member_assistant_context/);
   assert.match(fn, /assistant_messages/);
@@ -32,6 +39,8 @@ test('member portal exposes assistant chat and automation controls', async () =>
   assert.match(page, /Automations never publish, pay or RSVP/);
   assert.match(page, /no external AI service is used/);
   assert.match(page, /suggestedActions/);
+  assert.match(page, /Authorization: `Bearer \$\{session\.access_token\}`/);
+  assert.match(page, /response\?\.status === 401/);
   assert.match(app, /dashboard\/assistant/);
   assert.match(dashboard, /Ask Sanga/);
 });

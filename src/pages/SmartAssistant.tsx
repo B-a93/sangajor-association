@@ -32,8 +32,16 @@ export function SmartAssistant() {
     if (!clean || busy) return;
     setInput(''); setBusy(true); setStatus('');
     setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'user', content: clean }]);
-    const { data, error } = await supabase.functions.invoke<AssistantReply>('member-assistant', { body: { message: clean, conversationId } });
-    if (error || !data) setStatus('The assistant is unavailable right now. Your request was not lost—please try again.');
+    const { data, error } = await supabase.functions.invoke<AssistantReply>('member-assistant', {
+      body: { message: clean, conversationId },
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+    });
+    if (error || !data) {
+      const response = error && 'context' in error && error.context instanceof Response ? error.context : undefined;
+      setStatus(response?.status === 401
+        ? 'Your session has expired. Please sign in again before asking Sanga.'
+        : 'The assistant is unavailable right now. Your request was not lost—please try again.');
+    }
     else {
       setConversationId(data.conversationId);
       setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'assistant', content: data.answer, citations: data.citations }]);
