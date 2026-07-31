@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { applicationUrl } from '../config/site';
 import './Auth.css';
 
 type Mode = 'login' | 'reset';
@@ -25,7 +26,7 @@ export function Auth() {
 
       if (mode === 'reset') {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/#/dashboard`,
+          redirectTo: applicationUrl('/#/dashboard'),
         });
         if (error) throw error;
         setMessage('Password reset instructions have been sent to your email.');

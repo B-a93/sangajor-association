@@ -30,7 +30,7 @@ Deno.serve(async (request) => {
     invitation = data;
   } else return json({ error: 'Unsupported action.' }, 400);
 
-  const siteUrl = Deno.env.get('SITE_URL') ?? request.headers.get('origin') ?? '';
+  const siteUrl = (Deno.env.get('SITE_URL') ?? 'https://sangajorbcs8.org').replace(/\/$/, '');
   const invitationUrl = `${siteUrl}/#/accept-invitation?token=${encodeURIComponent(token)}`;
   const emailSent = await deliverInvitation(invitation.email, invitation.full_name, invitationUrl);
   return json({ success: true, email_sent: emailSent, invitation_url: invitationUrl });
