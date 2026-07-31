@@ -24,6 +24,7 @@ const Events = lazy(() => import('./pages/Events').then((module) => ({ default: 
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
 const ExecutiveProfile = lazy(() => import('./pages/ExecutiveProfile').then((module) => ({ default: module.ExecutiveProfile })));
 const ExecutiveAnalytics = lazy(() => import('./pages/ExecutiveAnalytics').then((module) => ({ default: module.ExecutiveAnalytics })));
+const SmartAssistant = lazy(() => import('./pages/SmartAssistant').then((module) => ({ default: module.SmartAssistant })));
 const Focus = lazy(() => import('./pages/Focus').then((module) => ({ default: module.Focus })));
 const FinanceAdministration = lazy(() => import('./pages/FinanceAdministration').then((module) => ({ default: module.FinanceAdministration })));
 const Gallery = lazy(() => import('./pages/Gallery').then((module) => ({ default: module.Gallery })));
@@ -157,6 +158,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/invitations': <MemberInvitations />,
   '/dashboard/administration': <MemberAdministration />,
   '/dashboard/analytics': <ExecutiveAnalytics />,
+  '/dashboard/assistant': <SmartAssistant />,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,
   '/dashboard/events': <MemberEvents />,

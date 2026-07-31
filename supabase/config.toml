@@ -10,3 +10,5 @@ verify_jwt = true
 # is validated against its SHA-256 digest inside the function.
 [functions.accept-invitation]
 verify_jwt = false
+[functions.member-assistant]
+verify_jwt = true
