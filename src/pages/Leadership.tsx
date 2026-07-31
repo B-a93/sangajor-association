@@ -16,7 +16,7 @@ export function Leadership() {
         <div className="leadership-grid">
           {executives.map((executive) => (
             <article className={`leader-card ${executive.status}`} key={executive.slug}>
-              <div className="leader-portrait"><span>{executive.name.split(' ').map((name) => name[0]).join('').slice(0, 2)}</span>{executive.status === 'pending' && <small>Profile Coming Soon</small>}</div>
+              <div className="leader-portrait">{executive.image ? <img src={executive.image} alt={`${executive.name} official portrait`} loading="lazy" /> : <span>{executive.name.split(' ').map((name) => name[0]).join('').slice(0, 2)}</span>}{executive.status === 'pending' && <small>Profile Coming Soon</small>}</div>
               <div className="leader-card-body">
                 <span>{executive.role}</span><h3>{executive.name}</h3>
                 {executive.location && <p><MapPin size={15} />{executive.location}</p>}
