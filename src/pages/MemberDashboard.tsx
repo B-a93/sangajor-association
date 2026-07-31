@@ -13,6 +13,7 @@ export function MemberDashboard() {
   const [canManageCommunications, setCanManageCommunications] = useState(false);
   const [canManageDocuments, setCanManageDocuments] = useState(false);
   const [canManageVolunteers, setCanManageVolunteers] = useState(false);
+  const [canViewAnalytics, setCanViewAnalytics] = useState(false);
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export function MemberDashboard() {
         void supabase.rpc('can_manage_announcements').then(({ data: authorized }) => setCanManageCommunications(Boolean(authorized)));
         void supabase.rpc('can_manage_documents').then(({ data: authorized }) => setCanManageDocuments(Boolean(authorized)));
         void supabase.rpc('can_manage_volunteers').then(({ data: authorized }) => setCanManageVolunteers(Boolean(authorized)));
+        void supabase.rpc('can_view_executive_analytics').then(({ data: authorized }) => setCanViewAnalytics(Boolean(authorized)));
         void supabase.rpc('unread_announcement_count').then(({ data: count }) => setUnreadAnnouncements(Number(count ?? 0)));
       }
       setLoading(false);
@@ -79,6 +81,7 @@ export function MemberDashboard() {
         {canManageCommunications && <article><span>Communications</span><strong>Publish notices and monitor readership</strong><a href="#/dashboard/communications/manage">Manage communications</a></article>}
         {canManageDocuments && <article><span>Documents</span><strong>Upload, version and publish Association files</strong><a href="#/dashboard/documents/manage">Manage documents</a></article>}
         {canManageVolunteers && <article><span>Volunteers</span><strong>Manage committees, applications and service hours</strong><a href="#/dashboard/volunteering/manage">Manage volunteers</a></article>}
+        {canViewAnalytics && <article><span>Intelligence</span><strong>Monitor membership, finance and engagement trends</strong><a href="#/dashboard/analytics">Executive analytics</a></article>}
       </div>
     </section>
   );
