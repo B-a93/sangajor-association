@@ -14,6 +14,7 @@ import { Contact } from './pages/Contact';
 import { CommunicationAdministration } from './pages/CommunicationAdministration';
 import { CommunicationCenter } from './pages/CommunicationCenter';
 import { CommitteesVolunteering } from './pages/CommitteesVolunteering';
+import { ConnectionHub } from './pages/ConnectionHub';
 import { EditMemberProfile } from './pages/EditMemberProfile';
 import { Events } from './pages/Events';
 import { EventAdministration } from './pages/EventAdministration';
@@ -159,6 +160,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/documents/manage': <DocumentAdministration />,
   '/dashboard/volunteering': <CommitteesVolunteering />,
   '/dashboard/volunteering/manage': <VolunteerAdministration />,
+  '/dashboard/connections': <ConnectionHub />,
 };
 
 export default function App() {
