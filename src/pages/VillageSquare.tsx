@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { Bookmark, Flag, Heart, ImagePlus, MessageCircle, Search, Trash2, X } from 'lucide-react';
+import { Bell, Bookmark, Flag, Heart, ImagePlus, MessageCircle, Search, ShieldCheck, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import type { VillageCategory, VillageComment, VillagePost } from '../types/village';
+import type { VillageCategory, VillageComment, VillageNotification, VillagePost } from '../types/village';
 import './VillageSquare.css';
 
 const categories: Array<{ value: 'all' | VillageCategory; label: string }> = [
@@ -25,6 +25,8 @@ export function VillageSquare() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [notifications, setNotifications] = useState<VillageNotification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const loadPosts = useCallback(async () => {
     const { data, error } = await supabase.from('village_posts')
@@ -43,10 +45,34 @@ export function VillageSquare() {
     setLoading(false);
   }, []);
 
+  const loadNotifications = useCallback(async () => {
+    const { data } = await supabase.from('village_notifications')
+      .select('id, recipient_id, actor_id, post_id, kind, read_at, created_at, actor:profiles!village_notifications_actor_id_fkey(full_name)')
+      .order('created_at', { ascending: false }).limit(20);
+    setNotifications((data ?? []) as unknown as VillageNotification[]);
+  }, []);
+
   useEffect(() => { void supabase.auth.getSession().then(({ data }) => {
     if (!data.session) window.location.hash = '/login';
-    setSession(data.session); if (data.session) void loadPosts();
-  }); }, [loadPosts]);
+    setSession(data.session); if (data.session) { void loadPosts(); void loadNotifications(); }
+  }); }, [loadNotifications, loadPosts]);
+
+  useEffect(() => {
+    if (!session) return;
+    const channel = supabase.channel(`village-ecosystem-${session.user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'village_posts' }, () => { void loadPosts(); })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'village_notifications', filter: `recipient_id=eq.${session.user.id}` }, () => { void loadNotifications(); })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [loadNotifications, loadPosts, session]);
+
+  async function openNotifications() {
+    const next = !showNotifications; setShowNotifications(next);
+    if (next && notifications.some((item) => !item.read_at)) {
+      await supabase.rpc('mark_village_notifications_read');
+      setNotifications((current) => current.map((item) => ({ ...item, read_at: item.read_at ?? new Date().toISOString() })));
+    }
+  }
 
   const visiblePosts = useMemo(() => posts.filter((post) => {
     const matchesCategory = filter === 'all' || post.category === filter;
@@ -99,7 +125,8 @@ export function VillageSquare() {
 
   if (!session || loading) return <section className="village-state">Opening the Village Square…</section>;
   return <section className="village-page">
-    <header className="village-header"><div><p className="eyebrow">MySANGAJOR Digital Village</p><h1>Village Square</h1><p>Share news, celebrate milestones and stay connected with the Association community.</p></div><a className="secondary-button" href="#/dashboard">Back to dashboard</a></header>
+    <header className="village-header"><div><p className="eyebrow">MySANGAJOR Digital Village</p><h1>Village Square</h1><p>Share news, celebrate milestones and stay connected with the Association community.</p></div><div className="village-header-actions"><button className="notification-button" type="button" onClick={() => void openNotifications()} aria-expanded={showNotifications}><Bell size={18} /> Activity {notifications.some((item) => !item.read_at) && <b>{notifications.filter((item) => !item.read_at).length}</b>}</button><a className="secondary-button" href="#/dashboard">Back to dashboard</a></div></header>
+    {showNotifications && <section className="notification-panel" aria-label="Village activity"><h2>Recent activity</h2>{notifications.length === 0 ? <p>No activity yet. New comments and celebrations will appear here.</p> : notifications.map((item) => <a href="#/dashboard/village" key={item.id}><span>{item.actor?.full_name || 'A member'} {item.kind === 'reaction' ? 'celebrated your post' : item.kind === 'comment' ? 'commented on your post' : 'sent a moderation update'}</span><time>{new Date(item.created_at).toLocaleDateString()}</time></a>)}</section>}
     <div className="village-layout"><div>
       <form className="village-composer" onSubmit={publish}><div className="composer-heading"><label htmlFor="village-post">Share with the village</label><select aria-label="Post category" value={category} onChange={(event) => setCategory(event.target.value as VillageCategory)}>{categories.slice(1).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div><textarea id="village-post" maxLength={2000} value={body} onChange={(event) => setBody(event.target.value)} placeholder="What would you like fellow members to know?" /><div><label className="image-picker"><ImagePlus size={18} /> {image ? image.name : 'Add photo'}<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImage(event.target.files?.[0] ?? null)} /></label>{image && <button className="clear-image" type="button" onClick={() => setImage(null)} aria-label="Remove photo"><X size={17} /></button>}<small>{body.length}/2000</small><button className="primary-button" disabled={!body.trim() || publishing}>{publishing ? 'Publishing…' : 'Publish update'}</button></div></form>
       {message && <p className="village-message" role="status">{message}</p>}
@@ -109,6 +136,6 @@ export function VillageSquare() {
         const reacted = post.village_reactions.some((item) => item.member_id === session.user.id); const saved = post.village_bookmarks.some((item) => item.member_id === session.user.id);
         return <article className="village-post" key={post.id}><header><span className="village-avatar">{post.author?.full_name?.charAt(0).toUpperCase() || 'S'}</span><div><strong>{post.author?.full_name || 'Association member'}</strong><span><time dateTime={post.created_at}>{new Date(post.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}</time><b className={`category-${post.category}`}>{post.category}</b></span></div><div className="post-options">{post.author_id === session.user.id ? <button type="button" title="Delete post" onClick={() => void deletePost(post)}><Trash2 size={17} /></button> : <button type="button" title="Report post" onClick={() => void reportPost(post)}><Flag size={17} /></button>}</div></header><p>{post.body}</p>{post.image_url && <img className="village-image" src={post.image_url} alt="Shared by the post author" loading="lazy" />}<div className="village-actions"><button className={reacted ? 'reacted' : ''} onClick={() => void toggleFor(post, 'village_reactions')} type="button"><Heart size={17} /> {post.village_reactions.length || 'Celebrate'}</button><button type="button" onClick={() => void loadComments(post.id)}><MessageCircle size={17} /> Comment ({post.village_comments.length})</button><button className={saved ? 'saved' : ''} onClick={() => void toggleFor(post, 'village_bookmarks')} type="button"><Bookmark size={17} /> {saved ? 'Saved' : 'Save'}</button></div>{comments[post.id] && <div className="village-comments">{comments[post.id].map((comment) => <p key={comment.id}><strong>{comment.author?.full_name || 'Member'}</strong> {comment.body}</p>)}<div><input aria-label="Add a comment" maxLength={1000} value={commentDrafts[post.id] ?? ''} onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))} placeholder="Add a respectful comment" /><button type="button" onClick={() => void addComment(post.id)}>Send</button></div></div>}</article>;
       })}</div>
-    </div><aside className="village-guidelines"><span className="eyebrow">Community promise</span><h2>A welcoming village</h2><p>Keep contributions respectful, helpful and appropriate for all Association members.</p><ul><li>Celebrate one another</li><li>Protect private information</li><li>Use the flag to report concerns</li></ul></aside></div>
+    </div><aside className="village-guidelines"><span className="eyebrow">Community promise</span><h2>A welcoming village</h2><p>Keep contributions respectful, helpful and appropriate for all Association members.</p><ul><li>Celebrate one another</li><li>Protect private information</li><li>Use the flag to report concerns</li></ul><a className="moderation-link" href="#/dashboard/village/moderation"><ShieldCheck size={17} /> Executive moderation</a></aside></div>
   </section>;
 }
