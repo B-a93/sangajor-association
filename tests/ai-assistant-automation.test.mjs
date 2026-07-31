@@ -18,6 +18,10 @@ test('assistant function authenticates, grounds replies and limits input', async
   assert.match(fn, /\.slice\(0, 500\)/);
   assert.match(fn, /member_assistant_context/);
   assert.match(fn, /assistant_messages/);
+  assert.match(fn, /request\.method !== 'POST'/);
+  assert.match(fn, /\.eq\('member_id', user\.id\)/);
+  assert.match(fn, /replyWriteError/);
+  assert.match(fn, /intent: 'help'/);
   assert.doesNotMatch(fn, /SERVICE_ROLE/);
 });
 
@@ -26,6 +30,8 @@ test('member portal exposes assistant chat and automation controls', async () =>
   assert.match(page, /Private by design/);
   assert.match(page, /Smart automation/);
   assert.match(page, /Automations never publish, pay or RSVP/);
+  assert.match(page, /no external AI service is used/);
+  assert.match(page, /suggestedActions/);
   assert.match(app, /dashboard\/assistant/);
   assert.match(dashboard, /Ask Sanga/);
 });

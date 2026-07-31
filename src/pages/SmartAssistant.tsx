@@ -16,6 +16,7 @@ export function SmartAssistant() {
   const [preferences, setPreferences] = useState(defaultPreferences);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
+  const [suggestedActions, setSuggestedActions] = useState<string[]>(starters);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { void supabase.auth.getSession().then(async ({ data }) => {
@@ -36,6 +37,7 @@ export function SmartAssistant() {
     else {
       setConversationId(data.conversationId);
       setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'assistant', content: data.answer, citations: data.citations }]);
+      setSuggestedActions(data.suggestedActions);
     }
     setBusy(false);
   }
@@ -51,7 +53,7 @@ export function SmartAssistant() {
 
   if (!session) return <section className="assistant-loading">Preparing your private assistant…</section>;
   return <section className="assistant-page">
-    <header className="assistant-hero"><div><p className="eyebrow">Smart member support</p><h1>Your Association assistant</h1><p>Get grounded answers from MySANGAJOR and automate the reminders that matter to you.</p></div><div className="assistant-trust"><ShieldCheck size={22}/><span><strong>Private by design</strong>Your conversation is visible only to you.</span></div></header>
+    <header className="assistant-hero"><div><p className="eyebrow">Rule-based member support</p><h1>Your Association assistant</h1><p>Get quick, predictable answers drawn only from your authorised MySANGAJOR records—no external AI service is used.</p></div><div className="assistant-trust"><ShieldCheck size={22}/><span><strong>Private by design</strong>Your conversation is visible only to you.</span></div></header>
     <div className="assistant-layout">
       <article className="assistant-chat" aria-label="Assistant conversation">
         <div className="chat-heading"><span><Bot size={22}/></span><div><strong>Sanga</strong><small>Association guide · Responses may need verification</small></div></div>
@@ -59,11 +61,12 @@ export function SmartAssistant() {
           {messages.length === 0 && <div className="assistant-welcome"><Sparkles/><h2>How can I help today?</h2><p>I can explain Association information, find member resources and help you stay on top of events, dues and volunteering.</p><div className="starter-grid">{starters.map((starter) => <button type="button" onClick={() => void ask(starter)} key={starter}>{starter}</button>)}</div></div>}
           {messages.map((message) => <div className={`chat-message ${message.role}`} key={message.id}><span>{message.role === 'assistant' ? 'Sanga' : 'You'}</span><p>{message.content}</p>{message.citations && message.citations.length > 0 && <div className="assistant-sources"><strong>Sources</strong>{message.citations.map((citation) => <a href={citation.href} key={citation.href}>{citation.label}<ExternalLink size={13}/></a>)}</div>}</div>)}
           {busy && <div className="assistant-thinking" role="status"><i/><i/><i/><span>Sanga is checking your Association records…</span></div>}
+          {!busy && messages.length > 0 && suggestedActions.length > 0 && <div className="assistant-followups" aria-label="Suggested questions">{suggestedActions.map((action) => <button type="button" onClick={() => void ask(action)} key={action}>{action}</button>)}</div>}
           <div ref={endRef}/>
         </div>
         {status && <p className="assistant-status" role="status">{status}</p>}
         <form className="chat-composer" onSubmit={submit}><label htmlFor="assistant-question" className="sr-only">Ask the Association assistant</label><textarea id="assistant-question" value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about events, dues, announcements or volunteering…" maxLength={500} rows={2}/><button type="submit" disabled={busy || !input.trim()} aria-label="Send question"><Send size={20}/></button></form>
-        <p className="assistant-disclaimer">Sanga uses your authorised Association data. Verify important financial or governance information with an executive.</p>
+        <p className="assistant-disclaimer">Sanga matches keywords to a small set of supported topics; it does not generate advice. Verify important financial or governance information with an executive.</p>
       </article>
       <aside className="automation-panel"><div className="automation-heading"><span><CalendarClock/></span><div><p className="eyebrow">Smart automation</p><h2>Stay one step ahead</h2></div></div><p>Choose the helpful nudges you want. You remain in control and can change them anytime.</p>
         <div className="automation-list">

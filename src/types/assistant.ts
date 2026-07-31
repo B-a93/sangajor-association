@@ -5,7 +5,10 @@ export type AssistantReply = {
   citations: AssistantCitation[];
   suggestedActions: string[];
   conversationId: string;
+  intent: AssistantIntent;
 };
+
+export type AssistantIntent = 'events' | 'dues' | 'announcements' | 'volunteering' | 'help';
 
 export type AssistantMessage = {
   id: string;
