@@ -30,8 +30,8 @@ export async function executiveFromRequest(request: Request) {
   const admin = adminClient();
   const { data: { user } } = await admin.auth.getUser(authorization.replace(/^Bearer /, ''));
   if (!user) return null;
-  const { data: profile } = await admin.from('profiles').select('id, role, is_active').eq('id', user.id).single();
-  return profile?.is_active && profile.role !== 'member' ? user : null;
+  const { data: member } = await admin.from('Members').select('id, role, status').eq('auth_user_id', user.id).maybeSingle();
+  return member?.status === 'active' && member.role !== 'member' ? user : null;
 }
 
 export async function deliverInvitation(email: string, fullName: string, url: string) {

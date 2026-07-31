@@ -9,6 +9,8 @@ export type AppRole = 'member' | (typeof executiveRoles)[number];
 export type AuthenticatedProfile = {
   id: string;
   full_name: string;
+  email: string | null;
+  membership_number: string | null;
   role: AppRole;
   is_active: boolean;
 };

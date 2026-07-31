@@ -50,7 +50,7 @@ export function EditMemberProfile() {
       setSession(currentSession);
 
       const { data, error } = await supabase
-        .from('members')
+        .from('Members')
         .select('id, membership_number, first_name, last_name, gender, date_of_birth, phone, email, address, country, occupation, status')
         .eq('auth_user_id', currentSession.user.id)
         .maybeSingle();
@@ -106,8 +106,8 @@ export function EditMemberProfile() {
     };
 
     const query = memberId
-      ? supabase.from('members').update(payload).eq('id', memberId)
-      : supabase.from('members').insert(payload).select('id').single();
+      ? supabase.from('Members').update(payload).eq('id', memberId)
+      : supabase.from('Members').insert(payload).select('id').single();
 
     const { data, error } = await query;
 

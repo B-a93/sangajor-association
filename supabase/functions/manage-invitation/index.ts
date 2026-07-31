@@ -25,7 +25,8 @@ Deno.serve(async (request) => {
     const email = String(body.email ?? '').trim().toLowerCase();
     const fullName = String(body.fullName ?? '').trim();
     if (!fullName || !/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'A valid full name and email are required.' }, 400);
-    const { data, error } = await admin.from('invitations').insert({ full_name: fullName, email, membership_number: String(body.membershipNumber ?? '').trim() || null, role: body.role ?? 'member', token_hash: tokenHash, expires_at: expiresAt, inviter_id: executive.id }).select().single();
+    const { data: inviter } = await admin.from('Members').select('auth_user_id').eq('auth_user_id', executive.id).single();
+    const { data, error } = await admin.from('invitations').insert({ full_name: fullName, email, membership_number: String(body.membershipNumber ?? '').trim() || null, role: body.role ?? 'member', token_hash: tokenHash, expires_at: expiresAt, inviter_id: inviter!.auth_user_id }).select().single();
     if (error) return json({ error: error.code === '23505' ? 'A pending invitation already exists for this email.' : error.message }, 400);
     invitation = data;
   } else return json({ error: 'Unsupported action.' }, 400);

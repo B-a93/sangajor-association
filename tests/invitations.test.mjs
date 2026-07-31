@@ -34,7 +34,8 @@ test('invitation management requires an executive and stores only a token digest
   ]);
   assert.match(manage, /executiveFromRequest/);
   assert.match(manage, /token_hash: tokenHash/);
-  assert.match(shared, /profile\.role !== 'member'/);
+  assert.match(shared, /member\.role !== 'member'/);
+  assert.match(shared, /from\('Members'\).*eq\('auth_user_id', user\.id\)/s);
   assert.match(migration, /enable row level security/);
   assert.match(migration, /revoke insert, update, delete/);
 });

@@ -34,7 +34,7 @@ export function MemberDirectory() {
       setSession(currentSession);
 
       const { data, error } = await supabase
-        .from('members')
+        .from('Members')
         .select('id, membership_number, first_name, last_name, country, occupation, profile_photo, status')
         .eq('status', 'active')
         .order('first_name', { ascending: true })
