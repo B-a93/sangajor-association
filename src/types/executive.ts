@@ -2,6 +2,7 @@ export type Executive = {
   slug: string;
   name: string;
   role: string;
+  image?: string;
   location?: string;
   occupation?: string;
   organisation?: string;

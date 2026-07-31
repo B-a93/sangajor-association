@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays, Camera, HeartHandshake, Newspaper, School, Users } from 'lucide-react';
+import { ArrowRight, HeartHandshake, School, Users } from 'lucide-react';
 import { CallToAction } from '../components/ui/CallToAction';
 import { executives } from '../data/executives';
 import { impactAreas } from '../data/site';
@@ -6,40 +6,9 @@ import './Home.css';
 
 const officialLogo = '/sangajorr-association-logo.png.jpeg';
 
-const newsItems = [
-  {
-    title: 'Association Website Officially Launched',
-    date: '30 July 2026',
-    text: 'We are delighted to introduce the official website of the Sangajor B.C.S. Class of 2008 Association—our central platform for news, events, programmes and member engagement.',
-  },
-  {
-    title: 'Executive Committee Begins Strategic Planning',
-    date: 'Coming soon',
-    text: 'The Executive Committee is developing the Association’s strategic roadmap around member engagement, education, community service and sustainable initiatives.',
-  },
-  {
-    title: 'Membership Registration Continues',
-    date: 'Ongoing',
-    text: 'Eligible members are encouraged to complete their registration so the Association can maintain accurate records and improve future communication and programmes.',
-  },
-];
-
-const galleryPreviews = [
-  {
-    title: 'Reunions & Gatherings',
-    text: 'Celebrating friendships, reconnecting classmates and strengthening the bonds that unite our Association.',
-  },
-  {
-    title: 'Community Engagement',
-    text: 'Highlights from outreach programmes, volunteer activities and initiatives that positively impact our communities.',
-  },
-  {
-    title: 'School & Legacy',
-    text: 'Preserving the history of Sangajor B.C.S. while supporting educational initiatives for future generations.',
-  },
-];
-
 export function Home() {
+  const chairman = executives.find((executive) => executive.slug === 'omar-bah');
+
   return (
     <>
       <section className="hero">
@@ -84,7 +53,9 @@ export function Home() {
       </section>
 
       <section className="section chairman-welcome-section">
-        <div className="chairman-welcome-mark" aria-hidden="true">OB</div>
+        <div className="chairman-welcome-mark">
+          {chairman?.image ? <img src={chairman.image} alt={`${chairman.name} official portrait`} /> : <span aria-hidden="true">OB</span>}
+        </div>
         <div className="chairman-welcome-copy">
           <span className="eyebrow">A Welcome from the Chairman</span>
           <h2>United by our shared journey and committed to a stronger future.</h2>
@@ -128,47 +99,6 @@ export function Home() {
         </div>
       </section>
 
-      <section className="section home-news-section">
-        <div className="section-heading">
-          <span className="eyebrow">Latest News</span>
-          <h2>Stay informed about our progress and activities.</h2>
-          <p>Follow announcements, programmes, community initiatives and milestones from the Association.</p>
-        </div>
-        <div className="home-news-grid">
-          {newsItems.map((item) => (
-            <article className="home-news-card" key={item.title}>
-              <div className="home-preview-icon"><Newspaper size={23} /></div>
-              <span><CalendarDays size={15} />{item.date}</span>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-              <a className="text-link" href="#/updates">Read more <ArrowRight size={16} /></a>
-            </article>
-          ))}
-        </div>
-        <a className="button button-secondary home-section-button" href="#/updates">View All News <ArrowRight size={17} /></a>
-      </section>
-
-      <section className="section muted-section home-gallery-section">
-        <div className="section-heading centered">
-          <span className="eyebrow">Capturing Our Journey</span>
-          <h2>Every photograph tells part of our story.</h2>
-          <p>Real Association photographs will be added as activities, reunions, school visits and community projects take place.</p>
-        </div>
-        <div className="home-gallery-grid">
-          {galleryPreviews.map((item) => (
-            <article className="home-gallery-card" key={item.title}>
-              <div className="home-gallery-placeholder"><Camera size={38} /><span>Photos coming soon</span></div>
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-                <a className="text-link" href="#/gallery">View gallery <ArrowRight size={16} /></a>
-              </div>
-            </article>
-          ))}
-        </div>
-        <a className="button home-section-button" href="#/gallery">Explore Our Gallery <ArrowRight size={17} /></a>
-      </section>
-
       <section className="section leadership-preview">
         <div className="section-heading">
           <span className="eyebrow">Leadership</span>
@@ -178,7 +108,7 @@ export function Home() {
         <div className="mini-leaders">
           {executives.filter((executive) => executive.status === 'complete').slice(0, 4).map((executive) => (
             <a href={`#/leadership/${executive.slug}`} key={executive.slug}>
-              <span>{executive.name.split(' ').map((name) => name[0]).join('')}</span>
+              <span>{executive.image ? <img src={executive.image} alt="" loading="lazy" /> : executive.name.split(' ').map((name) => name[0]).join('')}</span>
               <div>
                 <strong>{executive.name}</strong>
                 <small>{executive.role}</small>

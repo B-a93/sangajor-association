@@ -1,6 +1,5 @@
 (() => {
   const directoryPortraits = {
-    'Omar Bah': '/omar Bah-chairman Jul 28, 2026, 11_28_29 AM.png',
     'Kaddy Bojang': '/Kaddy-Bojang-vice-chairlady-png.png',
     'Landing Bojang': '/landing-bojang sg24, 2026, 01_46_19 PM.png',
     'Lamin Bangura': '/Lamin-Bangura-Ass-SG Jul 27, 2026, 11_34_59 PM.png',
