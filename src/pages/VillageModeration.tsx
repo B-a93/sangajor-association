@@ -6,11 +6,15 @@ import './VillageSquare.css';
 
 export function VillageModeration() {
   const [reports, setReports] = useState<VillageReport[]>([]);
+  const [allowed, setAllowed] = useState<boolean | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const load = useCallback(async () => {
     const { data: auth } = await supabase.auth.getSession();
     if (!auth.session) { window.location.hash = '/login'; return; }
+    const { data: authorized } = await supabase.rpc('can_moderate_village');
+    setAllowed(Boolean(authorized));
+    if (!authorized) { setLoading(false); return; }
     const { data, error } = await supabase.from('village_reports')
       .select('id, reason, details, status, resolution_note, created_at, reporter:profiles!village_reports_reporter_id_fkey(full_name), post:village_posts(body, author:profiles!village_posts_author_id_fkey(full_name))')
       .order('created_at', { ascending: false });
@@ -26,6 +30,7 @@ export function VillageModeration() {
     if (!error) await load();
   }
   if (loading) return <section className="village-state">Opening the moderation queue…</section>;
+  if (!allowed) return <section className="village-state"><div><h1>Access denied</h1><p>Village moderation is restricted to authorized officers.</p><a href="#/dashboard">Return to dashboard</a></div></section>;
   return <section className="village-page"><header className="village-header"><div><p className="eyebrow">Community safety</p><h1>Village moderation</h1><p>Review member concerns consistently and keep a clear resolution record.</p></div><a className="secondary-button" href="#/dashboard/village">Back to Village Square</a></header>
     {message && <p className="village-message" role="status">{message}</p>}
     <div className="moderation-summary"><ShieldCheck /><strong>{reports.filter((report) => report.status === 'open').length}</strong><span> open reports</span></div>

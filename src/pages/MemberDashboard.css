@@ -87,3 +87,9 @@
     grid-template-columns: 1fr;
   }
 }
+
+.member-dashboard > h2 { margin: 0 0 1rem; }
+.dashboard-alert { padding: 1rem 1.2rem; border: 1px solid #f0c36a; border-radius: 12px; background: #fff8e6; color: #684b00; }
+.executive-portal { margin-top: 2.5rem; padding: 2rem; border: 1px solid #bad7ca; border-radius: 20px; background: #eef8f3; }
+.executive-portal > div:first-child { margin-bottom: 1.25rem; }
+.executive-portal h2 { margin: .25rem 0; color: #0b5838; }
