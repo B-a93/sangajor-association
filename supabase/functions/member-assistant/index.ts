@@ -11,13 +11,13 @@ Deno.serve(async (request) => {
     if (!authorization) return json({ error: 'Authentication required' }, 401);
     const client = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, { global: { headers: { Authorization: authorization } } });
     const { data: { user }, error: authenticationError } = await client.auth.getUser();
-    if (authenticationError || !user) return json({ error: 'Authentication required' }, 401);
+    if (authenticationError || !user) return json({ error: 'Authentication required', details: authenticationError?.message }, 401);
     const body = await request.json().catch(() => null);
     if (!body || typeof body !== 'object') return json({ error: 'A JSON request body is required' }, 400);
     const message = String(body.message ?? '').trim().slice(0, 500);
     if (!message) return json({ error: 'A message is required' }, 400);
     const { data: context, error: contextError } = await client.rpc('member_assistant_context');
-    if (contextError || !context) return json({ error: 'Member context unavailable' }, 403);
+    if (contextError || !context) return json({ error: 'Member context unavailable', details: contextError?.message ?? 'No active Members row is linked to this Authentication user.' }, 403);
     let conversationId = typeof body.conversationId === 'string' ? body.conversationId : undefined;
     if (conversationId) {
       const { data: conversation } = await client.from('assistant_conversations').select('id').eq('id', conversationId).eq('member_id', user.id).maybeSingle();
@@ -32,7 +32,7 @@ Deno.serve(async (request) => {
     const { error: replyWriteError } = await client.from('assistant_messages').insert({ conversation_id: conversationId, member_id: user.id, role: 'assistant', content: reply.answer, citations: reply.citations });
     if (replyWriteError) throw replyWriteError;
     return json({ ...reply, conversationId });
-  } catch (error) { console.error('member-assistant', error); return json({ error: 'Assistant request failed' }, 500); }
+  } catch (error) { console.error('member-assistant', error); return json({ error: 'Assistant request failed', details: error instanceof Error ? error.message : String(error) }, 500); }
 });
 
 function answerFromContext(question: string, context: Record<string, Array<Record<string, unknown>>>) {

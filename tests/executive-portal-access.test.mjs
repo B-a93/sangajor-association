@@ -8,7 +8,7 @@ test('dashboard loads the authenticated public profile and gates the executive p
   const access = await read('src/lib/executiveAccess.ts');
   assert.match(dashboard, /from\('Members'\)/);
   assert.match(dashboard, /eq\('auth_user_id', data\.session\.user\.id\)/);
-  assert.match(dashboard, /member\.status === 'active'/);
+  assert.match(dashboard, /member\.status\?\.toLowerCase\(\) === 'active'/);
   assert.match(dashboard, /isActiveExecutive\(profile\)/);
   assert.match(dashboard, /isExecutive && <section className="executive-portal"/);
   assert.match(dashboard, /Executive Portal/);

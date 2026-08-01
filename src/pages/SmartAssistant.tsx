@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { Bot, CalendarClock, ExternalLink, Send, ShieldCheck, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { developmentErrorMessage } from '../lib/errorMessage';
 import type { AssistantMessage, AssistantReply, AutomationPreference } from '../types/assistant';
 import './SmartAssistant.css';
 
@@ -22,8 +23,9 @@ export function SmartAssistant() {
   useEffect(() => { void supabase.auth.getSession().then(async ({ data }) => {
     setSession(data.session);
     if (!data.session) { window.location.hash = '/login'; return; }
-    const { data: saved } = await supabase.from('assistant_automation_preferences').select('event_reminders, dues_reminders, announcement_digest, volunteer_matches').maybeSingle();
+    const { data: saved, error } = await supabase.from('assistant_automation_preferences').select('event_reminders, dues_reminders, announcement_digest, volunteer_matches').maybeSingle();
     if (saved) setPreferences(saved as AutomationPreference);
+    if (error) setStatus(developmentErrorMessage('Automation preferences could not be loaded.', error));
   }); }, []);
   useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
 
@@ -38,9 +40,15 @@ export function SmartAssistant() {
     });
     if (error || !data) {
       const response = error && 'context' in error && error.context instanceof Response ? error.context : undefined;
-      setStatus(response?.status === 401
+      let functionError: unknown = error ?? new Error('The Edge Function returned no response body.');
+      if (response) {
+        const payload = await response.clone().json().catch(() => null) as { error?: string; details?: string } | null;
+        if (payload?.error) functionError = new Error(`${payload.error}${payload.details ? `: ${payload.details}` : ''}`);
+      }
+      const summary = response?.status === 401
         ? 'Your session has expired. Please sign in again before asking Sanga.'
-        : 'The assistant is unavailable right now. Your request was not lost—please try again.');
+        : 'The assistant is unavailable right now. Your request was not lost—please try again.';
+      setStatus(developmentErrorMessage(summary, functionError));
     }
     else {
       setConversationId(data.conversationId);
@@ -56,7 +64,7 @@ export function SmartAssistant() {
     const next = { ...preferences, [key]: !preferences[key] };
     setPreferences(next); setStatus('Saving automation preferences…');
     const { error } = await supabase.from('assistant_automation_preferences').upsert({ user_id: session?.user.id, ...next });
-    setStatus(error ? 'Preferences could not be saved. Please try again.' : 'Automation preferences saved.');
+    setStatus(error ? developmentErrorMessage('Preferences could not be saved. Please try again.', error) : 'Automation preferences saved.');
   }
 
   if (!session) return <section className="assistant-loading">Preparing your private assistant…</section>;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { isActiveExecutive, roleLabel, type AuthenticatedProfile } from '../lib/executiveAccess';
 import { supabase } from '../lib/supabase';
+import { developmentErrorMessage } from '../lib/errorMessage';
 import './MemberDashboard.css';
 
 type ExecutiveTool = { allowed: boolean; label: string; description: string; href: string; link: string };
@@ -23,7 +24,12 @@ export function MemberDashboard() {
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
+    supabase.auth.getSession().then(async ({ data, error: sessionError }) => {
+      if (sessionError) {
+        setProfileError(developmentErrorMessage('Your current session could not be loaded.', sessionError));
+        setLoading(false);
+        return;
+      }
       setSession(data.session);
       if (data.session) {
         // The existing Members row is authoritative; Auth metadata is deliberately not used for authorization.
@@ -31,7 +37,8 @@ export function MemberDashboard() {
           .select('id, first_name, last_name, email, membership_number, role, status')
           .eq('auth_user_id', data.session.user.id).maybeSingle();
         if (result.error || !result.data) {
-          setProfileError('Your Association profile could not be loaded. Executive tools are unavailable until your profile is verified.');
+          const reason = result.error ?? new Error(`No Members row is linked to Authentication user ${data.session.user.id}.`);
+          setProfileError(developmentErrorMessage('Your Association profile could not be loaded. Executive tools are unavailable until your profile is verified.', reason));
         } else {
           const member = result.data;
           const currentProfile: AuthenticatedProfile = {
@@ -40,7 +47,7 @@ export function MemberDashboard() {
             email: member.email,
             membership_number: member.membership_number,
             role: member.role as AuthenticatedProfile['role'],
-            is_active: member.status === 'active',
+            is_active: member.status?.toLowerCase() === 'active',
           };
           setProfile(currentProfile);
           setCanInvite(isActiveExecutive(currentProfile));
@@ -52,6 +59,8 @@ export function MemberDashboard() {
           supabase.rpc('can_view_executive_analytics'), supabase.rpc('can_moderate_village'),
           supabase.rpc('unread_announcement_count'),
         ]);
+        const failedCheck = checks.find((check) => check.error)?.error;
+        if (failedCheck) setProfileError(developmentErrorMessage('Executive authorization could not be resolved.', failedCheck));
         setCanManage(Boolean(checks[0].data)); setCanManageFinances(Boolean(checks[1].data));
         setCanManageEvents(Boolean(checks[2].data)); setCanManageCommunications(Boolean(checks[3].data));
         setCanManageDocuments(Boolean(checks[4].data)); setCanManageVolunteers(Boolean(checks[5].data));
