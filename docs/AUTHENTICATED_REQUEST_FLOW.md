@@ -15,9 +15,9 @@ to replace that useful distinction with “Your Association profile could not be
 loaded.” The repair links only one-to-one normalized email matches and never guesses
 an ambiguous identity.
 
-There is no `executive_roles` table in this schema. The canonical executive office is
-`Members.role`; `member_has_role()` resolves it using the current JWT's `auth.uid()` and
-requires an active `Members` row.
+Production's canonical executive office is the active `executive_roles` assignment
+joined to `Members.id`. Migration `202608010003` supersedes the earlier compatibility
+assumption that `Members.role` was authoritative.
 
 ## Request and query trace
 
@@ -28,17 +28,18 @@ requires an active `Members` row.
    session plus refresh when required). It returns `session` or an Auth error. The
    dashboard now reports that error in development rather than continuing.
 3. **Member lookup** — table `Members`; projection `id, first_name, last_name, email,
-   membership_number, role, status`; filter `auth_user_id = session.user.id`;
+   membership_number, status`; filter `auth_user_id = session.user.id`;
    cardinality `maybeSingle`. A linked row is returned through the self-read RLS
    policy. A missing link returns `data: null, error: null`; PostgREST/schema/RLS
    failures return `result.error`. Both are now distinguished in development.
-4. **Executive authorization** — RPCs `can_manage_members`, `can_manage_finances`,
+4. **Executive authorization** — the dashboard loads the active `executive_roles.office`
+   through `member_id`. RPCs `can_manage_members`, `can_manage_finances`,
    `can_manage_events`, `can_manage_announcements`, `can_manage_documents`,
    `can_manage_volunteers`, `can_view_executive_analytics`, and
    `can_moderate_village` filter `Members.auth_user_id = auth.uid()`, normalized
-   `status = active`, and `role = any(allowed_roles)`. Each returns boolean or an RPC
-   error. The dashboard previously ignored every RPC error; it now exposes the first
-   one in development. `unread_announcement_count` returns a number or RPC error.
+   `status = active`, and an active office assignment. Each check updates its own tool,
+   so a missing optional RPC cannot suppress the portal or unrelated permissions.
+   `unread_announcement_count` is similarly isolated and returns zero for inactive members.
 5. **Assistant preferences** — table `assistant_automation_preferences`; RLS filter
    `user_id = auth.uid()`; `maybeSingle()` returns saved preferences, no row, or a
    PostgREST error. Loading and saving errors are now visible in development.
@@ -58,7 +59,7 @@ requires an active `Members` row.
    UUID and now reference `auth.users`, matching their RLS policies. Insert failures
    are returned with their real error detail and displayed during development.
 9. **Dashboard recognition** — the returned `Members.status` is compared
-   case-insensitively and `Members.role` is passed to `isActiveExecutive`; the portal
+   case-insensitively and normalized `executive_roles.office` is passed to `isActiveExecutive`; the portal
    appears only for an active recognized office. Tool visibility additionally uses
    the database RPC results above.
 
