@@ -4,6 +4,27 @@ import test from 'node:test';
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const migrationPath = 'supabase/migrations/202608010003_executive_authorization_compatibility.sql';
 
+test('migration defines active-member authorization before anything calls it', async () => {
+  const sql = await read(migrationPath);
+  const definition = sql.indexOf('create or replace function public.is_active_member(');
+  const unreadRpc = sql.indexOf('create or replace function public.unread_announcement_count(');
+
+  assert.notEqual(definition, -1);
+  assert.notEqual(unreadRpc, -1);
+  assert.ok(definition < unreadRpc);
+  assert.match(
+    sql.slice(definition, sql.indexOf('create or replace function public.normalize_executive_office(')),
+    /from public\."Members" m[\s\S]*m\.auth_user_id = user_id[\s\S]*m\.status/,
+  );
+});
+
+test('optional notification RPC does not require communication tables', async () => {
+  const sql = await read(migrationPath);
+  assert.match(sql, /if to_regclass\('public\.announcements'\) is not null[\s\S]*to_regclass\('public\.announcement_reads'\) is not null then/);
+  assert.match(sql, /if to_regprocedure\('public\.unread_announcement_count\(\)'\) is not null then[\s\S]*grant execute on function public\.unread_announcement_count\(\)/);
+  assert.doesNotMatch(sql, /public\.can_moderate_village\(uuid\), public\.unread_announcement_count\(\)/);
+});
+
 test('all dashboard RPCs authorize through active Members and executive_roles', async () => {
   const sql = await read(migrationPath);
   assert.match(sql, /from public\."Members" m\s+join public\.executive_roles er on er\.member_id = m\.id/);
