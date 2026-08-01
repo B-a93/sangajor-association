@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { isActiveExecutive, roleLabel, type AuthenticatedProfile } from '../lib/executiveAccess';
+import { isActiveExecutive, normalizeExecutiveOffice, roleLabel, type AuthenticatedProfile } from '../lib/executiveAccess';
 import { supabase } from '../lib/supabase';
 import { developmentErrorMessage } from '../lib/errorMessage';
 import './MemberDashboard.css';
@@ -12,6 +12,7 @@ export function MemberDashboard() {
   const [profile, setProfile] = useState<AuthenticatedProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
+  const [authorizationWarnings, setAuthorizationWarnings] = useState<string[]>([]);
   const [canInvite, setCanInvite] = useState(false);
   const [canManage, setCanManage] = useState(false);
   const [canManageFinances, setCanManageFinances] = useState(false);
@@ -34,38 +35,46 @@ export function MemberDashboard() {
       if (data.session) {
         // The existing Members row is authoritative; Auth metadata is deliberately not used for authorization.
         const result = await supabase.from('Members')
-          .select('id, first_name, last_name, email, membership_number, role, status')
+          .select('id, first_name, last_name, email, membership_number, status')
           .eq('auth_user_id', data.session.user.id).maybeSingle();
         if (result.error || !result.data) {
           const reason = result.error ?? new Error(`No Members row is linked to Authentication user ${data.session.user.id}.`);
           setProfileError(developmentErrorMessage('Your Association profile could not be loaded. Executive tools are unavailable until your profile is verified.', reason));
         } else {
           const member = result.data;
+          const officeResult = await supabase.from('executive_roles')
+            .select('office')
+            .eq('member_id', member.id)
+            .eq('is_active', true)
+            .limit(1)
+            .maybeSingle();
           const currentProfile: AuthenticatedProfile = {
             id: String(member.id),
             full_name: [member.first_name, member.last_name].filter(Boolean).join(' ').trim(),
             email: member.email,
             membership_number: member.membership_number,
-            role: member.role as AuthenticatedProfile['role'],
+            role: normalizeExecutiveOffice(officeResult.data?.office),
             is_active: member.status?.toLowerCase() === 'active',
           };
           setProfile(currentProfile);
           setCanInvite(isActiveExecutive(currentProfile));
+          if (officeResult.error) setAuthorizationWarnings(['executive office']);
         }
-        const checks = await Promise.all([
-          supabase.rpc('can_manage_members'), supabase.rpc('can_manage_finances'),
-          supabase.rpc('can_manage_events'), supabase.rpc('can_manage_announcements'),
-          supabase.rpc('can_manage_documents'), supabase.rpc('can_manage_volunteers'),
-          supabase.rpc('can_view_executive_analytics'), supabase.rpc('can_moderate_village'),
-          supabase.rpc('unread_announcement_count'),
-        ]);
-        const failedCheck = checks.find((check) => check.error)?.error;
-        if (failedCheck) setProfileError(developmentErrorMessage('Executive authorization could not be resolved.', failedCheck));
-        setCanManage(Boolean(checks[0].data)); setCanManageFinances(Boolean(checks[1].data));
-        setCanManageEvents(Boolean(checks[2].data)); setCanManageCommunications(Boolean(checks[3].data));
-        setCanManageDocuments(Boolean(checks[4].data)); setCanManageVolunteers(Boolean(checks[5].data));
-        setCanViewAnalytics(Boolean(checks[6].data)); setCanModerateVillage(Boolean(checks[7].data));
-        setUnreadAnnouncements(Number(checks[8].data ?? 0));
+        const permissionChecks = [
+          ['members', 'can_manage_members', setCanManage], ['finances', 'can_manage_finances', setCanManageFinances],
+          ['events', 'can_manage_events', setCanManageEvents], ['announcements', 'can_manage_announcements', setCanManageCommunications],
+          ['documents', 'can_manage_documents', setCanManageDocuments], ['volunteers', 'can_manage_volunteers', setCanManageVolunteers],
+          ['analytics', 'can_view_executive_analytics', setCanViewAnalytics], ['village moderation', 'can_moderate_village', setCanModerateVillage],
+        ] as const;
+        const checkResults = await Promise.all(permissionChecks.map(async ([label, rpc, setter]) => {
+          const check = await supabase.rpc(rpc);
+          if (!check.error) setter(Boolean(check.data));
+          return check.error ? label : null;
+        }));
+        const unreadResult = await supabase.rpc('unread_announcement_count');
+        if (!unreadResult.error) setUnreadAnnouncements(Number(unreadResult.data ?? 0));
+        const failedChecks = checkResults.filter((label): label is Exclude<typeof label, null> => label !== null);
+        setAuthorizationWarnings((current) => [...current, ...failedChecks, ...(unreadResult.error ? ['announcement badge'] : [])]);
       }
       setLoading(false);
       if (!data.session) window.location.hash = '/login';
@@ -96,6 +105,7 @@ export function MemberDashboard() {
   return <section className="member-dashboard">
     <div className="dashboard-heading"><div><p className="eyebrow">MySANGAJOR Digital Village</p><h1>Welcome, {displayName}</h1><p>Your secure Association member portal is now connected.</p></div><button className="secondary-button" type="button" onClick={signOut}>Sign out</button></div>
     {profileError && <p className="dashboard-alert" role="alert">{profileError}</p>}
+    {authorizationWarnings.length > 0 && <p className="dashboard-alert" role="status">Some optional portal tools are temporarily unavailable: {authorizationWarnings.join(', ')}.</p>}
     <h2>Member tools</h2>
     <div className="dashboard-grid">
       <article><span>AI Assistant</span><strong>Ask questions and automate helpful reminders</strong><a href="#/dashboard/assistant">Ask Sanga</a></article>

@@ -27,7 +27,7 @@ test('development surfaces the query and Edge Function failure details', async (
   ]);
   assert.match(helper, /import\.meta\.env\.DEV/);
   assert.match(dashboard, /No Members row is linked to Authentication user/);
-  assert.match(dashboard, /failedCheck/);
+  assert.match(dashboard, /authorizationWarnings/);
   assert.match(assistant, /payload\.details/);
   assert.match(fn, /details: contextError\?\.message/);
 });
