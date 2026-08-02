@@ -1,7 +1,7 @@
 export const executiveRoles = [
   'chairman', 'vice_chairperson', 'secretary_general', 'assistant_secretary_general',
   'treasurer', 'assistant_treasurer', 'auditor_general', 'assistant_auditor_general',
-  'ipro', 'assistant_ipro', 'programme_officer', 'assistant_programme_officer', 'adviser', 'admin',
+  'ipro', 'assistant_ipro', 'programme_officer', 'assistant_programme_officer', 'adviser',
 ] as const;
 
 export type AppRole = 'member' | (typeof executiveRoles)[number];

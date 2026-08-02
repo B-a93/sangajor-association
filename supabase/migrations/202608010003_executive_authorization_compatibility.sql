@@ -124,3 +124,32 @@ where routine_schema = 'public'
     'unread_announcement_count'
   )
 order by routine_name;
+
+
+-- Fail the migration transaction with an actionable error rather than allowing a
+-- partially deployed dashboard API. Identity arguments document the exact
+-- PostgREST signatures; UUID functions are callable without arguments because
+-- their user_id parameter defaults to auth.uid().
+do $required_dashboard_rpcs$
+declare
+  missing text[];
+begin
+  select array_agg(signature order by signature) into missing
+  from unnest(array[
+    'public.active_executive_office(uuid)',
+    'public.can_manage_members(uuid)',
+    'public.can_manage_finances(uuid)',
+    'public.can_manage_events(uuid)',
+    'public.can_manage_announcements(uuid)',
+    'public.can_manage_documents(uuid)',
+    'public.can_manage_volunteers(uuid)',
+    'public.can_view_executive_analytics(uuid)',
+    'public.can_moderate_village(uuid)',
+    'public.unread_announcement_count()'
+  ]) signature
+  where to_regprocedure(signature) is null;
+
+  if missing is not null then
+    raise exception 'Executive authorization migration incomplete. Missing required RPC signatures: %', array_to_string(missing, ', ');
+  end if;
+end $required_dashboard_rpcs$;

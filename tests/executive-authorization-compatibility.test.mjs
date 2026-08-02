@@ -46,10 +46,10 @@ test('office normalization and Banna verification preserve IPRO-only permissions
 
 test('dashboard reads office assignments and isolates permission failures', async () => {
   const dashboard = await read('src/pages/MemberDashboard.tsx');
-  assert.match(dashboard, /from\('executive_roles'\)[\s\S]*select\('office'\)[\s\S]*eq\('member_id', member\.id\)[\s\S]*eq\('is_active', true\)/);
+  assert.match(dashboard, /rpc\('active_executive_office'\)/);
   assert.doesNotMatch(dashboard, /membership_number, role, status/);
   assert.match(dashboard, /permissionChecks\.map/);
-  assert.doesNotMatch(dashboard, /Executive authorization could not be resolved/);
+  assert.doesNotMatch(dashboard, /Some optional portal tools are temporarily unavailable/);
 });
 
 const repairMigrationPath = 'supabase/migrations/202608020001_repair_dashboard_authorization_rpcs.sql';
@@ -99,4 +99,18 @@ test('repair ends with information-schema verification for every dashboard RPC',
   assert.match(verification, /from information_schema\.routines/);
   assert.match(verification, /where routine_schema = 'public'/);
   for (const rpc of dashboardRpcs) assert.match(verification, new RegExp(`'${rpc}'`));
+});
+
+
+test('required RPC verification fails for any missing exact signature', async () => {
+  for (const path of [migrationPath, repairMigrationPath]) {
+    const sql = await read(path);
+    assert.ok(sql.includes('do $required_dashboard_rpcs$'));
+    assert.match(sql, /to_regprocedure\(signature\) is null/);
+    assert.match(sql, /raise exception 'Executive authorization migration incomplete/);
+    for (const rpc of dashboardRpcs) {
+      const signature = rpc === 'unread_announcement_count' ? `${rpc}()` : `${rpc}(uuid)`;
+      assert.ok(sql.includes(`public.${signature}`));
+    }
+  }
 });
