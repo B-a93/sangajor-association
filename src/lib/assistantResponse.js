@@ -1,4 +1,8 @@
-const intents = new Set(['events', 'dues', 'announcements', 'volunteering', 'help']);
+const intents = new Set(['events', 'dues', 'announcements', 'volunteering', 'leadership', 'help']);
+
+function isSafeAssistantHref(value) {
+  return typeof value === 'string' && /^#\/[a-z0-9/_-]*$/i.test(value);
+}
 
 /**
  * Convert an untrusted Edge Function payload into values that are safe to render.
@@ -12,7 +16,7 @@ export function normalizeAssistantReply(value) {
     ? candidate.citations.flatMap((citation) => {
       if (!citation || typeof citation !== 'object') return [];
       const item = /** @type {Record<string, unknown>} */ (citation);
-      return typeof item.label === 'string' && typeof item.href === 'string'
+      return typeof item.label === 'string' && isSafeAssistantHref(item.href)
         ? [{ label: item.label, href: item.href }]
         : [];
     })

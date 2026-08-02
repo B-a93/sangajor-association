@@ -8,9 +8,17 @@ test('missing suggestedActions is normalized to an empty array', () => {
   assert.deepEqual(normalizeAssistantReply({ answer: 'Hello' }).suggestedActions, []);
 });
 
+test('missing citations is normalized to an empty array', () => {
+  assert.deepEqual(normalizeAssistantReply({ answer: 'Hello' }).citations, []);
+});
+
 test('malformed citations are discarded rather than reaching render callbacks', () => {
   assert.deepEqual(normalizeAssistantReply({ citations: { map: 'not a function', length: 1 } }).citations, []);
   assert.deepEqual(normalizeAssistantReply({ citations: [null, 'bad', { label: 4, href: [] }] }).citations, []);
+});
+
+test('unsafe citation links are discarded', () => {
+  assert.deepEqual(normalizeAssistantReply({ citations: [{ label: 'Bad', href: 'javascript:alert(1)' }] }).citations, []);
 });
 
 test('missing answer is normalized to a safe string', () => {

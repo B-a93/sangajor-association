@@ -8,7 +8,7 @@ export type AssistantReply = {
   intent: AssistantIntent;
 };
 
-export type AssistantIntent = 'events' | 'dues' | 'announcements' | 'volunteering' | 'help';
+export type AssistantIntent = 'events' | 'dues' | 'announcements' | 'volunteering' | 'leadership' | 'help';
 
 export type AssistantMessage = {
   id: string;
