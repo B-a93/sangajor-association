@@ -13,8 +13,9 @@ test('assistant data is private, scoped and opt-in', async () => {
 });
 
 test('assistant function authenticates, grounds replies and limits input', async () => {
-  const [fn, config] = await Promise.all([
+  const [fn, replies, config] = await Promise.all([
     read('supabase/functions/member-assistant/index.ts'),
+    read('supabase/functions/_shared/assistant-replies.mjs'),
     read('supabase/config.toml'),
   ]);
   // The Edge gateway's legacy verifier rejects JWTs from asymmetric signing
@@ -28,7 +29,9 @@ test('assistant function authenticates, grounds replies and limits input', async
   assert.match(fn, /request\.method !== 'POST'/);
   assert.match(fn, /\.eq\('member_id', user\.id\)/);
   assert.match(fn, /replyWriteError/);
-  assert.match(fn, /intent: 'help'/);
+  assert.match(fn, /answerFromContext/);
+  assert.match(replies, /reply\('help'/);
+  assert.match(replies, /reply\('leadership'/);
   assert.doesNotMatch(fn, /SERVICE_ROLE/);
 });
 

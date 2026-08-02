@@ -7,7 +7,7 @@ import { normalizeAssistantReply, readAssistantError } from '../lib/assistantRes
 import type { AssistantMessage, AssistantReply, AutomationPreference } from '../types/assistant';
 import './SmartAssistant.css';
 
-const starters = ['What events are coming up?', 'Do I have outstanding dues?', 'Find a volunteer opportunity', 'Summarise recent announcements'];
+const starters = ['Who is the chairman?', 'What events are coming up?', 'Do I have outstanding dues?', 'Find a volunteer opportunity'];
 const defaultPreferences: AutomationPreference = { event_reminders: true, dues_reminders: true, announcement_digest: false, volunteer_matches: true };
 
 export function SmartAssistant() {
@@ -53,9 +53,9 @@ export function SmartAssistant() {
     }
     else {
       const reply: AssistantReply = normalizeAssistantReply(data);
-      if (reply.conversationId) setConversationId(reply.conversationId);
+      if (typeof reply.conversationId === 'string' && reply.conversationId) setConversationId(reply.conversationId);
       setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'assistant', content: reply.answer, citations: reply.citations }]);
-      setSuggestedActions(reply.suggestedActions);
+      setSuggestedActions(Array.isArray(reply.suggestedActions) ? reply.suggestedActions : []);
     }
     setBusy(false);
   }
@@ -77,13 +77,13 @@ export function SmartAssistant() {
         <div className="chat-heading"><span><Bot size={22}/></span><div><strong>Sanga</strong><small>Association guide · Responses may need verification</small></div></div>
         <div className="chat-thread" aria-live="polite">
           {messages.length === 0 && <div className="assistant-welcome"><Sparkles/><h2>How can I help today?</h2><p>I can explain Association information, find member resources and help you stay on top of events, dues and volunteering.</p><div className="starter-grid">{starters.map((starter) => <button type="button" onClick={() => void ask(starter)} key={starter}>{starter}</button>)}</div></div>}
-          {messages.map((message) => <div className={`chat-message ${message.role}`} key={message.id}><span>{message.role === 'assistant' ? 'Sanga' : 'You'}</span><p>{message.content}</p>{message.citations && message.citations.length > 0 && <div className="assistant-sources"><strong>Sources</strong>{message.citations.map((citation) => <a href={citation.href} key={citation.href}>{citation.label}<ExternalLink size={13}/></a>)}</div>}</div>)}
+          {messages.map((message) => <div className={`chat-message ${message.role}`} key={message.id}><span>{message.role === 'assistant' ? 'Sanga' : 'You'}</span><p>{typeof message.content === 'string' ? message.content : ''}</p>{Array.isArray(message.citations) && message.citations.length > 0 && <div className="assistant-sources"><strong>Sources</strong>{message.citations.map((citation) => <a href={citation.href} key={`${citation.href}-${citation.label}`}>{citation.label}<ExternalLink size={13}/></a>)}</div>}</div>)}
           {busy && <div className="assistant-thinking" role="status"><i/><i/><i/><span>Sanga is checking your Association records…</span></div>}
-          {!busy && messages.length > 0 && suggestedActions.length > 0 && <div className="assistant-followups" aria-label="Suggested questions">{suggestedActions.map((action) => <button type="button" onClick={() => void ask(action)} key={action}>{action}</button>)}</div>}
+          {!busy && messages.length > 0 && Array.isArray(suggestedActions) && suggestedActions.length > 0 && <div className="assistant-followups" aria-label="Suggested questions">{suggestedActions.map((action) => <button type="button" onClick={() => void ask(action)} key={action}>{action}</button>)}</div>}
           <div ref={endRef}/>
         </div>
         {status && <p className="assistant-status" role="status">{status}</p>}
-        <form className="chat-composer" onSubmit={submit}><label htmlFor="assistant-question" className="sr-only">Ask the Association assistant</label><textarea id="assistant-question" value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about events, dues, announcements or volunteering…" maxLength={500} rows={2}/><button type="submit" disabled={busy || !input.trim()} aria-label="Send question"><Send size={20}/></button></form>
+        <form className="chat-composer" onSubmit={submit}><label htmlFor="assistant-question" className="sr-only">Ask the Association assistant</label><textarea id="assistant-question" value={input} onChange={(event) => setInput(event.target.value)} placeholder="Ask about leadership, events, dues, announcements or volunteering…" maxLength={500} rows={2}/><button type="submit" disabled={busy || !input.trim()} aria-label="Send question"><Send size={20}/></button></form>
         <p className="assistant-disclaimer">Sanga matches keywords to a small set of supported topics; it does not generate advice. Verify important financial or governance information with an executive.</p>
       </article>
       <aside className="automation-panel"><div className="automation-heading"><span><CalendarClock/></span><div><p className="eyebrow">Smart automation</p><h2>Stay one step ahead</h2></div></div><p>Choose the helpful nudges you want. You remain in control and can change them anytime.</p>
