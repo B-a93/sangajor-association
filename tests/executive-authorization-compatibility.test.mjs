@@ -18,11 +18,11 @@ test('migration defines active-member authorization before anything calls it', a
   );
 });
 
-test('optional notification RPC does not require communication tables', async () => {
+test('notification RPC is unconditional and does not require communication tables', async () => {
   const sql = await read(migrationPath);
-  assert.match(sql, /if to_regclass\('public\.announcements'\) is not null[\s\S]*to_regclass\('public\.announcement_reads'\) is not null then/);
-  assert.match(sql, /if to_regprocedure\('public\.unread_announcement_count\(\)'\) is not null then[\s\S]*grant execute on function public\.unread_announcement_count\(\)/);
-  assert.doesNotMatch(sql, /public\.can_moderate_village\(uuid\), public\.unread_announcement_count\(\)/);
+  assert.match(sql, /create or replace function public\.unread_announcement_count\(\)[\s\S]*language plpgsql/);
+  assert.match(sql, /to_regclass\('public\.announcements'\) is null/);
+  assert.match(sql, /grant execute on function public\.unread_announcement_count\(\) to authenticated/);
 });
 
 test('all dashboard RPCs authorize through active Members and executive_roles', async () => {
@@ -50,4 +50,53 @@ test('dashboard reads office assignments and isolates permission failures', asyn
   assert.doesNotMatch(dashboard, /membership_number, role, status/);
   assert.match(dashboard, /permissionChecks\.map/);
   assert.doesNotMatch(dashboard, /Executive authorization could not be resolved/);
+});
+
+const repairMigrationPath = 'supabase/migrations/202608020001_repair_dashboard_authorization_rpcs.sql';
+const dashboardRpcs = [
+  'active_executive_office',
+  'can_manage_members',
+  'can_manage_finances',
+  'can_manage_events',
+  'can_manage_announcements',
+  'can_manage_documents',
+  'can_manage_volunteers',
+  'can_view_executive_analytics',
+  'can_moderate_village',
+  'unread_announcement_count',
+];
+
+test('follow-up migration repairs databases where the original migration is already recorded', async () => {
+  const sql = await read(repairMigrationPath);
+
+  for (const rpc of dashboardRpcs) {
+    assert.match(sql, new RegExp(`create or replace function public\\.${rpc}\\(`));
+  }
+
+  const activeDefinition = sql.indexOf('create or replace function public.active_executive_office(');
+  assert.notEqual(activeDefinition, -1);
+  assert.ok(activeDefinition < sql.indexOf('create or replace function public.office_has_permission('));
+  assert.doesNotMatch(sql.slice(0, activeDefinition), /if[\s\S]*active_executive_office/);
+});
+
+test('repair always creates the notification RPC without requiring optional tables', async () => {
+  const sql = await read(repairMigrationPath);
+  const definition = sql.slice(
+    sql.indexOf('create or replace function public.unread_announcement_count('),
+    sql.indexOf('revoke all on function public.is_active_member('),
+  );
+
+  assert.match(definition, /language plpgsql/);
+  assert.match(definition, /to_regclass\('public\.announcements'\) is null/);
+  assert.match(definition, /execute \$query\$/);
+  assert.doesNotMatch(definition, /create or replace function[\s\S]*if to_regclass/);
+});
+
+test('repair ends with information-schema verification for every dashboard RPC', async () => {
+  const sql = await read(repairMigrationPath);
+  const verification = sql.slice(sql.lastIndexOf('select routine_name'));
+
+  assert.match(verification, /from information_schema\.routines/);
+  assert.match(verification, /where routine_schema = 'public'/);
+  for (const rpc of dashboardRpcs) assert.match(verification, new RegExp(`'${rpc}'`));
 });
