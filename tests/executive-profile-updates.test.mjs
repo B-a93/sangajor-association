@@ -87,7 +87,7 @@ test('Tida portrait has no legacy reference and reaches every executive surface'
   for (const legacyPortrait of legacyPortraits) {
     assert.ok(!publicEntries.includes(legacyPortrait), 'legacy Tida portrait file should be removed');
   }
-  assert.match(serviceWorker, /const CACHE = 'mysangajor-v4'/);
+  assert.match(serviceWorker, /const CACHE = 'mysangajor-v5'/);
 });
 
 test('the homepage uses executive data without the legacy portrait override script', () => {

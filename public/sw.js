@@ -1,6 +1,6 @@
 // Bump this when replacing assets at an existing public URL so active clients
 // discard stale responses (including executive portraits) during activation.
-const CACHE = 'mysangajor-v4';
+const CACHE = 'mysangajor-v5';
 const APP_SHELL = ['/', '/index.html', '/offline.html', '/manifest.webmanifest', '/sangajorr-association-logo.png.jpeg'];
 
 self.addEventListener('install', (event) => {
@@ -17,16 +17,19 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).then((response) => {
+    event.respondWith(fetch(event.request).then(async (response) => {
+      // Clone synchronously, before either branch can consume the response body.
       const copy = response.clone();
-      caches.open(CACHE).then((cache) => cache.put('/index.html', copy));
+      await caches.open(CACHE).then((cache) => cache.put('/index.html', copy));
       return response;
     }).catch(async () => (await caches.match('/index.html')) || caches.match('/offline.html')));
     return;
   }
 
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-    if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request).then(async (response) => {
+    // Never hand the original response to a body consumer before making the cache copy.
+    const copy = response.ok ? response.clone() : null;
+    if (copy) await caches.open(CACHE).then((cache) => cache.put(event.request, copy));
     return response;
   })));
 });

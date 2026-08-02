@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { Bot, CalendarClock, ExternalLink, Send, ShieldCheck, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { developmentErrorMessage } from '../lib/errorMessage';
+import { normalizeAssistantReply, readAssistantError } from '../lib/assistantResponse';
 import type { AssistantMessage, AssistantReply, AutomationPreference } from '../types/assistant';
 import './SmartAssistant.css';
 
@@ -34,7 +35,7 @@ export function SmartAssistant() {
     if (!clean || busy) return;
     setInput(''); setBusy(true); setStatus('');
     setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'user', content: clean }]);
-    const { data, error } = await supabase.functions.invoke<AssistantReply>('member-assistant', {
+    const { data, error } = await supabase.functions.invoke<unknown>('member-assistant', {
       body: { message: clean, conversationId },
       headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
     });
@@ -42,7 +43,7 @@ export function SmartAssistant() {
       const response = error && 'context' in error && error.context instanceof Response ? error.context : undefined;
       let functionError: unknown = error ?? new Error('The Edge Function returned no response body.');
       if (response) {
-        const payload = await response.clone().json().catch(() => null) as { error?: string; details?: string } | null;
+        const payload = await readAssistantError(response);
         if (payload?.error) functionError = new Error(`${payload.error}${payload.details ? `: ${payload.details}` : ''}`);
       }
       const summary = response?.status === 401
@@ -51,9 +52,10 @@ export function SmartAssistant() {
       setStatus(developmentErrorMessage(summary, functionError));
     }
     else {
-      setConversationId(data.conversationId);
-      setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'assistant', content: data.answer, citations: data.citations }]);
-      setSuggestedActions(data.suggestedActions);
+      const reply: AssistantReply = normalizeAssistantReply(data);
+      if (reply.conversationId) setConversationId(reply.conversationId);
+      setMessages((items) => [...items, { id: crypto.randomUUID(), role: 'assistant', content: reply.answer, citations: reply.citations }]);
+      setSuggestedActions(reply.suggestedActions);
     }
     setBusy(false);
   }
