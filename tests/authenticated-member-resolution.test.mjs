@@ -29,5 +29,6 @@ test('development surfaces the query and Edge Function failure details', async (
   assert.match(dashboard, /No Members row is linked to Authentication user/);
   assert.match(dashboard, /authorizationWarnings/);
   assert.match(assistant, /payload\.details/);
-  assert.match(fn, /details: contextError\?\.message/);
+  assert.match(fn, /problem\('Member context unavailable', 403, contextError/);
+  assert.match(fn, /ENVIRONMENT'\) !== 'production'/);
 });

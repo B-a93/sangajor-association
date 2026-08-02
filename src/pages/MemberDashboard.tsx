@@ -42,18 +42,15 @@ export function MemberDashboard() {
           setProfileError(developmentErrorMessage('Your Association profile could not be loaded. Executive tools are unavailable until your profile is verified.', reason));
         } else {
           const member = result.data;
-          const officeResult = await supabase.from('executive_roles')
-            .select('office')
-            .eq('member_id', member.id)
-            .eq('is_active', true)
-            .limit(1)
-            .maybeSingle();
+          // Apply the same active-member and active-office rules as every permission check.
+          // Authority never comes from Members.role or Authentication metadata.
+          const officeResult = await supabase.rpc('active_executive_office');
           const currentProfile: AuthenticatedProfile = {
             id: String(member.id),
             full_name: [member.first_name, member.last_name].filter(Boolean).join(' ').trim(),
             email: member.email,
             membership_number: member.membership_number,
-            role: normalizeExecutiveOffice(officeResult.data?.office),
+            role: normalizeExecutiveOffice(officeResult.data),
             is_active: member.status?.toLowerCase() === 'active',
           };
           setProfile(currentProfile);
@@ -105,7 +102,7 @@ export function MemberDashboard() {
   return <section className="member-dashboard">
     <div className="dashboard-heading"><div><p className="eyebrow">MySANGAJOR Digital Village</p><h1>Welcome, {displayName}</h1><p>Your secure Association member portal is now connected.</p></div><button className="secondary-button" type="button" onClick={signOut}>Sign out</button></div>
     {profileError && <p className="dashboard-alert" role="alert">{profileError}</p>}
-    {authorizationWarnings.length > 0 && <p className="dashboard-alert" role="status">Some optional portal tools are temporarily unavailable: {authorizationWarnings.join(', ')}.</p>}
+    {authorizationWarnings.length > 0 && <p className="dashboard-alert" role="status">Executive authorization could not be fully verified. Please try again later.{import.meta.env.DEV ? ` Missing services: ${authorizationWarnings.join(', ')}.` : ''}</p>}
     <h2>Member tools</h2>
     <div className="dashboard-grid">
       <article><span>AI Assistant</span><strong>Ask questions and automate helpful reminders</strong><a href="#/dashboard/assistant">Ask Sanga</a></article>
@@ -113,7 +110,7 @@ export function MemberDashboard() {
       <article><span>Profile</span><strong>Complete or update your member profile</strong><a href="#/dashboard/profile">Open profile</a></article>
       <article><span>Events</span><strong>RSVP and review your attendance</strong><a href="#/dashboard/events">View member events</a></article>
       <article><span>Directory</span><strong>Connect with fellow members</strong><a href="#/dashboard/members">Browse members</a></article>
-      <article><span>Connection Hub</span><strong>Build connections and message classmates privately</strong><a href="#/dashboard/connections">Open Connection Hub</a></article>
+      <article><span>Connection Hub</span><strong>Find support, exchange skills and message connections privately</strong><a href="#/dashboard/connections">Open Connection Hub</a></article>
       <article><span>Communication</span>{unreadAnnouncements > 0 && <span className="notification-badge" aria-label={`${unreadAnnouncements} unread announcements`}>{unreadAnnouncements > 99 ? '99+' : unreadAnnouncements}</span>}<strong>Read official member announcements</strong><a href="#/dashboard/communications">Open communication centre</a></article>
       <article><span>Knowledge</span><strong>Browse minutes, policies, forms and resources</strong><a href="#/dashboard/documents">Open Knowledge Centre</a></article>
       <article><span>Service</span><strong>Join committees and volunteer for Association projects</strong><a href="#/dashboard/volunteering">Explore opportunities</a></article>

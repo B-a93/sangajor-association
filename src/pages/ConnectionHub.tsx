@@ -1,8 +1,20 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
+import { BriefcaseBusiness, GraduationCap, HandHeart, HeartHandshake, Lightbulb, MessageCircle, Network, Search, Users, UserCheck, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { ConnectionMessage, ConnectionProfile, MemberConnection } from '../types/connection';
 import './ConnectionHub.css';
+
+
+const hubCategories = [
+  { title: 'Business & entrepreneurship', description: 'Share practical business knowledge and discover member-posted enterprise opportunities.', empty: 'No business opportunities have been posted yet.', icon: BriefcaseBusiness },
+  { title: 'Skills learning & exchange', description: 'Offer a skill, request guidance or learn through member-led knowledge exchange.', empty: 'No skills exchanges have been posted yet.', icon: GraduationCap },
+  { title: 'Family support', description: 'Find respectful, community-minded support for family life and shared responsibilities.', empty: 'No family-support resources have been posted yet.', icon: Users },
+  { title: 'Marriage support', description: 'Access a respectful space for member-posted marriage guidance and support resources.', empty: 'No marriage-support resources have been posted yet.', icon: HeartHandshake },
+  { title: 'Parenting', description: 'Exchange useful parenting knowledge and discover community support for caregivers.', empty: 'No parenting resources have been posted yet.', icon: HandHeart },
+  { title: 'Mentorship', description: 'Build trusted mentoring relationships for personal, educational and career growth.', empty: 'No mentorship opportunities have been posted yet.', icon: Lightbulb },
+  { title: 'Professional networking', description: 'Connect around professions, experience and member-posted career opportunities.', empty: 'No professional networking opportunities have been posted yet.', icon: Network },
+  { title: 'Community opportunities', description: 'Discover member-posted ways to contribute, collaborate and strengthen SANGAJOR.', empty: 'No community opportunities have been posted yet.', icon: UserPlus },
+] as const;
 
 export function ConnectionHub() {
   const [me, setMe] = useState('');
@@ -62,6 +74,10 @@ export function ConnectionHub() {
   return <section className="connection-page">
     <header className="connection-header"><div><p className="eyebrow">MySANGAJOR Digital Village</p><h1>SANGAJOR Connection Hub</h1><p>Reconnect safely, grow your network and have private conversations with fellow members.</p></div><a className="secondary-button" href="#/dashboard">Back to dashboard</a></header>
     {notice && <p className="connection-notice" role="status">{notice}</p>}
+    <section className="hub-package" aria-labelledby="hub-package-title">
+      <div className="hub-package-heading"><p className="eyebrow">Connect with purpose</p><h2 id="hub-package-title">Explore the Connection Hub</h2><p>Choose an area of interest. Opportunities will appear only when members publish real content.</p></div>
+      <div className="hub-category-grid">{hubCategories.map(({ title, description, empty, icon: Icon }) => <article key={title}><Icon aria-hidden="true" size={24}/><h3>{title}</h3><p>{description}</p><span>{empty}</span></article>)}</div>
+    </section>
     {requests.length > 0 && <section><h2><UserPlus size={21}/> Connection requests</h2><div className="connection-cards">{requests.map((item) => <article key={item.id}><Avatar profile={item.requester}/><div><strong>{item.requester.full_name}</strong><span>{item.requester.role.replaceAll('_', ' ')}</span></div><div className="connection-actions"><button onClick={() => respond(item.id, 'accepted')}>Accept</button><button onClick={() => respond(item.id, 'declined')}>Decline</button></div></article>)}</div></section>}
     <div className="connection-layout"><section><h2><UserCheck size={21}/> My connections</h2>{accepted.length ? <div className="connection-cards">{accepted.map((item) => <article className={selected === item.id ? 'selected' : ''} key={item.id}><Avatar profile={other(item)}/><div><strong>{other(item).full_name}</strong><span>{other(item).role.replaceAll('_', ' ')}</span></div><button aria-label={`Message ${other(item).full_name}`} onClick={() => setSelected(item.id)}><MessageCircle size={19}/></button></article>)}</div> : <p className="connection-empty">Accepted connections will appear here.</p>}</section>
       <section className="conversation"><h2>Private conversation</h2>{selected ? <><div className="message-list" aria-live="polite">{messages.length ? messages.map((message) => <p className={message.sender_id === me ? 'mine' : ''} key={message.id}>{message.body}<time>{new Date(message.created_at).toLocaleString()}</time></p>) : <span>Start the conversation with a friendly hello.</span>}</div><form onSubmit={send}><label htmlFor="connection-message">Message</label><textarea id="connection-message" maxLength={2000} required value={draft} onChange={(event) => setDraft(event.target.value)}/><button className="primary-button">Send message</button></form></> : <p className="connection-empty">Choose a connection to view your conversation.</p>}</section></div>
