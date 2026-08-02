@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { Footer } from './components/layout/Footer';
 import { Header } from './components/layout/Header';
 import { PWAExperience } from './components/pwa/PWAExperience';
+import { AssistantErrorBoundary } from './components/AssistantErrorBoundary';
 import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { supabase } from './lib/supabase';
@@ -158,7 +159,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/invitations': <MemberInvitations />,
   '/dashboard/administration': <MemberAdministration />,
   '/dashboard/analytics': <ExecutiveAnalytics />,
-  '/dashboard/assistant': <SmartAssistant />,
+  '/dashboard/assistant': <AssistantErrorBoundary><SmartAssistant /></AssistantErrorBoundary>,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,
   '/dashboard/events': <MemberEvents />,
