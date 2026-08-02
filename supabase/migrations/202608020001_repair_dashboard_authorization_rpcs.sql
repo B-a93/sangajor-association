@@ -1,5 +1,8 @@
--- Production compatibility: executive authority belongs to active office assignments,
--- never to Members.role, profiles, or Auth metadata.
+-- Repair for production environments that already recorded 202608010003 before its
+-- function definitions were added. Applied migrations are not rerun when their files
+-- are edited, so every dashboard RPC is recreated here unconditionally.
+-- Executive authority belongs to active office assignments, never to Members.role,
+-- profiles, or Auth metadata.
 -- Keep this migration self-contained: production may not have run the migration that
 -- originally introduced this helper.
 create or replace function public.is_active_member(user_id uuid default auth.uid())
