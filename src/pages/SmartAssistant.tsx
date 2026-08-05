@@ -28,7 +28,12 @@ export function SmartAssistant() {
     if (saved) setPreferences(saved as AutomationPreference);
     if (error) setStatus(developmentErrorMessage('Automation preferences could not be loaded.', error));
   }); }, []);
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
+  useEffect(() => {
+    const target = endRef.current;
+    if (typeof target?.scrollIntoView === 'function') {
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   async function ask(question: string) {
     const clean = question.trim();
