@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase';
 import type { ExecutiveAnalyticsData, MonthlyActivity } from '../types/analytics';
 import './ExecutiveAnalytics.css';
 
-const ranges = [30, 90, 365];
 const number = new Intl.NumberFormat('en');
 const currency = new Intl.NumberFormat('en-GM', { style: 'currency', currency: 'GMD', maximumFractionDigits: 0 });
 
@@ -23,7 +22,6 @@ function ActivityChart({ activity }: { activity: MonthlyActivity[] }) {
 
 export function ExecutiveAnalytics() {
   const [session, setSession] = useState<Session | null>(null);
-  const [days, setDays] = useState(30);
   const [data, setData] = useState<ExecutiveAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,12 +33,12 @@ export function ExecutiveAnalytics() {
   useEffect(() => {
     if (!session) return;
     setLoading(true); setError('');
-    void supabase.rpc('executive_analytics', { range_days: days }).then(({ data: result, error: requestError }) => {
+    void supabase.rpc('executive_analytics').then(({ data: result, error: requestError }) => {
       if (requestError) setError(requestError.message.includes('authorised') ? 'You do not have permission to view executive analytics.' : 'Analytics could not be loaded. Please try again.');
       else setData(result as ExecutiveAnalyticsData);
       setLoading(false);
     });
-  }, [days, session]);
+  }, [session]);
 
   const engagementTotal = useMemo(() => data ? Object.values(data.engagement).reduce((sum, value) => sum + value, 0) : 0, [data]);
 
@@ -55,7 +53,7 @@ export function ExecutiveAnalytics() {
   if (error || !data) return <section className="analytics-state" role="alert"><h1>Analytics unavailable</h1><p>{error}</p><a href="#/dashboard">Return to dashboard</a></section>;
 
   return <section className="executive-analytics">
-    <header className="analytics-header"><div><p className="eyebrow">Executive intelligence</p><h1>Association health at a glance</h1><p>Aggregated insights for informed, privacy-conscious decisions.</p></div><div className="analytics-actions"><label>Reporting period<select value={days} onChange={(event) => setDays(Number(event.target.value))}>{ranges.map((range) => <option value={range} key={range}>Last {range} days</option>)}</select></label><button className="primary-button" type="button" onClick={downloadReport}>Export CSV</button></div></header>
+    <header className="analytics-header"><div><p className="eyebrow">Executive intelligence</p><h1>Association health at a glance</h1><p>Aggregated insights for informed, privacy-conscious decisions.</p></div><div className="analytics-actions"><span>Last {data.rangeDays} days</span><button className="primary-button" type="button" onClick={downloadReport}>Export CSV</button></div></header>
     <div className="analytics-kpis">
       <article><span>Active membership</span><strong>{number.format(data.members.total)}</strong><small>+{number.format(data.members.new)} in this period</small></article>
       <article><span>Dues collected</span><strong>{currency.format(data.finance.collected)}</strong><small>{number.format(data.finance.payments)} recorded payments</small></article>
