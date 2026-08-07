@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Invitation, InvitationStatus } from '../types/invitation';
+import { executiveInvitationRoles } from '../lib/executiveInvitationRoles';
 import './MemberInvitations.css';
 
 const groups: Array<{ status: InvitationStatus; title: string }> = [
@@ -9,7 +10,7 @@ const groups: Array<{ status: InvitationStatus; title: string }> = [
   { status: 'expired', title: 'Expired Invitations' },
   { status: 'cancelled', title: 'Cancelled Invitations' },
 ];
-const emptyForm = { fullName: '', email: '', phone: '', membershipNumber: '', role: 'member' };
+const emptyForm = { fullName: '', email: '', phone: '', membershipNumber: '', executiveOffice: '' };
 
 export function whatsappShareUrl(phone: string, fullName: string, invitationUrl: string) {
   const number = phone.replace(/\D/g, '');
@@ -31,7 +32,7 @@ export function MemberInvitations() {
     setAuthorized(Boolean(allowed));
     if (!allowed) return;
     await supabase.rpc('expire_invitations');
-    const { data, error } = await supabase.from('invitations').select('id, full_name, email, phone, membership_number, role, status, expires_at, accepted_at, created_at').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('invitations').select('id, full_name, email, phone, membership_number, role, executive_office, executive_position, status, expires_at, accepted_at, created_at').order('created_at', { ascending: false });
     if (error) setMessage(error.message); else setInvitations((data ?? []) as Invitation[]);
   }, []);
 
@@ -73,12 +74,12 @@ export function MemberInvitations() {
       <label>Email (optional)<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></label>
       <label>WhatsApp / Phone (optional)<input type="tel" placeholder="+2201234567" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /><small>Use international format. Email or phone is required.</small></label>
       <label>Membership Number (optional)<input value={form.membershipNumber} onChange={(e) => setForm({ ...form, membershipNumber: e.target.value })} /></label>
-      <label>Role<select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}><option value="member">Member</option><option value="admin">Admin</option><option value="secretary_general">Secretary General</option><option value="chairman">Chairman</option><option value="ipro">IPRO</option></select></label>
+      <label>Invitation Type<select value={form.executiveOffice} onChange={(e) => setForm({ ...form, executiveOffice: e.target.value })}><option value="">Member</option>{executiveInvitationRoles.map(([office, position]) => <option key={office} value={office}>{position}</option>)}</select><small>Select an office to grant executive dashboard access when accepted.</small></label>
       <button className="primary-button" disabled={busy}>{busy ? 'Creating…' : 'Send Invitation'}</button>
     </form>}
     {message && <p className="invitation-message" role="status">{message}</p>}
     {groups.map(({ status, title }) => { const items = invitations.filter((item) => item.status === status); return <section className="invitation-section" key={status}><h2>{title} <span>{items.length}</span></h2>
-      {items.length === 0 ? <p className="invitation-empty">No {status} invitations.</p> : <div className="invitation-list">{items.map((item) => <article key={item.id}><div><strong>{item.full_name}</strong>{item.email && <a href={`mailto:${item.email}`}>{item.email}</a>}{item.phone && <a href={`tel:${item.phone}`}>{item.phone}</a>}<small>{item.membership_number || 'No membership number'} · {item.role.replaceAll('_', ' ')}</small></div><div className="invitation-meta"><span className={`invitation-status ${item.status}`}>{item.status}</span><small>{status === 'accepted' ? `Accepted ${new Date(item.accepted_at!).toLocaleDateString()}` : `Expires ${new Date(item.expires_at).toLocaleDateString()}`}</small>{links[item.id] && <div className="share-actions"><button disabled={busy} onClick={() => void copyLink(links[item.id])}>Copy Invitation Link</button>{item.phone && <a target="_blank" rel="noreferrer" href={whatsappShareUrl(item.phone, item.full_name, links[item.id])}>Send via WhatsApp</a>}</div>}{status !== 'accepted' && <div><button disabled={busy} onClick={() => void action('resend', item.id)}>Create New Link</button>{status === 'pending' && <button disabled={busy} onClick={() => void action('cancel', item.id)}>Cancel</button>}</div>}</div></article>)}</div>}
+      {items.length === 0 ? <p className="invitation-empty">No {status} invitations.</p> : <div className="invitation-list">{items.map((item) => <article key={item.id}><div><strong>{item.full_name}</strong>{item.email && <a href={`mailto:${item.email}`}>{item.email}</a>}{item.phone && <a href={`tel:${item.phone}`}>{item.phone}</a>}<small>{item.membership_number || 'No membership number'} · {item.executive_position ?? 'Member'}</small></div><div className="invitation-meta"><span className={`invitation-status ${item.status}`}>{item.status}</span><small>{status === 'accepted' ? `Accepted ${new Date(item.accepted_at!).toLocaleDateString()}` : `Expires ${new Date(item.expires_at).toLocaleDateString()}`}</small>{links[item.id] && <div className="share-actions"><button disabled={busy} onClick={() => void copyLink(links[item.id])}>Copy Invitation Link</button>{item.phone && <a target="_blank" rel="noreferrer" href={whatsappShareUrl(item.phone, item.full_name, links[item.id])}>Send via WhatsApp</a>}</div>}{status !== 'accepted' && <div><button disabled={busy} onClick={() => void action('resend', item.id)}>Create New Link</button>{status === 'pending' && <button disabled={busy} onClick={() => void action('cancel', item.id)}>Cancel</button>}</div>}</div></article>)}</div>}
     </section>; })}
   </section>;
 }

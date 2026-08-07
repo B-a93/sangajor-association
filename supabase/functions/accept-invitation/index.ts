@@ -15,27 +15,52 @@ Deno.serve(async (request) => {
     return json({ error: rejection.error }, rejection.status);
   }
 
-  // An invitation activates an existing Association member; it must never manufacture a duplicate.
+  // Link an existing Association record when possible; otherwise the invitation
+  // is the authority to create exactly one member record.
   let memberQuery = admin.from('Members').select('id, auth_user_id, email, phone, membership_number');
   memberQuery = invitation.membership_number
     ? memberQuery.eq('membership_number', invitation.membership_number)
     : invitation.email ? memberQuery.ilike('email', invitation.email) : memberQuery.eq('phone', invitation.phone);
-  const { data: member, error: memberError } = await memberQuery.maybeSingle();
-  if (memberError || !member) return json({ error: 'No matching Association member record was found. Please contact an executive.' }, 409);
-  if (member.auth_user_id) return json({ error: 'This member already has an account. Please sign in instead.' }, 409);
+  const { data: existingMember, error: memberError } = await memberQuery.maybeSingle();
+  if (memberError) return json({ error: 'The Association member record could not be checked.' }, 409);
+  if (existingMember?.auth_user_id) return json({ error: 'This member already has an account. Please sign in instead.' }, 409);
 
   const identity = invitation.email
     ? { email: invitation.email, email_confirm: true }
     : { phone: invitation.phone, phone_confirm: true };
   const { data: created, error: createError } = await admin.auth.admin.createUser({ ...identity, password, user_metadata: { full_name: invitation.full_name, membership_number: invitation.membership_number ?? '' } });
   if (createError || !created.user) return json({ error: createError?.message ?? 'Account could not be created.' }, 400);
-  const contactUpdate = invitation.email ? { email: invitation.email } : { phone: invitation.phone };
-  const { data: linked, error: linkError } = await admin.from('Members').update({ auth_user_id: created.user.id, ...contactUpdate }).eq('id', member.id).is('auth_user_id', null).select('id').maybeSingle();
-  if (linkError || !linked) { await admin.auth.admin.deleteUser(created.user.id); return json({ error: 'The member account could not be linked.' }, 409); }
+
+  const names = invitation.full_name.trim().split(/\s+/);
+  const memberValues = { first_name: names.shift(), last_name: names.join(' ') || '-', email: invitation.email, phone: invitation.phone, membership_number: invitation.membership_number, role: invitation.executive_office ?? 'member', status: 'active', auth_user_id: created.user.id };
+  let member: { id: string } | null = null;
+  let createdMember = false;
+  if (existingMember) {
+    const { data, error } = await admin.from('Members').update({ auth_user_id: created.user.id, email: invitation.email ?? existingMember.email, phone: invitation.phone ?? existingMember.phone, role: invitation.executive_office ?? 'member', status: 'active' }).eq('id', existingMember.id).is('auth_user_id', null).select('id').maybeSingle();
+    if (error || !data) { await admin.auth.admin.deleteUser(created.user.id); return json({ error: 'The member account could not be linked.' }, 409); }
+    member = data;
+  } else {
+    const { data, error } = await admin.from('Members').insert(memberValues).select('id').single();
+    if (error || !data) { await admin.auth.admin.deleteUser(created.user.id); return json({ error: error?.message ?? 'The member record could not be created.' }, 409); }
+    member = data; createdMember = true;
+  }
+
+  let executiveRoleId: string | null = null;
+  if (invitation.executive_office) {
+    const { data, error } = await admin.from('executive_roles').insert({ member_id: member.id, office: invitation.executive_office, position: invitation.executive_position }).select('id').single();
+    if (error || !data) {
+      if (createdMember) await admin.from('Members').delete().eq('id', member.id); else await admin.from('Members').update({ auth_user_id: null }).eq('id', member.id).eq('auth_user_id', created.user.id);
+      await admin.auth.admin.deleteUser(created.user.id);
+      return json({ error: error?.message ?? 'The executive office could not be assigned.' }, 409);
+    }
+    executiveRoleId = data.id;
+  }
+
   const acceptedAt = new Date().toISOString();
   const { data: claimed, error: claimError } = await admin.from('invitations').update({ status: 'accepted', accepted_at: acceptedAt, accepted_user_id: created.user.id }).eq('id', invitation.id).eq('status', 'pending').select('id').maybeSingle();
   if (claimError || !claimed) {
-    await admin.from('Members').update({ auth_user_id: null }).eq('id', member.id).eq('auth_user_id', created.user.id);
+    if (executiveRoleId) await admin.from('executive_roles').delete().eq('id', executiveRoleId);
+    if (createdMember) await admin.from('Members').delete().eq('id', member.id); else await admin.from('Members').update({ auth_user_id: null }).eq('id', member.id).eq('auth_user_id', created.user.id);
     await admin.auth.admin.deleteUser(created.user.id);
     return json({ error: 'This invitation is no longer available.' }, 409);
   }

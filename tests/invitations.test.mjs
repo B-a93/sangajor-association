@@ -145,3 +145,27 @@ test('deployment keeps public signup closed and verifies historical token safety
   assert.match(verification, /historical_total/);
   assert.match(verification, /missing_token_hash/);
 });
+
+test('executive invitations use the complete office allow-list and persist assignments', async () => {
+  const [page, manage, migration] = await Promise.all([
+    read('src/lib/executiveInvitationRoles.ts'), read('supabase/functions/manage-invitation/index.ts'),
+    read('supabase/migrations/202608070003_executive_member_invitations.sql'),
+  ]);
+  for (const office of ['chairman', 'vice_chairlady', 'assistant_auditor', 'adviser_4']) {
+    assert.match(page, new RegExp(office));
+    assert.match(manage, new RegExp(office));
+    assert.match(migration, new RegExp(office));
+  }
+  assert.match(migration, /executive_office text/);
+  assert.match(migration, /executive_position text/);
+});
+
+test('acceptance creates a member and activates an invited executive office', async () => {
+  const acceptance = await read('supabase/functions/accept-invitation/index.ts');
+  assert.match(acceptance, /from\('Members'\)\.insert\(memberValues\)/);
+  assert.match(acceptance, /from\('executive_roles'\)\.insert/);
+  assert.match(acceptance, /office: invitation\.executive_office/);
+  assert.match(acceptance, /position: invitation\.executive_position/);
+  assert.match(acceptance, /status: 'active'/);
+  assert.match(acceptance, /eq\('status', 'pending'\)/);
+});

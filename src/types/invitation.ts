@@ -7,6 +7,8 @@ export type Invitation = {
   phone: string | null;
   membership_number: string | null;
   role: string;
+  executive_office: string | null;
+  executive_position: string | null;
   status: InvitationStatus;
   expires_at: string;
   accepted_at: string | null;
