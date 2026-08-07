@@ -32,10 +32,14 @@ export async function invitationManagerFromRequest(request: Request) {
   const { data: { user } } = await admin.auth.getUser(authorization.replace(/^Bearer /, ''));
   if (!user) return null;
   const { data: allowed, error } = await admin.rpc('can_manage_invitations', { user_id: user.id });
-  return !error && allowed ? user : null;
+  if (error || !allowed) return null;
+  const { data: member } = await admin.from('Members').select('id, auth_user_id')
+    .eq('auth_user_id', user.id).maybeSingle();
+  return member ? { user, member } : null;
 }
 
-export async function deliverInvitation(email: string, fullName: string, url: string) {
+export async function deliverInvitation(email: string | null, fullName: string, url: string) {
+  if (!email) return false;
   const apiKey = Deno.env.get('RESEND_API_KEY');
   if (!apiKey) return false;
   const response = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({

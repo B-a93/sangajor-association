@@ -17,7 +17,7 @@ test('production repair authorizes only active Members linked to the Auth UID', 
 
 test('invitation acceptance links one existing Members record and creates no duplicate', async () => {
   const acceptance = await read('supabase/functions/accept-invitation/index.ts');
-  assert.match(acceptance, /from\('Members'\)\.select\('id, auth_user_id, email, membership_number'\)/);
+  assert.match(acceptance, /from\('Members'\)\.select\('id, auth_user_id, email, phone, membership_number'\)/);
   assert.match(acceptance, /if \(member\.auth_user_id\)/);
   assert.match(acceptance, /\.update\(\{ auth_user_id: created\.user\.id/);
   assert.match(acceptance, /\.is\('auth_user_id', null\)/);

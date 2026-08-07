@@ -18,3 +18,6 @@
 .invitation-status.accepted { background: #d9f4e5; color: #16643a; }.invitation-status.expired { background: #eceff2; color: #55606a; }
 .invitation-empty { padding: 1.25rem; color: #5f6f7f; background: #f7f9fa; border-radius: 10px; }
 @media (max-width: 650px) { .invitations-header, .invitation-list article { align-items: flex-start; flex-direction: column; }.invitation-form { grid-template-columns: 1fr; }.invitation-meta { justify-items: start; } }
+.invitation-form label small { color: #5f6f7f; font-weight: 400; }
+.share-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; }
+.invitation-meta .share-actions button, .invitation-meta .share-actions a { margin: 0; padding: .45rem .7rem; border: 1px solid #0f4c81; border-radius: 7px; color: #0f4c81; background: white; font: inherit; font-size: .8rem; font-weight: 700; text-decoration: none; cursor: pointer; }

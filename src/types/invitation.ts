@@ -3,7 +3,8 @@ export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'cancelled';
 export type Invitation = {
   id: string;
   full_name: string;
-  email: string;
+  email: string | null;
+  phone: string | null;
   membership_number: string | null;
   role: string;
   status: InvitationStatus;
