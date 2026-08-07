@@ -16,17 +16,21 @@ Deno.serve(async (request) => {
   }
 
   // An invitation activates an existing Association member; it must never manufacture a duplicate.
-  let memberQuery = admin.from('Members').select('id, auth_user_id, email, membership_number');
+  let memberQuery = admin.from('Members').select('id, auth_user_id, email, phone, membership_number');
   memberQuery = invitation.membership_number
     ? memberQuery.eq('membership_number', invitation.membership_number)
-    : memberQuery.ilike('email', invitation.email);
+    : invitation.email ? memberQuery.ilike('email', invitation.email) : memberQuery.eq('phone', invitation.phone);
   const { data: member, error: memberError } = await memberQuery.maybeSingle();
   if (memberError || !member) return json({ error: 'No matching Association member record was found. Please contact an executive.' }, 409);
   if (member.auth_user_id) return json({ error: 'This member already has an account. Please sign in instead.' }, 409);
 
-  const { data: created, error: createError } = await admin.auth.admin.createUser({ email: invitation.email, password, email_confirm: true, user_metadata: { full_name: invitation.full_name, membership_number: invitation.membership_number ?? '' } });
+  const identity = invitation.email
+    ? { email: invitation.email, email_confirm: true }
+    : { phone: invitation.phone, phone_confirm: true };
+  const { data: created, error: createError } = await admin.auth.admin.createUser({ ...identity, password, user_metadata: { full_name: invitation.full_name, membership_number: invitation.membership_number ?? '' } });
   if (createError || !created.user) return json({ error: createError?.message ?? 'Account could not be created.' }, 400);
-  const { data: linked, error: linkError } = await admin.from('Members').update({ auth_user_id: created.user.id, email: invitation.email }).eq('id', member.id).is('auth_user_id', null).select('id').maybeSingle();
+  const contactUpdate = invitation.email ? { email: invitation.email } : { phone: invitation.phone };
+  const { data: linked, error: linkError } = await admin.from('Members').update({ auth_user_id: created.user.id, ...contactUpdate }).eq('id', member.id).is('auth_user_id', null).select('id').maybeSingle();
   if (linkError || !linked) { await admin.auth.admin.deleteUser(created.user.id); return json({ error: 'The member account could not be linked.' }, 409); }
   const acceptedAt = new Date().toISOString();
   const { data: claimed, error: claimError } = await admin.from('invitations').update({ status: 'accepted', accepted_at: acceptedAt, accepted_user_id: created.user.id }).eq('id', invitation.id).eq('status', 'pending').select('id').maybeSingle();
@@ -35,7 +39,8 @@ Deno.serve(async (request) => {
     await admin.auth.admin.deleteUser(created.user.id);
     return json({ error: 'This invitation is no longer available.' }, 409);
   }
-  const { data: session, error: loginError } = await admin.auth.signInWithPassword({ email: invitation.email, password });
+  const loginIdentity = invitation.email ? { email: invitation.email } : { phone: invitation.phone };
+  const { data: session, error: loginError } = await admin.auth.signInWithPassword({ ...loginIdentity, password });
   if (loginError || !session.session) return json({ error: 'Account activated. Please sign in.' }, 500);
   return json({ access_token: session.session.access_token, refresh_token: session.session.refresh_token });
 });

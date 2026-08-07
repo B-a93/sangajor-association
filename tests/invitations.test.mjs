@@ -79,3 +79,69 @@ test('acceptance hashes tokens, creates Auth account, guarded-links Members, and
   assert.match(acceptance, /eq\('status', 'pending'\)/);
   assert.match(acceptance, /signInWithPassword/);
 });
+
+test('invitations support email-only, phone-only, or both contacts', async () => {
+  const [manage, migration] = await Promise.all([
+    read('supabase/functions/manage-invitation/index.ts'),
+    read('supabase/migrations/202608070002_repair_invitation_contacts_and_ownership.sql'),
+  ]);
+  assert.match(manage, /if \(!email && !phone\)/);
+  assert.match(manage, /if \(email && !\/\^\\S\+@/);
+  assert.match(manage, /if \(phone && !\/\^\\\+/);
+  assert.match(manage, /email, phone,/);
+  assert.match(migration, /invitations_contact_required/);
+  assert.match(migration, /email is not null[\s\S]*or \(phone is not null/);
+});
+
+test('repair uses Members ownership and preserves legacy invitation history', async () => {
+  const migration = await read('supabase/migrations/202608070002_repair_invitation_contacts_and_ownership.sql');
+  assert.match(migration, /inviter_member_id uuid/);
+  assert.match(migration, /references public\."Members"\(id\)/);
+  assert.match(migration, /drop constraint if exists invitations_inviter_id_fkey/);
+  assert.match(migration, /alter column inviter_id drop not null/);
+  assert.doesNotMatch(migration, /delete from public\.invitations|drop column inviter_id/i);
+  assert.match(migration, /accepted_user_id[\s\S]*Supabase Auth user identity/);
+});
+
+test('manager resolves authoritative member and returns a shareable URL without persisting raw token', async () => {
+  const [manage, shared, migration] = await Promise.all([
+    read('supabase/functions/manage-invitation/index.ts'),
+    read('supabase/functions/_shared/invitations.ts'),
+    read('supabase/migrations/202608070002_repair_invitation_contacts_and_ownership.sql'),
+  ]);
+  assert.match(shared, /from\('Members'\)\.select\('id, auth_user_id'\)/);
+  assert.match(manage, /inviter_member_id: manager\.member\.id/);
+  assert.match(manage, /invitation_url: invitationUrl/);
+  assert.match(manage, /token_hash: tokenHash/);
+  assert.doesNotMatch(manage, /token:\s*token[,}]/);
+  assert.match(migration, /array|can_manage_invitations/);
+});
+
+test('phone-only acceptance uses supported phone Auth identity and never invents email', async () => {
+  const acceptance = await read('supabase/functions/accept-invitation/index.ts');
+  assert.match(acceptance, /phone: invitation\.phone, phone_confirm: true/);
+  assert.match(acceptance, /signInWithPassword\(\{ \.\.\.loginIdentity, password \}\)/);
+  assert.doesNotMatch(acceptance, /@.*phone|placeholder.*email|invent/i);
+});
+
+test('WhatsApp sharing launches wa.me with name and secure invitation URL', async () => {
+  const page = await read('src/pages/MemberInvitations.tsx');
+  assert.match(page, /https:\/\/wa\.me\/\$\{number\}\?text=/);
+  assert.match(page, /Hello \$\{fullName\}/);
+  assert.match(page, /\$\{invitationUrl\}/);
+  assert.match(page, /Send via WhatsApp/);
+  assert.match(page, /No automated WhatsApp delivery occurred/);
+});
+
+test('deployment keeps public signup closed and verifies historical token safety', async () => {
+  const [config, docs, verification] = await Promise.all([
+    read('supabase/config.toml'),
+    read('docs/EXECUTIVE_INVITATION_CONTACTS_DEPLOYMENT.md'),
+    read('supabase/verification/invitation_contacts_and_ownership.sql'),
+  ]);
+  assert.match(config, /enable_signup = false/);
+  assert.match(docs, /run only[\s\S]*202608070002_repair_invitation_contacts_and_ownership\.sql/i);
+  assert.match(docs, /manage-invitation.*accept-invitation/s);
+  assert.match(verification, /historical_total/);
+  assert.match(verification, /missing_token_hash/);
+});
