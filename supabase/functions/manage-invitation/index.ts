@@ -1,10 +1,10 @@
-import { adminClient, corsHeaders, deliverInvitation, executiveFromRequest, json, secureToken, sha256 } from '../_shared/invitations.ts';
+import { adminClient, corsHeaders, deliverInvitation, invitationManagerFromRequest, json, secureToken, sha256 } from '../_shared/invitations.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
-  const executive = await executiveFromRequest(request);
-  if (!executive) return json({ error: 'Only active executives may manage invitations.' }, 403);
+  const executive = await invitationManagerFromRequest(request);
+  if (!executive) return json({ error: 'You are not authorized to manage invitations.' }, 403);
 
   const body = await request.json();
   const admin = adminClient();

@@ -7,6 +7,7 @@ const groups: Array<{ status: InvitationStatus; title: string }> = [
   { status: 'pending', title: 'Pending Invitations' },
   { status: 'accepted', title: 'Accepted Invitations' },
   { status: 'expired', title: 'Expired Invitations' },
+  { status: 'cancelled', title: 'Cancelled Invitations' },
 ];
 
 export function MemberInvitations() {
@@ -18,7 +19,7 @@ export function MemberInvitations() {
   const [form, setForm] = useState({ fullName: '', email: '', membershipNumber: '', role: 'member' });
 
   const load = useCallback(async () => {
-    const { data: allowed } = await supabase.rpc('is_executive');
+    const { data: allowed } = await supabase.rpc('can_manage_invitations');
     setAuthorized(Boolean(allowed));
     if (!allowed) return;
     await supabase.rpc('expire_invitations');

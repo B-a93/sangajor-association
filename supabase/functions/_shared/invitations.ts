@@ -24,14 +24,15 @@ export function secureToken() {
   return btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
-export async function executiveFromRequest(request: Request) {
+/** Resolve the caller, then delegate authorization to the database's canonical RPC. */
+export async function invitationManagerFromRequest(request: Request) {
   const authorization = request.headers.get('Authorization');
   if (!authorization) return null;
   const admin = adminClient();
   const { data: { user } } = await admin.auth.getUser(authorization.replace(/^Bearer /, ''));
   if (!user) return null;
-  const { data: member } = await admin.from('Members').select('id, role, status').eq('auth_user_id', user.id).maybeSingle();
-  return member?.status === 'active' && member.role !== 'member' ? user : null;
+  const { data: allowed, error } = await admin.rpc('can_manage_invitations', { user_id: user.id });
+  return !error && allowed ? user : null;
 }
 
 export async function deliverInvitation(email: string, fullName: string, url: string) {
