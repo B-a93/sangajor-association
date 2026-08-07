@@ -15,14 +15,14 @@ test('production repair authorizes only active Members linked to the Auth UID', 
   assert.doesNotMatch(migration, /insert into public\."Members"/i);
 });
 
-test('invitation acceptance links one existing Members record and creates no duplicate', async () => {
+test('invitation acceptance links an existing Member or creates exactly one record', async () => {
   const acceptance = await read('supabase/functions/accept-invitation/index.ts');
   assert.match(acceptance, /from\('Members'\)\.select\('id, auth_user_id, email, phone, membership_number'\)/);
-  assert.match(acceptance, /if \(member\.auth_user_id\)/);
+  assert.match(acceptance, /if \(existingMember\?\.auth_user_id\)/);
   assert.match(acceptance, /\.update\(\{ auth_user_id: created\.user\.id/);
   assert.match(acceptance, /\.is\('auth_user_id', null\)/);
   assert.doesNotMatch(acceptance, /from\('profiles'\)/);
-  assert.doesNotMatch(acceptance, /from\('Members'\)\.insert/);
+  assert.match(acceptance, /from\('Members'\)\.insert\(memberValues\)/);
 });
 
 test('normal members cannot pass executive role checks', async () => {

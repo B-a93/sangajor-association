@@ -1,3 +1,5 @@
+const executivePositions: Record<string, string> = { chairman: 'Chairman', vice_chairlady: 'Vice Chairlady', secretary_general: 'Secretary General', assistant_secretary_general: 'Assistant Secretary General', treasurer: 'Treasurer', assistant_treasurer: 'Assistant Treasurer', auditor_general: 'Auditor General', assistant_auditor_general: 'Assistant Auditor General', assistant_auditor: 'Assistant Auditor', ipro: 'IPRO', assistant_ipro: 'Assistant IPRO', programme_officer: 'Programme Officer', assistant_programme_officer: 'Assistant Programme Officer', adviser_1: 'Adviser 1', adviser_2: 'Adviser 2', adviser_3: 'Adviser 3', adviser_4: 'Adviser 4' };
+
 import { adminClient, corsHeaders, deliverInvitation, invitationManagerFromRequest, json, secureToken, sha256 } from '../_shared/invitations.ts';
 
 Deno.serve(async (request) => {
@@ -30,7 +32,9 @@ Deno.serve(async (request) => {
     if (email && !/^\S+@\S+\.\S+$/.test(email)) return json({ error: 'Enter a valid email address.' }, 400);
     if (phone && !/^\+[1-9]\d{7,14}$/.test(phone)) return json({ error: 'Enter the phone number in international format, for example +2201234567.' }, 400);
     if (!email && !phone) return json({ error: 'A valid email or phone/WhatsApp number is required.' }, 400);
-    const { data, error } = await admin.from('invitations').insert({ full_name: fullName, email, phone, membership_number: String(body.membershipNumber ?? '').trim() || null, role: body.role ?? 'member', token_hash: tokenHash, expires_at: expiresAt, inviter_member_id: manager.member.id }).select().single();
+    const executiveOffice = String(body.executiveOffice ?? '').trim() || null;
+    if (executiveOffice && !executivePositions[executiveOffice]) return json({ error: 'Select a valid executive office.' }, 400);
+    const { data, error } = await admin.from('invitations').insert({ full_name: fullName, email, phone, membership_number: String(body.membershipNumber ?? '').trim() || null, role: 'member', executive_office: executiveOffice, executive_position: executiveOffice ? executivePositions[executiveOffice] : null, token_hash: tokenHash, expires_at: expiresAt, inviter_member_id: manager.member.id }).select().single();
     if (error) return json({ error: error.code === '23505' ? 'A pending invitation already exists for this contact.' : error.message }, 400);
     invitation = data;
   } else return json({ error: 'Unsupported action.' }, 400);
