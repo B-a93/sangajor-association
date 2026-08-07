@@ -54,11 +54,10 @@ export function MemberDashboard() {
             is_active: member.status?.toLowerCase() === 'active',
           };
           setProfile(currentProfile);
-          setCanInvite(isActiveExecutive(currentProfile));
           if (officeResult.error) setAuthorizationWarnings(['executive office']);
         }
         const permissionChecks = [
-          ['members', 'can_manage_members', setCanManage], ['finances', 'can_manage_finances', setCanManageFinances],
+          ['invitations', 'can_manage_invitations', setCanInvite], ['members', 'can_manage_members', setCanManage], ['finances', 'can_manage_finances', setCanManageFinances],
           ['events', 'can_manage_events', setCanManageEvents], ['announcements', 'can_manage_announcements', setCanManageCommunications],
           ['documents', 'can_manage_documents', setCanManageDocuments], ['volunteers', 'can_manage_volunteers', setCanManageVolunteers],
           ['analytics', 'can_view_executive_analytics', setCanViewAnalytics], ['village moderation', 'can_moderate_village', setCanModerateVillage],
