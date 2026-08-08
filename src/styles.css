@@ -273,3 +273,34 @@ blockquote { margin: 0; padding: 48px; color: var(--navy); background: var(--cre
   .communication-page { padding-top: calc(2.5rem + 72px); }
   .village-page { padding-top: calc(48px + 72px); }
 }
+
+/* Connection Hub resource library */
+.hub-category-grid article { display: flex; flex-direction: column; }
+.hub-category-grid article button { margin-top: auto; padding: .7rem 1rem; border: 0; border-radius: 9px; color: #fff; background: var(--green); font-weight: 800; cursor: pointer; }
+.hub-resource-panel { position: relative; margin-top: 1.5rem; padding: clamp(1.25rem,3vw,2rem); border: 1px solid #b9d7c6; border-radius: 18px; background: #fff; }
+.hub-resource-panel > h2 { margin: .25rem 0 .6rem; }
+.resource-close { position: absolute; top: 1rem; right: 1rem; padding: .45rem .7rem; border: 1px solid #cbd8df; border-radius: 8px; background: #fff; cursor: pointer; }
+.resource-columns { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; margin-top: 1.25rem; }
+.resource-columns > div { padding: 1.2rem; border-radius: 14px; background: #f4f8f6; }
+.resource-columns h3 { margin: 0 0 .75rem; }
+.resource-columns li { margin: .55rem 0; line-height: 1.5; }
+.tutor-card svg { color: var(--green); }
+.tutor-card a { display: inline-flex; margin-top: .6rem; color: #0f4c81; font-weight: 800; }
+
+/* Member-controlled profile photograph */
+.profile-photo-fieldset { margin-bottom: 1.5rem !important; padding-bottom: 1.5rem !important; border-bottom: 1px solid #e5e7eb !important; }
+.profile-photo-editor { display: flex; align-items: center; gap: 1.25rem; }
+.profile-photo-editor > img,
+.profile-photo-editor > div { width: 96px; height: 96px; flex: 0 0 96px; border-radius: 50%; object-fit: cover; }
+.profile-photo-editor > div { display: grid; place-items: center; color: #fff; background: var(--navy); font-size: 1.6rem; font-weight: 800; }
+.profile-photo-editor label { flex: 1; }
+.profile-photo-editor small { color: #6b7280; font-weight: 400; }
+.membership-summary small { display: block; margin-top: .45rem; color: #6b7280; line-height: 1.4; }
+
+@media (max-width: 800px) {
+  .resource-columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .profile-photo-editor { align-items: flex-start; flex-direction: column; }
+}
