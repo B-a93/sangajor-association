@@ -21,6 +21,9 @@ const CommunicationCenter = lazy(() => import('./pages/CommunicationCenter').the
 const CommitteesVolunteering = lazy(() => import('./pages/CommitteesVolunteering').then((module) => ({ default: module.CommitteesVolunteering })));
 const ConnectionHub = lazy(() => import('./pages/ConnectionHub').then((module) => ({ default: module.ConnectionHub })));
 const DigitalIncomeLesson = lazy(() => import('./pages/DigitalIncomeLesson').then((module) => ({ default: module.DigitalIncomeLesson })));
+const DigitalIncomeCourseDashboard = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeCourseDashboard })));
+const DigitalIncomeCourseLesson = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeCourseLesson })));
+const DigitalIncomeFinalAssessment = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeFinalAssessment })));
 const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
 const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
@@ -173,6 +176,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/volunteering/manage': <VolunteerAdministration />,
   '/dashboard/connections': <ConnectionHub />,
   '/dashboard/learning/digital-income/lesson-1': <DigitalIncomeLesson />,
+  '/dashboard/learning/digital-income': <DigitalIncomeCourseDashboard />,
+  '/dashboard/learning/digital-income/final-assessment': <DigitalIncomeFinalAssessment />,
   '/dashboard/village': <VillageSquare />,
   '/dashboard/village/moderation': <VillageModeration />,
 };
@@ -181,6 +186,7 @@ export default function App() {
   const route = useHashRoute();
   const leadershipProfileMatch = route.match(/^\/leadership\/([^/]+)$/);
   const memberProfileMatch = route.match(/^\/dashboard\/members\/([^/]+)$/);
+  const digitalIncomeLessonMatch = route.match(/^\/dashboard\/learning\/digital-income\/lesson-([2-6])$/);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -192,6 +198,8 @@ export default function App() {
     page = executive ? <ExecutiveProfile executive={executive} /> : <Leadership />;
   } else if (memberProfileMatch) {
     page = <MemberProfile memberId={decodeURIComponent(memberProfileMatch[1])} />;
+  } else if (digitalIncomeLessonMatch) {
+    page = <DigitalIncomeCourseLesson lessonNumber={Number(digitalIncomeLessonMatch[1])} />;
   } else {
     page = pages[route] ?? <Home />;
   }

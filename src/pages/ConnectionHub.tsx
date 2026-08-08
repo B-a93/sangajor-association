@@ -247,8 +247,8 @@ export function ConnectionHub() {
 }
 
 function CourseCard({ skill }: { skill: { readonly name: string; readonly description: string } }) {
-  const lessonHref = skill.name === 'Digital Income & Online Work' ? '#/dashboard/learning/digital-income/lesson-1' : null;
-  return <li className="course-card"><strong>{skill.name}</strong><span>{skill.description}</span><span className="certificate-badge"><Award size={15} aria-hidden="true"/> Certificate of Completion Available</span><small>A Certificate of Completion will be issued after you complete all required lessons and meet the course requirements.</small>{lessonHref && <a className="course-link" href={lessonHref}>Open Lesson 1</a>}</li>;
+  const lessonHref = skill.name === 'Digital Income & Online Work' ? '#/dashboard/learning/digital-income' : null;
+  return <li className="course-card"><strong>{skill.name}</strong><span>{skill.description}</span><span className="certificate-badge"><Award size={15} aria-hidden="true"/> Certificate of Completion Available</span><small>A Certificate of Completion will be issued after you complete all required lessons and meet the course requirements.</small>{lessonHref && <a className="course-link" href={lessonHref}>Open Lesson 1 & course dashboard</a>}</li>;
 }
 
 function Avatar({ profile }: { profile: ConnectionProfile }) {
