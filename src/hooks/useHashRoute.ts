@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 
-const readRoute = () => window.location.hash.replace('#', '') || '/';
+const readRoute = () => {
+  const hashPath = window.location.hash.replace(/^#/, '');
+  return hashPath.split('?')[0] || '/';
+};
 
 export function useHashRoute() {
   const [route, setRoute] = useState(readRoute);
