@@ -6,6 +6,9 @@ import './DigitalIncomeLesson.css';
 
 type Answers = Record<string, string>;
 
+const databaseError = (action: string, message: string) =>
+  import.meta.env.DEV ? `${action}: ${message}` : `${action}. Please try again.`;
+
 export function DigitalIncomeLesson() {
   const [memberId, setMemberId] = useState('');
   const [started, setStarted] = useState(false);
@@ -23,9 +26,10 @@ export function DigitalIncomeLesson() {
     const id = auth.session?.user.id;
     if (!id) { window.location.hash = '/login'; return; }
     setMemberId(id);
-    await supabase.from('course_enrolments').upsert({ member_id: id, course_slug: 'digital-income-online-work' }, { onConflict: 'member_id,course_slug' });
+    const { error: enrolmentError } = await supabase.from('course_enrolments').upsert({ member_id: id, course_slug: 'digital-income-online-work' }, { onConflict: 'member_id,course_slug' });
+    if (enrolmentError) setNotice(databaseError('Your course enrolment could not be saved', enrolmentError.message));
     const { data, error } = await supabase.from('lesson_progress').select('*').eq('member_id', id).eq('lesson_slug', 'digital-income-lesson-1').maybeSingle();
-    if (error) setNotice('Your saved progress could not be loaded. You may still review the lesson.');
+    if (error) setNotice(databaseError('Your saved progress could not be loaded', error.message));
     if (data) {
       setStarted(Boolean(data.started_at)); setReadSections(Array.isArray(data.read_sections) ? data.read_sections : []);
       setPathway((data.pathway_answers as Answers) ?? {}); setAnswers((data.knowledge_answers as Answers) ?? {});
@@ -46,30 +50,51 @@ export function DigitalIncomeLesson() {
     if (!memberId || !started) return;
     setSaving(true);
     const { error } = await supabase.from('lesson_progress').upsert({ member_id: memberId, lesson_slug: 'digital-income-lesson-1', started_at: new Date().toISOString(), read_sections: readSections, pathway_answers: pathway, knowledge_answers: answers, knowledge_score: submittedScore ?? 0, knowledge_submitted: submittedScore !== null, updated_at: new Date().toISOString() }, { onConflict: 'member_id,lesson_slug' });
-    setSaving(false); setNotice(error ? 'Progress could not be saved. Please try again.' : message);
+    setSaving(false); setNotice(error ? databaseError('Progress could not be saved', error.message) : message);
   }
 
   async function startLesson() {
-    setStarted(true); setSaving(true);
+    setSaving(true);
     const { error } = await supabase.from('lesson_progress').upsert({ member_id: memberId, lesson_slug: 'digital-income-lesson-1', started_at: new Date().toISOString() }, { onConflict: 'member_id,lesson_slug' });
-    setSaving(false); setNotice(error ? 'The lesson could not be started. Please try again.' : 'Lesson started. Your progress will be saved to your account.');
+    setSaving(false);
+    if (error) setNotice(databaseError('The lesson could not be started', error.message));
+    else { setStarted(true); setNotice('Lesson started. Your progress will be saved to your account.'); }
   }
 
   async function submitKnowledge() {
     if (!allAnswered) { setNotice('Answer all six knowledge-check questions before submitting.'); return; }
-    setSubmittedScore(score); setNotice(score >= PASSING_SCORE ? `Knowledge check passed with ${score}%.` : `You scored ${score}%. Review the lesson and try again; at least 70% is required.`);
     setSaving(true);
     const { error } = await supabase.from('lesson_progress').upsert({ member_id: memberId, lesson_slug: 'digital-income-lesson-1', started_at: new Date().toISOString(), read_sections: readSections, pathway_answers: pathway, knowledge_answers: answers, knowledge_score: score, knowledge_submitted: true, updated_at: new Date().toISOString() }, { onConflict: 'member_id,lesson_slug' });
-    setSaving(false); if (error) setNotice('Your result could not be saved. Please submit it again.');
+    setSaving(false);
+    if (error) setNotice(databaseError('Your result could not be saved', error.message));
+    else {
+      setSubmittedScore(score);
+      setNotice(score >= PASSING_SCORE ? `Knowledge check passed with ${score}%.` : `You scored ${score}%. Review the lesson and try again; at least 70% is required.`);
+    }
   }
 
   async function completeLesson() {
     if (!canComplete) { setNotice('Complete every reading, all six pathway responses and a knowledge-check score of at least 70% first.'); return; }
     setSaving(true);
     const { error } = await supabase.rpc('complete_digital_income_lesson_one', { pathway_responses: pathway, section_ids: readSections });
+    if (error) {
+      setSaving(false);
+      setNotice(databaseError('Completion could not be recorded', error.message));
+      return;
+    }
+    const { data: saved, error: reloadError } = await supabase.from('lesson_progress').select('*').eq('member_id', memberId).eq('lesson_slug', 'digital-income-lesson-1').single();
     setSaving(false);
-    if (error) setNotice('Completion could not be recorded. Check every requirement and try again.');
-    else { setCompleted(true); setNotice('Lesson 1 complete! Lesson 2 is now unlocked.'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    if (reloadError) setNotice(databaseError('Completion was recorded but could not be reloaded', reloadError.message));
+    else if (!saved.completed_at) setNotice(databaseError('Completion could not be verified', 'The saved record has no completed_at value'));
+    else {
+      setCompleted(true);
+      setReadSections(Array.isArray(saved.read_sections) ? saved.read_sections : []);
+      setPathway((saved.pathway_answers as Answers) ?? {});
+      setAnswers((saved.knowledge_answers as Answers) ?? {});
+      setSubmittedScore(saved.knowledge_submitted ? Number(saved.knowledge_score) : null);
+      setNotice('Lesson 1 complete! Lesson 2 is now unlocked.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   if (loading) return <section className="lesson-state" role="status">Loading your lesson…</section>;
