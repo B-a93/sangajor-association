@@ -1,11 +1,19 @@
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { navItems } from '../../data/site';
+import { supabase } from '../../lib/supabase';
 
 const officialLogo = '/sangajorr-association-logo.png.jpeg';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(Boolean(session)));
+    return () => data.subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -37,7 +45,7 @@ export function Header() {
 
       <nav className="desktop-nav" aria-label="Primary navigation">
         {navItems.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
-        <a className="member-login-link" href="#/login">Member Login</a>
+        <a className="member-login-link" href={signedIn ? '#/dashboard' : '#/login'}>{signedIn ? 'Member Dashboard' : 'Member Login'}</a>
       </nav>
 
       <button
@@ -56,7 +64,7 @@ export function Header() {
           {navItems.map(([label, href]) => (
             <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
           ))}
-          <a href="#/login" onClick={() => setMenuOpen(false)}>Member Login</a>
+          <a href={signedIn ? '#/dashboard' : '#/login'} onClick={() => setMenuOpen(false)}>{signedIn ? 'Member Dashboard' : 'Member Login'}</a>
         </nav>
       )}
     </header>
