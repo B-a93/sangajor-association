@@ -18,10 +18,19 @@ test('administrative mutations are audited and unavailable as direct table write
   assert.match(migration, /security definer set search_path = public/);
 });
 
-test('administration portal offers search, status filters and role management', async () => {
+test('administration portal offers search, status filters and membership-number management', async () => {
   const page = await read('src/pages/MemberAdministration.tsx');
   assert.match(page, /can_manage_members/);
-  assert.match(page, /update_member_administration/);
+  assert.match(page, /update_member_registry/);
   assert.match(page, /Account status/);
-  assert.match(page, /Association role/);
+  assert.match(page, /Membership number/);
+});
+
+test('membership-number and profile-photo changes are secured and audited', async () => {
+  const migration = await read('supabase/migrations/202608080002_profile_photos_and_member_numbers.sql');
+  assert.match(migration, /member-profile-photos/);
+  assert.match(migration, /storage\.foldername\(name\)/);
+  assert.match(migration, /create or replace function public\.update_member_registry/);
+  assert.match(migration, /insert into public\.member_registry_log/);
+  assert.match(migration, /public\.can_manage_members\(\)/);
 });
