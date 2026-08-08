@@ -31,7 +31,7 @@ test('Connection Hub presents one skills exchange with learning and teaching pat
   const page = await read('src/pages/ConnectionHub.tsx');
   assert.match(page, /Skills Learning &amp; Exchange/);
   assert.match(page, /Learn a Skill/);
-  for (const category of ['Digital & Technology Skills', 'Business & Entrepreneurship', 'Career & Professional Development', 'Financial Literacy', 'Leadership & Communication', 'Cooking & Baking', 'Tailoring\/Crafts\/Creativity', 'Agriculture & Farming', 'Family Wellbeing', 'Community Development']) {
+  for (const category of ['Education & Teaching Support', 'Digital & Technology Skills', 'Business & Entrepreneurship', 'Career & Professional Development', 'Financial Literacy', 'Leadership & Communication', 'Cooking & Baking', 'Tailoring\/Crafts\/Creativity', 'Agriculture & Farming', 'Family Wellbeing', 'Community Development']) {
     assert.match(page, new RegExp(category.replace('&', '\\&')));
   }
   assert.match(page, /Digital Income & Online Work/);
@@ -46,6 +46,21 @@ test('Connection Hub presents one skills exchange with learning and teaching pat
   assert.match(page, /All submissions require approval before publication/);
   assert.match(page, /member_connections/);
   assert.match(page, /connection_messages/);
+});
+
+test('education support pathways and moderated teacher network are complete and respectful', async () => {
+  const page = await read('src/pages/ConnectionHub.tsx');
+  const migration = await read('supabase/migrations/202608080004_member_teacher_network.sql');
+  assert.match(page, /Learn and Return to Education/);
+  assert.match(page, /Teaching & Tutoring Skills/);
+  for (const topic of ['Adult Literacy', 'English', 'Mathematics', 'Computer Literacy', 'Exam Preparation', 'Vocational Pathways', 'Lesson Planning', 'Classroom Management', 'Inclusive Teaching', 'Assessment', 'Safeguarding', 'Volunteer Tutoring']) assert.match(page, new RegExp(topic));
+  for (const field of ['subjects', 'learner_levels', 'languages', 'availability', 'teaching_format']) assert.match(page, new RegExp(`teacherProfile\.${field}`));
+  assert.match(page, /Member Teacher Network/);
+  assert.doesNotMatch(page.toLowerCase(), /school dropouts?/);
+  assert.match(migration, /member_teacher_network/);
+  assert.match(migration, /status = 'approved'/);
+  assert.match(migration, /auth\.uid\(\) = member_id and status = 'pending'/);
+  assert.match(migration, /Executives can moderate teacher profiles/);
 });
 
 test('learning-system plan defines controlled, non-accredited certificates', async () => {

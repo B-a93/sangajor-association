@@ -1,11 +1,33 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { BookOpen, GraduationCap, MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, GraduationCap, Languages, MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { ConnectionMessage, ConnectionProfile, MemberConnection } from '../types/connection';
 import './ConnectionHub.css';
 
 
 const learningCategories = [
+  {
+    title: 'Education & Teaching Support',
+    introduction: 'Support members to continue learning and help educators strengthen welcoming, safe and inclusive learning spaces.',
+    pathways: [
+      { title: 'Learn and Return to Education', skills: [
+        { name: 'Adult Literacy', description: 'Build reading and writing confidence at a comfortable pace, with practical support for everyday life.' },
+        { name: 'English', description: 'Develop useful speaking, listening, reading and writing skills for study, work and daily communication.' },
+        { name: 'Mathematics', description: 'Strengthen foundational numeracy and work through mathematics topics step by step.' },
+        { name: 'Computer Literacy', description: 'Learn essential device, document, email and internet skills for education and work.' },
+        { name: 'Exam Preparation', description: 'Plan revision, practise questions and develop calm, effective study routines.' },
+        { name: 'Vocational Pathways', description: 'Explore practical training routes and identify the skills, entry steps and support needed to progress.' },
+      ] },
+      { title: 'Teaching & Tutoring Skills', skills: [
+        { name: 'Lesson Planning', description: 'Set clear learning goals and organise relevant, achievable learning activities.' },
+        { name: 'Classroom Management', description: 'Create respectful routines that encourage participation, focus and positive behaviour.' },
+        { name: 'Inclusive Teaching', description: 'Adapt teaching so learners with different strengths, needs and backgrounds can participate with dignity.' },
+        { name: 'Assessment', description: 'Use fair checks for understanding and constructive feedback to guide next steps.' },
+        { name: 'Safeguarding', description: 'Understand responsibilities, appropriate boundaries and how to report a concern through approved channels.' },
+        { name: 'Volunteer Tutoring', description: 'Prepare to offer patient, reliable learning support within the Association’s approved tutoring arrangements.' },
+      ] },
+    ],
+  },
   {
     title: 'Digital & Technology Skills',
     introduction: 'Build the confidence to use everyday technology safely, productively and creatively.',
@@ -98,6 +120,8 @@ const learningCategories = [
   },
 ] as const;
 
+type TeacherListing = { id: string; subjects: string; learner_levels: string; languages: string; availability: string; teaching_format: string; teacher: { full_name: string } | null };
+
 export function ConnectionHub() {
   const [me, setMe] = useState('');
   const [members, setMembers] = useState<ConnectionProfile[]>([]);
@@ -110,19 +134,34 @@ export function ConnectionHub() {
   const [loading, setLoading] = useState(true);
   const [teaching, setTeaching] = useState({ skill: '', experience: '', format: '', availability: '', resources: '' });
   const [submittingSkill, setSubmittingSkill] = useState(false);
+  const [teachers, setTeachers] = useState<TeacherListing[]>([]);
+  const [teacherProfile, setTeacherProfile] = useState({ subjects: '', learner_levels: '', languages: '', availability: '', teaching_format: '' });
+  const [submittingTeacher, setSubmittingTeacher] = useState(false);
 
   async function load() {
     const { data: auth } = await supabase.auth.getSession();
     const userId = auth.session?.user.id;
     if (!userId) { window.location.hash = '/login'; return; }
     setMe(userId);
-    const [profiles, links] = await Promise.all([
+    const [profiles, links, teacherListings] = await Promise.all([
       supabase.from('profiles').select('id, full_name, avatar_url, role').eq('is_active', true).neq('id', userId).order('full_name'),
       supabase.from('member_connections').select('id, requester_id, recipient_id, status, created_at, requester:profiles!member_connections_requester_id_fkey(id, full_name, avatar_url, role), recipient:profiles!member_connections_recipient_id_fkey(id, full_name, avatar_url, role)').order('created_at', { ascending: false }),
+      supabase.from('member_teacher_network').select('id, subjects, learner_levels, languages, availability, teaching_format, teacher:profiles!member_teacher_network_member_id_fkey(full_name)').eq('status', 'approved').order('approved_at', { ascending: false }),
     ]);
     if (profiles.error || links.error) setNotice('The Connection Hub could not be loaded. Please try again.');
     else { setMembers((profiles.data ?? []) as ConnectionProfile[]); setConnections((links.data ?? []) as unknown as MemberConnection[]); }
+    if (!teacherListings.error) setTeachers((teacherListings.data ?? []) as unknown as TeacherListing[]);
     setLoading(false);
+  }
+
+  async function joinTeacherNetwork(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setSubmittingTeacher(true);
+    const { error } = await supabase.from('member_teacher_network').insert({ member_id: me, ...teacherProfile });
+    setSubmittingTeacher(false);
+    if (error) setNotice(error.message); else {
+      setTeacherProfile({ subjects: '', learner_levels: '', languages: '', availability: '', teaching_format: '' });
+      setNotice('Thank you. Your teacher profile will be listed after approval.');
+    }
   }
 
   useEffect(() => { void load(); }, []);
@@ -174,7 +213,7 @@ export function ConnectionHub() {
       <div className="hub-package-heading"><p className="eyebrow">Learn, share and grow</p><h2 id="skills-exchange-title">Skills Learning &amp; Exchange</h2><p>Build practical knowledge or help another member grow by sharing what you know.</p></div>
       <div className="skill-pathways">
         <article className="skill-pathway learn-pathway"><BookOpen aria-hidden="true"/><h3>Learn a Skill</h3><p>Explore learning areas supported by community knowledge, trusted resources and approved volunteer teachers.</p>
-          <div className="learning-categories">{learningCategories.map((category) => <section key={category.title}><h4>{category.title}</h4><p className="category-introduction">{category.introduction}</p><ul>{category.skills.map((skill) => <li key={skill.name}><strong>{skill.name}</strong><span>{skill.description}</span></li>)}</ul></section>)}</div>
+          <div className="learning-categories">{learningCategories.map((category) => <section className={'pathways' in category ? 'education-category' : ''} key={category.title}><h4>{category.title}</h4><p className="category-introduction">{category.introduction}</p>{'pathways' in category ? <div className="education-pathways">{category.pathways.map((pathway) => <div key={pathway.title}><h5>{pathway.title}</h5><ul>{pathway.skills.map((skill) => <li key={skill.name}><strong>{skill.name}</strong><span>{skill.description}</span></li>)}</ul></div>)}</div> : <ul>{category.skills.map((skill) => <li key={skill.name}><strong>{skill.name}</strong><span>{skill.description}</span></li>)}</ul>}</section>)}</div>
         </article>
         <article className="skill-pathway teach-pathway"><GraduationCap aria-hidden="true"/><h3>Teach a Skill</h3><p>Volunteer to share practical knowledge with fellow SANGAJOR members. Tell us how you can help.</p>
           <form onSubmit={volunteerToTeach}>
@@ -188,6 +227,13 @@ export function ConnectionHub() {
           </form>
         </article>
       </div>
+      <section className="teacher-network" aria-labelledby="teacher-network-title">
+        <div className="teacher-network-heading"><GraduationCap aria-hidden="true"/><div><p className="eyebrow">Approved member educators</p><h3 id="teacher-network-title">Member Teacher Network</h3><p>Members with teaching experience can offer respectful learning support. Profiles only appear here after Association approval.</p></div></div>
+        {teachers.length > 0 ? <div className="teacher-listings">{teachers.map((teacher) => <article key={teacher.id}><h4>{teacher.teacher?.full_name ?? 'Approved member teacher'}</h4><dl><div><dt>Subjects</dt><dd>{teacher.subjects}</dd></div><div><dt>Learner levels</dt><dd>{teacher.learner_levels}</dd></div><div><dt><Languages size={15}/> Languages</dt><dd>{teacher.languages}</dd></div><div><dt>Availability</dt><dd>{teacher.availability}</dd></div><div><dt>Teaching format</dt><dd>{teacher.teaching_format}</dd></div></dl></article>)}</div> : <p className="connection-empty">Approved teacher profiles will appear here as the network grows.</p>}
+        <form className="teacher-network-form" onSubmit={joinTeacherNetwork}><h4>Apply to join the network</h4><p>Share your teaching profile for review. Please describe the learners you support by level or learning goal—never by a negative label.</p><div>
+          <label>Subjects<input required maxLength={300} value={teacherProfile.subjects} onChange={(event) => setTeacherProfile({ ...teacherProfile, subjects: event.target.value })}/></label><label>Learner levels<input required maxLength={300} placeholder="For example: foundational, primary, secondary or adult learning" value={teacherProfile.learner_levels} onChange={(event) => setTeacherProfile({ ...teacherProfile, learner_levels: event.target.value })}/></label><label>Languages<input required maxLength={300} value={teacherProfile.languages} onChange={(event) => setTeacherProfile({ ...teacherProfile, languages: event.target.value })}/></label><label>Availability<input required maxLength={300} value={teacherProfile.availability} onChange={(event) => setTeacherProfile({ ...teacherProfile, availability: event.target.value })}/></label><label>Teaching format<input required maxLength={120} placeholder="Online, in person or blended" value={teacherProfile.teaching_format} onChange={(event) => setTeacherProfile({ ...teacherProfile, teaching_format: event.target.value })}/></label>
+        </div><p className="approval-note">For learner safety and trust, the Association reviews every profile before it is listed.</p><button className="primary-button" disabled={submittingTeacher}>{submittingTeacher ? 'Submitting…' : 'Submit teacher profile'}</button></form>
+      </section>
     </section>
     {requests.length > 0 && <section><h2><UserPlus size={21}/> Connection requests</h2><div className="connection-cards">{requests.map((item) => <article key={item.id}><Avatar profile={item.requester}/><div><strong>{item.requester.full_name}</strong><span>{item.requester.role.replaceAll('_', ' ')}</span></div><div className="connection-actions"><button onClick={() => respond(item.id, 'accepted')}>Accept</button><button onClick={() => respond(item.id, 'declined')}>Decline</button></div></article>)}</div></section>}
     <div className="connection-layout"><section><h2><UserCheck size={21}/> My connections</h2>{accepted.length ? <div className="connection-cards">{accepted.map((item) => <article className={selected === item.id ? 'selected' : ''} key={item.id}><Avatar profile={other(item)}/><div><strong>{other(item).full_name}</strong><span>{other(item).role.replaceAll('_', ' ')}</span></div><button aria-label={`Message ${other(item).full_name}`} onClick={() => setSelected(item.id)}><MessageCircle size={19}/></button></article>)}</div> : <p className="connection-empty">Accepted connections will appear here.</p>}</section>
