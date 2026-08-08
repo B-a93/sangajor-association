@@ -2,6 +2,11 @@
 -- public."Members" remains authoritative; public.profiles is a derived projection
 -- used by legacy foreign keys, display joins, and RLS policies.
 
+-- Some production databases missed the earlier compatibility migration that
+-- introduced this column. Keep this repair independently deployable.
+alter table public."Members"
+  add column if not exists role text not null default 'member';
+
 create or replace function public.compatible_profile_role(member_role text)
 returns public.app_role
 language sql immutable set search_path = public

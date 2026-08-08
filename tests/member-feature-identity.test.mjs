@@ -26,3 +26,9 @@ test('authenticated route headings clear the fixed header', async () => {
     assert.match(styles, new RegExp(`\\.${selector} \\{ padding-top:`));
   }
 });
+
+test('route changes open at the top of the selected page', async () => {
+  const app = await read('src/App.tsx');
+  assert.match(app, /window\.scrollTo\(\{ top: 0, left: 0, behavior: 'auto' \}\)/);
+  assert.match(app, /\[route\]/);
+});

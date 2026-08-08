@@ -27,13 +27,14 @@ test('member portal exposes discovery, requests, connections and messaging', asy
 });
 
 
-test('full Connection Hub package uses honest category empty states', async () => {
+test('full Connection Hub package opens resources and tutor pathways', async () => {
   const page = await read('src/pages/ConnectionHub.tsx');
   for (const category of ['Business & entrepreneurship', 'Skills learning & exchange', 'Family support', 'Marriage support', 'Parenting', 'Mentorship', 'Professional networking', 'Community opportunities']) {
     assert.match(page, new RegExp(category.replace('&', '\\&')));
   }
-  assert.match(page, /Opportunities will appear only when members publish real content/);
-  assert.match(page, /No business opportunities have been posted yet/);
+  assert.match(page, /View resources/);
+  assert.match(page, /How to make money online safely/);
+  assert.match(page, /Tutor support/);
   assert.match(page, /member_connections/);
   assert.match(page, /connection_messages/);
 });

@@ -180,6 +180,10 @@ export default function App() {
   const leadershipProfileMatch = route.match(/^\/leadership\/([^/]+)$/);
   const memberProfileMatch = route.match(/^\/dashboard\/members\/([^/]+)$/);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [route]);
+
   let page: ReactElement;
   if (leadershipProfileMatch) {
     const executive = executives.find((item) => item.slug === leadershipProfileMatch[1]);
