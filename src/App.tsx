@@ -20,6 +20,7 @@ const CommunicationAdministration = lazy(() => import('./pages/CommunicationAdmi
 const CommunicationCenter = lazy(() => import('./pages/CommunicationCenter').then((module) => ({ default: module.CommunicationCenter })));
 const CommitteesVolunteering = lazy(() => import('./pages/CommitteesVolunteering').then((module) => ({ default: module.CommitteesVolunteering })));
 const ConnectionHub = lazy(() => import('./pages/ConnectionHub').then((module) => ({ default: module.ConnectionHub })));
+const DigitalIncomeLesson = lazy(() => import('./pages/DigitalIncomeLesson').then((module) => ({ default: module.DigitalIncomeLesson })));
 const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
 const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
@@ -171,6 +172,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/volunteering': <CommitteesVolunteering />,
   '/dashboard/volunteering/manage': <VolunteerAdministration />,
   '/dashboard/connections': <ConnectionHub />,
+  '/dashboard/learning/digital-income/lesson-1': <DigitalIncomeLesson />,
   '/dashboard/village': <VillageSquare />,
   '/dashboard/village/moderation': <VillageModeration />,
 };
