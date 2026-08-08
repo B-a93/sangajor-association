@@ -258,3 +258,18 @@ blockquote { margin: 0; padding: 48px; color: var(--navy); background: var(--cre
 @media (prefers-reduced-data: reduce) {
   .hero-glow { display: none; }
 }
+
+/* Authenticated pages need their own offset because the global header is fixed. */
+.member-dashboard { padding-top: calc(4rem + 82px); }
+.member-profile-page { padding-top: calc(4rem + 82px); }
+.connection-page { padding-top: calc(4rem + 82px); }
+.village-page { padding-top: calc(64px + 82px); }
+.communication-page { padding-top: calc(4rem + 82px); }
+
+@media (max-width: 700px) {
+  .member-dashboard,
+  .member-profile-page,
+  .connection-page,
+  .communication-page { padding-top: calc(2.5rem + 72px); }
+  .village-page { padding-top: calc(48px + 72px); }
+}
