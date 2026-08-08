@@ -6,9 +6,96 @@ import './ConnectionHub.css';
 
 
 const learningCategories = [
-  'Digital & Technology Skills', 'Business & Entrepreneurship', 'Career & Professional Development',
-  'Financial Literacy', 'Leadership & Communication', 'Cooking & Baking',
-  'Tailoring/Crafts/Creativity', 'Agriculture & Farming', 'Family Wellbeing', 'Community Development',
+  {
+    title: 'Digital & Technology Skills',
+    introduction: 'Build the confidence to use everyday technology safely, productively and creatively.',
+    skills: [
+      { name: 'Digital Income & Online Work', description: 'Explore legitimate freelancing, online payments, AI tools, social-media work and practical scam awareness.' },
+      { name: 'Everyday Digital Literacy', description: 'Learn to use devices, email, files and common online services with confidence.' },
+      { name: 'Online Safety & Privacy', description: 'Recognise common digital risks and protect your accounts, information and devices.' },
+    ],
+  },
+  {
+    title: 'Business & Entrepreneurship',
+    introduction: 'Turn useful ideas into responsible ventures that serve customers and strengthen livelihoods.',
+    skills: [
+      { name: 'Starting a Small Business', description: 'Shape an achievable business idea, understand your customer and plan a practical launch.' },
+      { name: 'Sales & Customer Service', description: 'Build trust with customers through clear communication, reliable service and ethical selling.' },
+      { name: 'Record-Keeping & Pricing', description: 'Track income and costs so you can price fairly and make informed business decisions.' },
+    ],
+  },
+  {
+    title: 'Career & Professional Development',
+    introduction: 'Prepare for opportunities and grow the habits needed for a confident professional journey.',
+    skills: [
+      { name: 'CV & Application Writing', description: 'Present your experience and strengths clearly in targeted applications.' },
+      { name: 'Interview Preparation', description: 'Practise thoughtful answers and professional communication for interviews.' },
+      { name: 'Workplace Readiness', description: 'Develop dependable habits for teamwork, time management and professional conduct.' },
+    ],
+  },
+  {
+    title: 'Financial Literacy',
+    introduction: 'Make informed everyday money decisions for greater personal, family and business resilience.',
+    skills: [
+      { name: 'Budgeting & Saving', description: 'Create a realistic spending plan and build savings toward clear goals.' },
+      { name: 'Banking & Digital Payments', description: 'Use financial services and digital payments more confidently and securely.' },
+      { name: 'Responsible Borrowing', description: 'Compare borrowing options and understand costs, obligations and warning signs.' },
+    ],
+  },
+  {
+    title: 'Leadership & Communication',
+    introduction: 'Strengthen the people skills needed to guide, listen and collaborate with integrity.',
+    skills: [
+      { name: 'Public Speaking', description: 'Plan and deliver clear, confident messages for different audiences.' },
+      { name: 'Team Leadership', description: 'Set shared goals, support participation and follow through responsibly.' },
+      { name: 'Conflict Resolution', description: 'Approach disagreements calmly and work toward respectful, practical solutions.' },
+    ],
+  },
+  {
+    title: 'Cooking & Baking',
+    introduction: 'Develop practical food skills for the home, community events or a future enterprise.',
+    skills: [
+      { name: 'Food Safety & Hygiene', description: 'Prepare, handle and store food using clean and responsible practices.' },
+      { name: 'Everyday Cooking', description: 'Plan and prepare balanced meals using accessible ingredients and reliable methods.' },
+      { name: 'Baking Basics', description: 'Learn accurate measuring, mixing and baking techniques for consistent results.' },
+    ],
+  },
+  {
+    title: 'Tailoring/Crafts/Creativity',
+    introduction: 'Build creative confidence through hands-on making, design and practical craft techniques.',
+    skills: [
+      { name: 'Sewing & Garment Repair', description: 'Learn essential stitching, measuring and repair techniques for everyday garments.' },
+      { name: 'Craft Making', description: 'Turn accessible materials into useful or decorative handmade items.' },
+      { name: 'Creative Design', description: 'Develop ideas through colour, composition and simple design planning.' },
+    ],
+  },
+  {
+    title: 'Agriculture & Farming',
+    introduction: 'Share practical approaches to productive, responsible farming and food growing.',
+    skills: [
+      { name: 'Crop Planning', description: 'Choose suitable crops and organise planting around seasons, space and available resources.' },
+      { name: 'Soil & Plant Care', description: 'Support healthy growth through thoughtful soil preparation, watering and crop care.' },
+      { name: 'Farm Business Basics', description: 'Estimate costs, reduce waste and plan how farm products can reach customers.' },
+    ],
+  },
+  {
+    title: 'Family Wellbeing',
+    introduction: 'Learn respectful practices that support healthier relationships and more resilient households.',
+    skills: [
+      { name: 'Healthy Communication', description: 'Use attentive listening and respectful language in everyday family conversations.' },
+      { name: 'Household Planning', description: 'Coordinate responsibilities, priorities and resources through shared planning.' },
+      { name: 'Parenting Support', description: 'Explore positive routines and age-appropriate ways to guide and encourage children.' },
+    ],
+  },
+  {
+    title: 'Community Development',
+    introduction: 'Grow the skills to organise, serve and create positive change together.',
+    skills: [
+      { name: 'Project Planning', description: 'Turn a community need into clear activities, responsibilities and achievable outcomes.' },
+      { name: 'Volunteer Coordination', description: 'Welcome volunteers, match people to useful roles and support a safe team effort.' },
+      { name: 'Fundraising & Partnerships', description: 'Present community priorities honestly and build responsible support relationships.' },
+    ],
+  },
 ] as const;
 
 export function ConnectionHub() {
@@ -87,7 +174,7 @@ export function ConnectionHub() {
       <div className="hub-package-heading"><p className="eyebrow">Learn, share and grow</p><h2 id="skills-exchange-title">Skills Learning &amp; Exchange</h2><p>Build practical knowledge or help another member grow by sharing what you know.</p></div>
       <div className="skill-pathways">
         <article className="skill-pathway learn-pathway"><BookOpen aria-hidden="true"/><h3>Learn a Skill</h3><p>Explore learning areas supported by community knowledge, trusted resources and approved volunteer teachers.</p>
-          <div className="learning-categories">{learningCategories.map((category) => <section key={category}><h4>{category}</h4>{category === 'Digital & Technology Skills' && <div className="digital-income"><strong>Digital Income &amp; Online Work</strong><p>Learn about legitimate freelancing, online payments, AI tools, social-media work and scam awareness.</p></div>}</section>)}</div>
+          <div className="learning-categories">{learningCategories.map((category) => <section key={category.title}><h4>{category.title}</h4><p className="category-introduction">{category.introduction}</p><ul>{category.skills.map((skill) => <li key={skill.name}><strong>{skill.name}</strong><span>{skill.description}</span></li>)}</ul></section>)}</div>
         </article>
         <article className="skill-pathway teach-pathway"><GraduationCap aria-hidden="true"/><h3>Teach a Skill</h3><p>Volunteer to share practical knowledge with fellow SANGAJOR members. Tell us how you can help.</p>
           <form onSubmit={volunteerToTeach}>
