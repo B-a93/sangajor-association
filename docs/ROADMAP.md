@@ -37,6 +37,14 @@
 - Partnership portal
 - Project tracking
 
+### Learning-system plan
+- Organise learning as structured courses, workshops and community-led skill exchanges while preserving separate **Learn a Skill** and **Teach a Skill** pathways.
+- Give every learning category a short introduction and every listed skill a clear description so members can choose an appropriate pathway.
+- Structured courses may offer a **Certificate of Completion** only after the required lessons, attendance and any stated quiz or assignment requirements have been verified.
+- Workshops may offer a **Certificate of Participation** when the stated participation and attendance requirements have been verified.
+- Every certificate requires approval from the tutor or an authorised Association executive before issue, and must include a unique certificate number and a verification method.
+- Certificates recognise participation or completion within the Association learning system and must never state or imply formal accreditation.
+
 ## 2028: Legacy Platform
 - Digital archive
 - Historical timeline
