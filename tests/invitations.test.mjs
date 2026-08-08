@@ -169,3 +169,10 @@ test('acceptance creates a member and activates an invited executive office', as
   assert.match(acceptance, /status: 'active'/);
   assert.match(acceptance, /eq\('status', 'pending'\)/);
 });
+
+test('invitation token query parameters do not turn the acceptance route into the homepage', async () => {
+  const router = await read('src/hooks/useHashRoute.ts');
+  const app = await read('src/App.tsx');
+  assert.match(router, /hashPath\.split\('\?'\)\[0\]/);
+  assert.match(app, /'\/accept-invitation': <InvitationAcceptance \/>/);
+});
