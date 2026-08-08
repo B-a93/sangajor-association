@@ -73,6 +73,19 @@ test('learning-system plan defines controlled, non-accredited certificates', asy
   assert.match(roadmap, /must never state or imply formal accreditation/);
 });
 
+test('learning interface clearly explains certificate availability and approval requirements', async () => {
+  const page = await read('src/pages/ConnectionHub.tsx');
+  assert.match(page, /Certificate of Completion Available/);
+  assert.match(page, /A Certificate of Completion will be issued after you complete all required lessons and meet the course requirements/);
+  assert.match(page, /Certificate of Participation Available/);
+  assert.match(page, /Certificate requirements/);
+  for (const requirement of ['Lessons', 'Attendance', 'Quiz or assignment', 'Approval']) assert.match(page, new RegExp(requirement));
+  assert.match(page, /tutor or an authorised Association executive/);
+  assert.match(page, /My Certificates/);
+  assert.match(page, /view and download/);
+  assert.match(page, /does not complete a course and will never automatically issue a certificate/);
+});
+
 test('teaching offers are private and pending approval when submitted', async () => {
   const migration = await read('supabase/migrations/202608080003_skills_learning_exchange.sql');
   assert.match(migration, /skill_teaching_submissions/);
