@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { BookOpen, GraduationCap, Languages, MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
+import { Award, BookOpen, CheckCircle2, Download, GraduationCap, Languages, MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { ConnectionMessage, ConnectionProfile, MemberConnection } from '../types/connection';
 import './ConnectionHub.css';
@@ -212,8 +212,8 @@ export function ConnectionHub() {
     <section className="skills-exchange" aria-labelledby="skills-exchange-title">
       <div className="hub-package-heading"><p className="eyebrow">Learn, share and grow</p><h2 id="skills-exchange-title">Skills Learning &amp; Exchange</h2><p>Build practical knowledge or help another member grow by sharing what you know.</p></div>
       <div className="skill-pathways">
-        <article className="skill-pathway learn-pathway"><BookOpen aria-hidden="true"/><h3>Learn a Skill</h3><p>Explore learning areas supported by community knowledge, trusted resources and approved volunteer teachers.</p>
-          <div className="learning-categories">{learningCategories.map((category) => <section className={'pathways' in category ? 'education-category' : ''} key={category.title}><h4>{category.title}</h4><p className="category-introduction">{category.introduction}</p>{'pathways' in category ? <div className="education-pathways">{category.pathways.map((pathway) => <div key={pathway.title}><h5>{pathway.title}</h5><ul>{pathway.skills.map((skill) => <li key={skill.name}><strong>{skill.name}</strong><span>{skill.description}</span></li>)}</ul></div>)}</div> : <ul>{category.skills.map((skill) => <li key={skill.name}><strong>{skill.name}</strong><span>{skill.description}</span></li>)}</ul>}</section>)}</div>
+        <article className="skill-pathway learn-pathway"><BookOpen aria-hidden="true"/><h3>Learn a Skill</h3><p>Explore learning areas supported by community knowledge, trusted resources and approved volunteer teachers.</p><div className="learning-formats" aria-label="Certificate availability by learning format"><div><strong>Structured courses</strong><span className="certificate-badge"><Award size={15} aria-hidden="true"/> Certificate of Completion Available</span></div><div><strong>Workshops</strong><span className="certificate-badge participation"><Award size={15} aria-hidden="true"/> Certificate of Participation Available</span></div></div>
+          <div className="learning-categories">{learningCategories.map((category) => <section className={'pathways' in category ? 'education-category' : ''} key={category.title}><h4>{category.title}</h4><p className="category-introduction">{category.introduction}</p>{'pathways' in category ? <div className="education-pathways">{category.pathways.map((pathway) => <div key={pathway.title}><h5>{pathway.title}</h5><ul>{pathway.skills.map((skill) => <CourseCard key={skill.name} skill={skill}/>)}</ul></div>)}</div> : <ul>{category.skills.map((skill) => <CourseCard key={skill.name} skill={skill}/>)}</ul>}</section>)}</div>
         </article>
         <article className="skill-pathway teach-pathway"><GraduationCap aria-hidden="true"/><h3>Teach a Skill</h3><p>Volunteer to share practical knowledge with fellow SANGAJOR members. Tell us how you can help.</p>
           <form onSubmit={volunteerToTeach}>
@@ -226,6 +226,10 @@ export function ConnectionHub() {
             <button className="primary-button" disabled={submittingSkill}>{submittingSkill ? 'Submitting…' : 'Volunteer to teach'}</button>
           </form>
         </article>
+      </div>
+      <div className="certificate-information">
+        <section className="certificate-requirements" aria-labelledby="certificate-requirements-title"><div className="certificate-section-heading"><CheckCircle2 aria-hidden="true"/><div><p className="eyebrow">Clear completion pathway</p><h3 id="certificate-requirements-title">Certificate requirements</h3></div></div><p>Certificates are only issued after the applicable requirements have been checked and approved.</p><dl><div><dt>Lessons</dt><dd>Complete all required course lessons.</dd></div><div><dt>Attendance</dt><dd>Meet the stated course or workshop attendance requirement.</dd></div><div><dt>Quiz or assignment</dt><dd>Pass any required quiz or submit the required assignment.</dd></div><div><dt>Approval</dt><dd>Receive approval from the tutor or an authorised Association executive.</dd></div></dl><p className="certificate-safeguard">Opening a lesson, link or resource does not complete a course and will never automatically issue a certificate.</p></section>
+        <section className="my-certificates" aria-labelledby="my-certificates-title"><div className="certificate-section-heading"><Award aria-hidden="true"/><div><p className="eyebrow">Your achievements</p><h3 id="my-certificates-title">My Certificates</h3></div></div><p>Approved Certificates of Completion and Participation will appear here for you to view and download.</p><div className="certificate-empty"><Download aria-hidden="true"/><strong>No approved certificates yet</strong><span>When a tutor or authorised executive approves a certificate, it will be available here.</span></div></section>
       </div>
       <section className="teacher-network" aria-labelledby="teacher-network-title">
         <div className="teacher-network-heading"><GraduationCap aria-hidden="true"/><div><p className="eyebrow">Approved member educators</p><h3 id="teacher-network-title">Member Teacher Network</h3><p>Members with teaching experience can offer respectful learning support. Profiles only appear here after Association approval.</p></div></div>
@@ -240,6 +244,10 @@ export function ConnectionHub() {
       <section className="conversation"><h2>Private conversation</h2>{selected ? <><div className="message-list" aria-live="polite">{messages.length ? messages.map((message) => <p className={message.sender_id === me ? 'mine' : ''} key={message.id}>{message.body}<time>{new Date(message.created_at).toLocaleString()}</time></p>) : <span>Start the conversation with a friendly hello.</span>}</div><form onSubmit={send}><label htmlFor="connection-message">Message</label><textarea id="connection-message" maxLength={2000} required value={draft} onChange={(event) => setDraft(event.target.value)}/><button className="primary-button">Send message</button></form></> : <p className="connection-empty">Choose a connection to view your conversation.</p>}</section></div>
     <section><h2><Search size={21}/> Discover members</h2><label className="member-search"><span>Search by name</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a classmate"/></label><div className="connection-cards discover">{discover.map((member) => <article key={member.id}><Avatar profile={member}/><div><strong>{member.full_name}</strong><span>{member.role.replaceAll('_', ' ')}</span></div><button onClick={() => connect(member.id)}>Connect</button></article>)}</div>{!discover.length && <p className="connection-empty">No new members match your search.</p>}</section>
   </section>;
+}
+
+function CourseCard({ skill }: { skill: { readonly name: string; readonly description: string } }) {
+  return <li className="course-card"><strong>{skill.name}</strong><span>{skill.description}</span><span className="certificate-badge"><Award size={15} aria-hidden="true"/> Certificate of Completion Available</span><small>A Certificate of Completion will be issued after you complete all required lessons and meet the course requirements.</small></li>;
 }
 
 function Avatar({ profile }: { profile: ConnectionProfile }) {
