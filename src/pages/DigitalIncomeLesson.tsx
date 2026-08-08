@@ -23,6 +23,7 @@ export function DigitalIncomeLesson() {
     const id = auth.session?.user.id;
     if (!id) { window.location.hash = '/login'; return; }
     setMemberId(id);
+    await supabase.from('course_enrolments').upsert({ member_id: id, course_slug: 'digital-income-online-work' }, { onConflict: 'member_id,course_slug' });
     const { data, error } = await supabase.from('lesson_progress').select('*').eq('member_id', id).eq('lesson_slug', 'digital-income-lesson-1').maybeSingle();
     if (error) setNotice('Your saved progress could not be loaded. You may still review the lesson.');
     if (data) {
@@ -85,6 +86,6 @@ export function DigitalIncomeLesson() {
       </main>
       <div className="lesson-actions"><button className="secondary-button" onClick={() => void save()} disabled={saving}>{saving ? 'Saving…' : 'Save and Continue Later'}</button><button className="primary-button" onClick={completeLesson} disabled={saving || completed || !canComplete}>{completed ? 'Lesson Completed' : 'Complete Lesson'}</button>{!canComplete && <p>Complete all three requirements above to enable lesson completion.</p>}</div>
     </>}
-    <section className={completed ? 'next-lesson unlocked' : 'next-lesson'} aria-labelledby="lesson-two-title">{completed ? <CheckCircle2 aria-hidden="true"/> : <LockKeyhole aria-hidden="true"/>}<div><p className="eyebrow">{completed ? 'Unlocked' : 'Locked'}</p><h2 id="lesson-two-title">Lesson 2: Choosing a Profitable Digital Skill or Service</h2><p>{completed ? 'Lesson 1 is complete. Lesson 2 is unlocked and will be available when its learning material is published.' : 'Meet every Lesson 1 requirement to unlock this lesson.'}</p></div></section>
+    <section className={completed ? 'next-lesson unlocked' : 'next-lesson'} aria-labelledby="lesson-two-title">{completed ? <CheckCircle2 aria-hidden="true"/> : <LockKeyhole aria-hidden="true"/>}<div><p className="eyebrow">{completed ? 'Unlocked' : 'Locked'}</p><h2 id="lesson-two-title">Lesson 2: Choosing a Profitable Digital Skill or Service</h2><p>{completed ? 'Lesson 1 is complete. Continue to the next lesson.' : 'Meet every Lesson 1 requirement to unlock this lesson.'}</p>{completed && <a className="primary-button" href="#/dashboard/learning/digital-income/lesson-2">Next Lesson</a>}</div></section>
   </section>;
 }
