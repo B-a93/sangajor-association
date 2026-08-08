@@ -24,6 +24,7 @@ const DigitalIncomeLesson = lazy(() => import('./pages/DigitalIncomeLesson').the
 const DigitalIncomeCourseDashboard = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeCourseDashboard })));
 const DigitalIncomeCourseLesson = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeCourseLesson })));
 const DigitalIncomeFinalAssessment = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeFinalAssessment })));
+const ChairmanCertificateApproval = lazy(() => import('./pages/ChairmanCertificateApproval').then((module) => ({ default: module.ChairmanCertificateApproval })));
 const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
 const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
@@ -163,6 +164,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/invitations': <MemberInvitations />,
   '/dashboard/administration': <MemberAdministration />,
   '/dashboard/analytics': <ExecutiveAnalytics />,
+  '/dashboard/certificates/approval': <ChairmanCertificateApproval />,
   '/dashboard/assistant': <AssistantErrorBoundary><SmartAssistant /></AssistantErrorBoundary>,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,

@@ -22,6 +22,7 @@ export function MemberDashboard() {
   const [canManageVolunteers, setCanManageVolunteers] = useState(false);
   const [canViewAnalytics, setCanViewAnalytics] = useState(false);
   const [canModerateVillage, setCanModerateVillage] = useState(false);
+  const [canApproveCertificates, setCanApproveCertificates] = useState(false);
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
   useEffect(() => {
@@ -68,6 +69,8 @@ export function MemberDashboard() {
           return check.error ? label : null;
         }));
         const unreadResult = await supabase.rpc('unread_announcement_count');
+        const certificateAccess = await supabase.rpc('is_active_chairman');
+        if (!certificateAccess.error) setCanApproveCertificates(Boolean(certificateAccess.data));
         if (!unreadResult.error) setUnreadAnnouncements(Number(unreadResult.data ?? 0));
         const failedChecks = checkResults.filter((label): label is Exclude<typeof label, null> => label !== null);
         setAuthorizationWarnings((current) => [...current, ...failedChecks, ...(unreadResult.error ? ['announcement badge'] : [])]);
@@ -116,5 +119,6 @@ export function MemberDashboard() {
       <article><span>Contributions</span><strong>Track your dues and payment history</strong><a href="#/dashboard/dues">View my dues</a></article>
     </div>
     {isExecutive && <section className="executive-portal" aria-labelledby="executive-portal-title"><div><p className="eyebrow">Authorized office</p><h2 id="executive-portal-title">Executive Portal</h2><p>{roleLabel(profile!.role)} · tools shown below are limited to this office.</p></div><div className="dashboard-grid">{executiveTools.filter((tool) => tool.allowed).map((tool) => <article key={tool.href}><span>{tool.label}</span><strong>{tool.description}</strong><a href={tool.href}>{tool.link}</a></article>)}</div></section>}
+    {canApproveCertificates && <section className="executive-portal"><div><p className="eyebrow">Chairman only</p><h2>Certificate approvals</h2><p>Give final approval to tutor-verified course completions.</p></div><div className="dashboard-grid"><article><span>Certificates</span><strong>Review the pending Chairman approval queue</strong><a href="#/dashboard/certificates/approval">Open approval dashboard</a></article></div></section>}
   </section>;
 }

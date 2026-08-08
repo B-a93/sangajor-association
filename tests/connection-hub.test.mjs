@@ -80,7 +80,7 @@ test('learning interface clearly explains certificate availability and approval 
   assert.match(page, /Certificate of Participation Available/);
   assert.match(page, /Certificate requirements/);
   for (const requirement of ['Lessons', 'Attendance', 'Quiz or assignment', 'Approval']) assert.match(page, new RegExp(requirement));
-  assert.match(page, /tutor or an authorised Association executive/);
+  assert.match(page, /only the current active Chairman gives final certificate approval/);
   assert.match(page, /My Certificates/);
   assert.match(page, /view and download/);
   assert.match(page, /does not complete a course and will never automatically issue a certificate/);
