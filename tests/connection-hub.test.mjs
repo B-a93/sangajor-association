@@ -27,14 +27,26 @@ test('member portal exposes discovery, requests, connections and messaging', asy
 });
 
 
-test('full Connection Hub package opens resources and tutor pathways', async () => {
+test('Connection Hub presents one skills exchange with learning and teaching pathways', async () => {
   const page = await read('src/pages/ConnectionHub.tsx');
-  for (const category of ['Business & entrepreneurship', 'Skills learning & exchange', 'Family support', 'Marriage support', 'Parenting', 'Mentorship', 'Professional networking', 'Community opportunities']) {
+  assert.match(page, /Skills Learning &amp; Exchange/);
+  assert.match(page, /Learn a Skill/);
+  for (const category of ['Digital & Technology Skills', 'Business & Entrepreneurship', 'Career & Professional Development', 'Financial Literacy', 'Leadership & Communication', 'Cooking & Baking', 'Tailoring\/Crafts\/Creativity', 'Agriculture & Farming', 'Family Wellbeing', 'Community Development']) {
     assert.match(page, new RegExp(category.replace('&', '\\&')));
   }
-  assert.match(page, /View resources/);
-  assert.match(page, /How to make money online safely/);
-  assert.match(page, /Tutor support/);
+  assert.match(page, /Digital Income &amp; Online Work/);
+  assert.match(page, /legitimate freelancing, online payments, AI tools, social-media work and scam awareness/);
+  assert.match(page, /Teach a Skill/);
+  for (const field of ['skill', 'experience', 'format', 'availability', 'resources']) assert.match(page, new RegExp(`teaching\\.${field}`));
+  assert.match(page, /All submissions require approval before publication/);
   assert.match(page, /member_connections/);
   assert.match(page, /connection_messages/);
+});
+
+test('teaching offers are private and pending approval when submitted', async () => {
+  const migration = await read('supabase/migrations/202608080003_skills_learning_exchange.sql');
+  assert.match(migration, /skill_teaching_submissions/);
+  assert.match(migration, /status text not null default 'pending'/);
+  assert.match(migration, /auth\.uid\(\) = member_id and status = 'pending'/);
+  assert.match(migration, /auth\.uid\(\) = member_id/);
 });

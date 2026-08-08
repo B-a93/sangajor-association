@@ -1,19 +1,14 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { BriefcaseBusiness, GraduationCap, HandHeart, HeartHandshake, Lightbulb, MessageCircle, Network, Search, Users, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, GraduationCap, MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { ConnectionMessage, ConnectionProfile, MemberConnection } from '../types/connection';
 import './ConnectionHub.css';
 
 
-const hubCategories = [
-  { slug: 'business', title: 'Business & entrepreneurship', description: 'Build income, launch small businesses and learn practical digital enterprise skills.', icon: BriefcaseBusiness, resources: ['How to make money online safely', 'Starting a small business with limited capital', 'Pricing, record keeping and customer service'], lessons: ['Freelancing and remote work', 'Selling through WhatsApp and social media', 'Avoiding online job and investment scams'] },
-  { slug: 'skills', title: 'Skills learning & exchange', description: 'Learn useful skills through guided lessons, peer exchange and tutor support.', icon: GraduationCap, resources: ['Digital literacy and online safety', 'CV writing and interview preparation', 'Cooking, tailoring, crafts and practical trades'], lessons: ['Choose a skill pathway', 'Follow beginner lessons', 'Request an approved tutor or peer mentor'] },
-  { slug: 'family', title: 'Family support', description: 'Find respectful guidance for family wellbeing and shared responsibilities.', icon: Users, resources: ['Healthy family communication', 'Household planning and wellbeing', 'Support during difficult periods'], lessons: ['Listening without judgement', 'Resolving family disagreements', 'Knowing when professional help is needed'] },
-  { slug: 'marriage', title: 'Marriage support', description: 'Access respectful marriage education, communication tools and support resources.', icon: HeartHandshake, resources: ['Communication and mutual respect', 'Managing expectations and conflict', 'Building trust and partnership'], lessons: ['Healthy boundaries', 'Financial conversations', 'Seeking qualified counselling'] },
-  { slug: 'parenting', title: 'Parenting', description: 'Strengthen parenting knowledge and support children at every stage.', icon: HandHeart, resources: ['Positive discipline', 'Children’s education and online safety', 'Parent wellbeing'], lessons: ['Age-appropriate communication', 'Learning routines at home', 'Protecting children online'] },
-  { slug: 'mentorship', title: 'Mentorship', description: 'Build trusted mentoring relationships for education, career and personal growth.', icon: Lightbulb, resources: ['Finding the right mentor', 'Setting a practical growth goal', 'Preparing for mentor meetings'], lessons: ['Create a 90-day goal', 'Track progress', 'Become a responsible mentor'] },
-  { slug: 'networking', title: 'Professional networking', description: 'Connect around professions, experience and career development.', icon: Network, resources: ['Professional introductions', 'LinkedIn and CV improvement', 'Career and scholarship preparation'], lessons: ['Create a strong professional profile', 'Ask for guidance respectfully', 'Maintain useful connections'] },
-  { slug: 'community', title: 'Community opportunities', description: 'Find ways to serve, collaborate and strengthen SANGAJOR.', icon: UserPlus, resources: ['Volunteer opportunities', 'Community project planning', 'Fundraising and donor readiness'], lessons: ['Choose a service area', 'Join a committee', 'Record and report community impact'] },
+const learningCategories = [
+  'Digital & Technology Skills', 'Business & Entrepreneurship', 'Career & Professional Development',
+  'Financial Literacy', 'Leadership & Communication', 'Cooking & Baking',
+  'Tailoring/Crafts/Creativity', 'Agriculture & Farming', 'Family Wellbeing', 'Community Development',
 ] as const;
 
 export function ConnectionHub() {
@@ -26,7 +21,8 @@ export function ConnectionHub() {
   const [draft, setDraft] = useState('');
   const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<(typeof hubCategories)[number] | null>(null);
+  const [teaching, setTeaching] = useState({ skill: '', experience: '', format: '', availability: '', resources: '' });
+  const [submittingSkill, setSubmittingSkill] = useState(false);
 
   async function load() {
     const { data: auth } = await supabase.auth.getSession();
@@ -71,14 +67,40 @@ export function ConnectionHub() {
     if (error) setNotice(error.message); else { setDraft(''); const { data } = await supabase.from('connection_messages').select('*').eq('connection_id', selected).order('created_at'); setMessages((data ?? []) as ConnectionMessage[]); }
   }
 
+  async function volunteerToTeach(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmittingSkill(true);
+    const { error } = await supabase.from('skill_teaching_submissions').insert({ member_id: me, ...teaching });
+    setSubmittingSkill(false);
+    if (error) setNotice(error.message);
+    else {
+      setTeaching({ skill: '', experience: '', format: '', availability: '', resources: '' });
+      setNotice('Thank you for volunteering. Your submission is awaiting approval before publication.');
+    }
+  }
+
   if (loading) return <section className="connection-state">Opening the Connection Hub…</section>;
   return <section className="connection-page">
     <header className="connection-header"><div><p className="eyebrow">MySANGAJOR Digital Village</p><h1>SANGAJOR Connection Hub</h1><p>Reconnect safely, grow your network and have private conversations with fellow members.</p></div><a className="secondary-button" href="#/dashboard">Back to dashboard</a></header>
     {notice && <p className="connection-notice" role="status">{notice}</p>}
-    <section className="hub-package" aria-labelledby="hub-package-title">
-      <div className="hub-package-heading"><p className="eyebrow">Learn and grow</p><h2 id="hub-package-title">Explore the Connection Hub</h2><p>Choose an area to open its learning resources, practical lessons and tutor-support pathway.</p></div>
-      <div className="hub-category-grid">{hubCategories.map((category) => { const Icon = category.icon; return <article key={category.slug}><Icon aria-hidden="true" size={24}/><h3>{category.title}</h3><p>{category.description}</p><button type="button" onClick={() => setActiveCategory(category)}>View resources</button></article>; })}</div>
-      {activeCategory && <section className="hub-resource-panel" aria-live="polite"><button className="resource-close" type="button" onClick={() => setActiveCategory(null)}>Close</button><p className="eyebrow">Resource area</p><h2>{activeCategory.title}</h2><p>{activeCategory.description}</p><div className="resource-columns"><div><h3>Resources</h3><ul>{activeCategory.resources.map((item) => <li key={item}>{item}</li>)}</ul></div><div><h3>Learning pathway</h3><ol>{activeCategory.lessons.map((item) => <li key={item}>{item}</li>)}</ol></div><div className="tutor-card"><GraduationCap aria-hidden="true"/><h3>Tutor support</h3><p>Approved volunteer tutors and facilitators will be listed here. Members can request guidance without publishing personal details publicly.</p><a href="#/contact">Request tutor support</a></div></div></section>}
+    <section className="skills-exchange" aria-labelledby="skills-exchange-title">
+      <div className="hub-package-heading"><p className="eyebrow">Learn, share and grow</p><h2 id="skills-exchange-title">Skills Learning &amp; Exchange</h2><p>Build practical knowledge or help another member grow by sharing what you know.</p></div>
+      <div className="skill-pathways">
+        <article className="skill-pathway learn-pathway"><BookOpen aria-hidden="true"/><h3>Learn a Skill</h3><p>Explore learning areas supported by community knowledge, trusted resources and approved volunteer teachers.</p>
+          <div className="learning-categories">{learningCategories.map((category) => <section key={category}><h4>{category}</h4>{category === 'Digital & Technology Skills' && <div className="digital-income"><strong>Digital Income &amp; Online Work</strong><p>Learn about legitimate freelancing, online payments, AI tools, social-media work and scam awareness.</p></div>}</section>)}</div>
+        </article>
+        <article className="skill-pathway teach-pathway"><GraduationCap aria-hidden="true"/><h3>Teach a Skill</h3><p>Volunteer to share practical knowledge with fellow SANGAJOR members. Tell us how you can help.</p>
+          <form onSubmit={volunteerToTeach}>
+            <label>Skill you can teach<input required maxLength={120} value={teaching.skill} onChange={(event) => setTeaching({ ...teaching, skill: event.target.value })}/></label>
+            <label>Your experience<textarea required maxLength={1000} value={teaching.experience} onChange={(event) => setTeaching({ ...teaching, experience: event.target.value })}/></label>
+            <label>Teaching format<input required maxLength={120} placeholder="Online, in person or small group" value={teaching.format} onChange={(event) => setTeaching({ ...teaching, format: event.target.value })}/></label>
+            <label>Availability<input required maxLength={200} placeholder="Days and times that work for you" value={teaching.availability} onChange={(event) => setTeaching({ ...teaching, availability: event.target.value })}/></label>
+            <label>Supporting resources<textarea required maxLength={1000} placeholder="Materials, links, equipment or notes you can provide" value={teaching.resources} onChange={(event) => setTeaching({ ...teaching, resources: event.target.value })}/></label>
+            <p className="approval-note">All submissions require approval before publication.</p>
+            <button className="primary-button" disabled={submittingSkill}>{submittingSkill ? 'Submitting…' : 'Volunteer to teach'}</button>
+          </form>
+        </article>
+      </div>
     </section>
     {requests.length > 0 && <section><h2><UserPlus size={21}/> Connection requests</h2><div className="connection-cards">{requests.map((item) => <article key={item.id}><Avatar profile={item.requester}/><div><strong>{item.requester.full_name}</strong><span>{item.requester.role.replaceAll('_', ' ')}</span></div><div className="connection-actions"><button onClick={() => respond(item.id, 'accepted')}>Accept</button><button onClick={() => respond(item.id, 'declined')}>Decline</button></div></article>)}</div></section>}
     <div className="connection-layout"><section><h2><UserCheck size={21}/> My connections</h2>{accepted.length ? <div className="connection-cards">{accepted.map((item) => <article className={selected === item.id ? 'selected' : ''} key={item.id}><Avatar profile={other(item)}/><div><strong>{other(item).full_name}</strong><span>{other(item).role.replaceAll('_', ' ')}</span></div><button aria-label={`Message ${other(item).full_name}`} onClick={() => setSelected(item.id)}><MessageCircle size={19}/></button></article>)}</div> : <p className="connection-empty">Accepted connections will appear here.</p>}</section>
