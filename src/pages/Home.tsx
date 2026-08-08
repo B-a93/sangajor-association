@@ -5,8 +5,9 @@ import { impactAreas } from '../data/site';
 import './Home.css';
 
 const officialLogo = '/sangajorr-association-logo.png.jpeg';
-const homepageLeadershipSlugs = new Set(['omar-bah', 'kaddy-bojang', 'banna-bojang', 'tida-bojang']);
-const homepageLeaders = executives.filter((executive) => executive.status === 'complete' && homepageLeadershipSlugs.has(executive.slug));
+const homepageLeaders = executives
+  .filter((executive) => executive.status === 'complete')
+  .slice(0, 4);
 
 export function Home() {
   const chairman = executives.find((executive) => executive.slug === 'omar-bah');

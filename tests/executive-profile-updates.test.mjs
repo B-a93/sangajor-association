@@ -52,7 +52,6 @@ test('Tida and Banna use their cropped portraits from the executive data', async
 
     assert.ok(profile, `${name} profile should exist`);
     assert.match(profile, new RegExp(`image:'${image.replaceAll('.', '\\.')}'`));
-    assert.match(homepage, new RegExp(`'${slug}'`));
     await access(new URL(`../public${image}`, import.meta.url));
   }
 
@@ -71,7 +70,8 @@ test('Tida portrait has no legacy reference and reaches every executive surface'
   assert.match(tidaProfile, /image:'\/Tida-Bojang-Assi-IPRO-crop-png\.png'/);
   await access(new URL(`../public${expectedPortrait}`, import.meta.url));
 
-  assert.match(homepage, /homepageLeadershipSlugs[\s\S]*'tida-bojang'/);
+  assert.match(homepage, /executives[\s\S]*\.filter\(\(executive\) => executive\.status === 'complete'\)[\s\S]*\.slice\(0, 4\)/);
+  assert.doesNotMatch(homepage, /homepageLeadershipSlugs/);
   assert.match(homepage, /executive\.image \? <img src=\{executive\.image\}/);
   assert.match(leadership, /executive\.image \? <img src=\{executive\.image\}/);
   assert.match(executiveProfile, /executive\.image \? <img src=\{executive\.image\}/);
@@ -92,7 +92,7 @@ test('Tida portrait has no legacy reference and reaches every executive surface'
 
 test('the homepage uses executive data without the legacy portrait override script', () => {
   assert.match(homepage, /import \{ executives \} from '\.\.\/data\/executives';/);
-  assert.match(homepage, /executives\.filter\(/);
+  assert.match(homepage, /executives[\s\S]*\.filter\(/);
   assert.doesNotMatch(index, /executive-portraits\.js/);
 });
 
