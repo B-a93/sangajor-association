@@ -30,6 +30,7 @@ const Events = lazy(() => import('./pages/Events').then((module) => ({ default: 
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
 const ExecutiveProfile = lazy(() => import('./pages/ExecutiveProfile').then((module) => ({ default: module.ExecutiveProfile })));
 const ExecutiveAnalytics = lazy(() => import('./pages/ExecutiveAnalytics').then((module) => ({ default: module.ExecutiveAnalytics })));
+const ExecutiveOfficeProgress = lazy(() => import('./pages/ExecutiveOfficeProgress').then((module) => ({ default: module.ExecutiveOfficeProgress })));
 const SmartAssistant = lazy(() => import('./pages/SmartAssistant').then((module) => ({ default: module.SmartAssistant })));
 const Focus = lazy(() => import('./pages/Focus').then((module) => ({ default: module.Focus })));
 const FinanceAdministration = lazy(() => import('./pages/FinanceAdministration').then((module) => ({ default: module.FinanceAdministration })));
@@ -164,6 +165,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/invitations': <MemberInvitations />,
   '/dashboard/administration': <MemberAdministration />,
   '/dashboard/analytics': <ExecutiveAnalytics />,
+  '/dashboard/executive-progress': <ExecutiveOfficeProgress />,
   '/dashboard/certificates/approval': <ChairmanCertificateApproval />,
   '/dashboard/assistant': <AssistantErrorBoundary><SmartAssistant /></AssistantErrorBoundary>,
   '/dashboard/dues': <MemberDues />,
