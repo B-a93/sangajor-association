@@ -1,0 +1,33 @@
+.office-progress-page { min-height: 72vh; padding: 3.5rem clamp(1.25rem, 5vw, 5rem); background: #f4f7f8; color: #17342b; }
+.office-progress-header { display: flex; justify-content: space-between; align-items: end; gap: 2rem; margin-bottom: 2rem; }
+.office-progress-header h1 { margin: .25rem 0 .5rem; font-size: clamp(2rem, 4vw, 3.25rem); }
+.office-progress-header p { margin: 0; color: #587067; }
+.office-progress-alert { padding: 1rem; border-left: 4px solid #b45c3c; background: #fff1ec; }
+.office-progress-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.office-progress-summary article, .office-task-form, .office-progress-group { padding: 1.4rem; border: 1px solid #dce6e1; border-radius: 16px; background: white; box-shadow: 0 12px 35px rgba(23,52,43,.06); }
+.office-progress-summary article { display: grid; gap: .45rem; }
+.office-progress-summary span { color: #557067; font-size: .8rem; font-weight: 800; text-transform: uppercase; }
+.office-progress-summary strong { color: #0f4c3a; font-size: 1.8rem; }
+.office-task-form { display: grid; grid-template-columns: 1.3fr 1fr .7fr auto; align-items: end; gap: 1rem; margin: 1rem 0; }
+.office-task-form h2 { margin: .2rem 0 0; }
+.office-task-form label { display: grid; gap: .4rem; font-size: .82rem; font-weight: 800; }
+.office-task-form input, .office-task-form textarea { width: 100%; padding: .75rem; border: 1px solid #b8c9c2; border-radius: 9px; font: inherit; }
+.office-task-description { grid-column: 2 / 4; }
+.office-progress-groups { display: grid; gap: 1rem; }
+.office-progress-group-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.office-progress-group-heading h2 { margin: 0; }
+.office-progress-group-heading span { color: #657b73; font-size: .85rem; }
+.office-task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.office-task-card { padding: 1.2rem; border: 1px solid #dce6e1; border-radius: 13px; }
+.office-task-card-heading, .office-task-meta, .office-task-actions { display: flex; justify-content: space-between; gap: .6rem; align-items: center; }
+.office-task-card h3 { margin: 1rem 0 .45rem; }
+.office-task-card p, .office-task-card small, .office-task-meta { color: #657b73; }
+.office-status { padding: .3rem .55rem; border-radius: 999px; font-size: .72rem; font-weight: 900; text-transform: uppercase; }
+.office-status-pending { background: #fff2cd; color: #785a00; }.office-status-ongoing { background: #dcecff; color: #175591; }.office-status-completed { background: #dff3e8; color: #176443; }
+.office-progress-track { height: 8px; margin: 1.2rem 0 .5rem; overflow: hidden; border-radius: 999px; background: #e7eeeb; }.office-progress-track span { display: block; height: 100%; background: #218263; }
+.office-task-meta { font-size: .75rem; }
+.office-task-actions { margin-top: 1rem; }
+.office-task-actions button { padding: .45rem .6rem; border: 1px solid #b8c9c2; border-radius: 7px; background: white; color: #17342b; cursor: pointer; }
+.office-progress-empty, .office-progress-state { min-height: 40vh; display: grid; place-content: center; text-align: center; color: #657b73; }
+@media (max-width: 960px) { .office-progress-summary { grid-template-columns: repeat(2, 1fr); } .office-task-grid { grid-template-columns: repeat(2, 1fr); } .office-task-form { grid-template-columns: 1fr 1fr; } .office-task-description { grid-column: 1 / -1; } }
+@media (max-width: 620px) { .office-progress-header { align-items: stretch; flex-direction: column; } .office-progress-summary, .office-task-grid, .office-task-form { grid-template-columns: 1fr; } .office-task-description { grid-column: auto; } .office-task-actions { align-items: stretch; flex-direction: column; } }
