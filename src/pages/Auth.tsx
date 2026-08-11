@@ -5,9 +5,22 @@ import './Auth.css';
 
 type Mode = 'login' | 'reset';
 
+function loginIdentity(identifier: string) {
+  const value = identifier.trim();
+
+  if (value.includes('@')) return { email: value.toLowerCase() };
+
+  const phone = value.replace(/[\s().-]/g, '');
+  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+    throw new Error('Enter an email address or a phone number in international format, for example +2203145237.');
+  }
+
+  return { phone };
+}
+
 export function Auth() {
   const [mode, setMode] = useState<Mode>('login');
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,12 +32,17 @@ export function Auth() {
 
     try {
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const identity = loginIdentity(identifier);
+        const { error } = await supabase.auth.signInWithPassword({ ...identity, password });
         if (error) throw error;
         window.location.hash = '/dashboard';
       }
 
       if (mode === 'reset') {
+        const email = identifier.trim().toLowerCase();
+        if (!email.includes('@')) {
+          throw new Error('Phone password recovery requires SMS service. For now, contact an executive to reset a phone-only account.');
+        }
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: applicationUrl('/#/dashboard'),
         });
@@ -47,8 +65,17 @@ export function Auth() {
 
         <form onSubmit={handleSubmit}>
           <label>
-            Email address
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required autoComplete="email" />
+            {mode === 'login' ? 'Email address or phone number' : 'Email address'}
+            <input
+              type={mode === 'login' ? 'text' : 'email'}
+              inputMode={mode === 'login' ? 'email' : undefined}
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+              placeholder={mode === 'login' ? 'Email or +2203145237' : 'Your email address'}
+              required
+              autoComplete="username"
+            />
+            {mode === 'login' && <small>Use the email or international-format phone number attached to your invitation.</small>}
           </label>
 
           {mode !== 'reset' && (
