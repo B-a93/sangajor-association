@@ -16,6 +16,7 @@ test('mobile member access is first and remains reachable on short screens', asy
   assert.ok(memberLink > -1, 'mobile member link is missing');
   assert.ok(publicLinks > memberLink, 'mobile member access must appear before public links');
   assert.match(header, /signedIn \? 'Member Dashboard' : 'Member Login'/);
-  assert.match(styles, /\.mobile-nav \{[^}]*position: fixed;[^}]*bottom: 0;[^}]*overflow-y: auto;/);
+  assert.match(styles, /\.mobile-nav \{[^}]*position: absolute;[^}]*max-height: calc\(100dvh - 82px\);[^}]*overflow-y: auto;/);
+  assert.match(styles, /\.mobile-nav \{ top: 72px; max-height: calc\(100dvh - 72px\); \}/);
   assert.match(styles, /safe-area-inset-bottom/);
 });
