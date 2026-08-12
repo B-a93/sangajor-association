@@ -205,7 +205,7 @@ blockquote { margin: 0; padding: 48px; color: var(--navy); background: var(--cre
 @media (max-width: 1050px) {
   .desktop-nav { display: none; }
   .menu-button { display: grid; }
-  .mobile-nav { position: fixed; display: flex; flex-direction: column; gap: 20px; top: 82px; right: 0; bottom: 0; left: 0; overflow-y: auto; overscroll-behavior: contain; padding: 28px 5vw calc(34px + env(safe-area-inset-bottom)); background: white; border-bottom: 1px solid #dce4e8; box-shadow: 0 15px 30px rgba(0,0,0,.08); -webkit-overflow-scrolling: touch; }
+  .mobile-nav { position: absolute; display: flex; flex-direction: column; gap: 0; top: 82px; right: 0; left: 0; max-height: calc(100dvh - 82px); overflow-y: auto; overscroll-behavior: contain; padding: 18px 5vw calc(24px + env(safe-area-inset-bottom)); background: white; border-bottom: 1px solid #dce4e8; box-shadow: 0 15px 30px rgba(0,0,0,.08); -webkit-overflow-scrolling: touch; }
   .mobile-member-link { color: var(--green); font-weight: 800; }
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero-card { max-width: 650px; }
@@ -223,7 +223,7 @@ blockquote { margin: 0; padding: 48px; color: var(--navy); background: var(--cre
   .site-header { height: 72px; }
   .brand span { max-width: 180px; font-size: .61rem; }
   .brand-mark { width: 39px; height: 39px; }
-  .mobile-nav { top: 72px; }
+  .mobile-nav { top: 72px; max-height: calc(100dvh - 72px); }
   .mobile-nav a { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid #edf1f2; }
   .network-status { top: 72px; width: 100%; justify-content: center; border-radius: 0; text-align: center; }
   .install-prompt { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); left: 12px; grid-template-columns: auto 1fr auto; gap: 10px; padding: 14px; }
