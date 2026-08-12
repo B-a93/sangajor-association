@@ -205,7 +205,8 @@ blockquote { margin: 0; padding: 48px; color: var(--navy); background: var(--cre
 @media (max-width: 1050px) {
   .desktop-nav { display: none; }
   .menu-button { display: grid; }
-  .mobile-nav { position: absolute; display: flex; flex-direction: column; gap: 20px; top: 82px; left: 0; right: 0; padding: 28px 5vw 34px; background: white; border-bottom: 1px solid #dce4e8; box-shadow: 0 15px 30px rgba(0,0,0,.08); }
+  .mobile-nav { position: fixed; display: flex; flex-direction: column; gap: 20px; top: 82px; right: 0; bottom: 0; left: 0; overflow-y: auto; overscroll-behavior: contain; padding: 28px 5vw calc(34px + env(safe-area-inset-bottom)); background: white; border-bottom: 1px solid #dce4e8; box-shadow: 0 15px 30px rgba(0,0,0,.08); -webkit-overflow-scrolling: touch; }
+  .mobile-member-link { color: var(--green); font-weight: 800; }
   .hero { grid-template-columns: 1fr; min-height: auto; }
   .hero-card { max-width: 650px; }
   .card-grid { grid-template-columns: repeat(2, 1fr); }
