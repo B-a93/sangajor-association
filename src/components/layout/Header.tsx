@@ -61,10 +61,12 @@ export function Header() {
 
       {menuOpen && (
         <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">
+          <a className="mobile-member-link" href={signedIn ? '#/dashboard' : '#/login'} onClick={() => setMenuOpen(false)}>
+            {signedIn ? 'Member Dashboard' : 'Member Login'}
+          </a>
           {navItems.map(([label, href]) => (
             <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
           ))}
-          <a href={signedIn ? '#/dashboard' : '#/login'} onClick={() => setMenuOpen(false)}>{signedIn ? 'Member Dashboard' : 'Member Login'}</a>
         </nav>
       )}
     </header>
