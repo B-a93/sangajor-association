@@ -24,6 +24,9 @@ const DigitalIncomeLesson = lazy(() => import('./pages/DigitalIncomeLesson').the
 const DigitalIncomeCourseDashboard = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeCourseDashboard })));
 const DigitalIncomeCourseLesson = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeCourseLesson })));
 const DigitalIncomeFinalAssessment = lazy(() => import('./pages/DigitalIncomeCourse').then((module) => ({ default: module.DigitalIncomeFinalAssessment })));
+const EssentialDigitalSkillsDashboard = lazy(() => import('./pages/EssentialDigitalSkillsCourse').then((module) => ({ default: module.EssentialDigitalSkillsDashboard })));
+const EssentialDigitalSkillsLesson = lazy(() => import('./pages/EssentialDigitalSkillsCourse').then((module) => ({ default: module.EssentialDigitalSkillsLesson })));
+const EssentialDigitalSkillsFinalAssessment = lazy(() => import('./pages/EssentialDigitalSkillsCourse').then((module) => ({ default: module.EssentialDigitalSkillsFinalAssessment })));
 const ChairmanCertificateApproval = lazy(() => import('./pages/ChairmanCertificateApproval').then((module) => ({ default: module.ChairmanCertificateApproval })));
 const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
 const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
@@ -182,6 +185,8 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/learning/digital-income/lesson-1': <DigitalIncomeLesson />,
   '/dashboard/learning/digital-income': <DigitalIncomeCourseDashboard />,
   '/dashboard/learning/digital-income/final-assessment': <DigitalIncomeFinalAssessment />,
+  '/dashboard/learning/essential-digital-skills': <EssentialDigitalSkillsDashboard />,
+  '/dashboard/learning/essential-digital-skills/final-assessment': <EssentialDigitalSkillsFinalAssessment />,
   '/dashboard/village': <VillageSquare />,
   '/dashboard/village/moderation': <VillageModeration />,
 };
@@ -191,6 +196,7 @@ export default function App() {
   const leadershipProfileMatch = route.match(/^\/leadership\/([^/]+)$/);
   const memberProfileMatch = route.match(/^\/dashboard\/members\/([^/]+)$/);
   const digitalIncomeLessonMatch = route.match(/^\/dashboard\/learning\/digital-income\/lesson-([2-6])$/);
+  const essentialDigitalLessonMatch = route.match(/^\/dashboard\/learning\/essential-digital-skills\/lesson-([1-6])$/);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -204,6 +210,8 @@ export default function App() {
     page = <MemberProfile memberId={decodeURIComponent(memberProfileMatch[1])} />;
   } else if (digitalIncomeLessonMatch) {
     page = <DigitalIncomeCourseLesson lessonNumber={Number(digitalIncomeLessonMatch[1])} />;
+  } else if (essentialDigitalLessonMatch) {
+    page = <EssentialDigitalSkillsLesson lessonNumber={Number(essentialDigitalLessonMatch[1])} />;
   } else {
     page = pages[route] ?? <Home />;
   }

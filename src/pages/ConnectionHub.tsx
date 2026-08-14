@@ -32,6 +32,7 @@ const learningCategories = [
     title: 'Digital & Technology Skills',
     introduction: 'Build the confidence to use everyday technology safely, productively and creatively.',
     skills: [
+      { name: 'Essential Digital & Technology Skills', description: 'Build practical confidence with devices, internet, email, files, collaboration, online safety, AI and productivity tools.' },
       { name: 'Digital Income & Online Work', description: 'Explore legitimate freelancing, online payments, AI tools, social-media work and practical scam awareness.' },
       { name: 'Everyday Digital Literacy', description: 'Learn to use devices, email, files and common online services with confidence.' },
       { name: 'Online Safety & Privacy', description: 'Recognise common digital risks and protect your accounts, information and devices.' },
@@ -247,7 +248,7 @@ export function ConnectionHub() {
 }
 
 function CourseCard({ skill }: { skill: { readonly name: string; readonly description: string } }) {
-  const lessonHref = skill.name === 'Digital Income & Online Work' ? '#/dashboard/learning/digital-income' : null;
+  const lessonHref = skill.name === 'Digital Income & Online Work' ? '#/dashboard/learning/digital-income' : skill.name === 'Essential Digital & Technology Skills' ? '#/dashboard/learning/essential-digital-skills' : null;
   return <li className="course-card"><strong>{skill.name}</strong><span>{skill.description}</span><span className="certificate-badge"><Award size={15} aria-hidden="true"/> Certificate of Completion Available</span><small>A Certificate of Completion will be issued after you complete all required lessons and meet the course requirements.</small>{lessonHref && <a className="course-link" href={lessonHref}>Open Lesson 1 & course dashboard</a>}</li>;
 }
 
