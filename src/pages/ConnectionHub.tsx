@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { Award, BookOpen, CheckCircle2, Download, GraduationCap, Languages, MessageCircle, Mic, Search, Square, UserCheck, UserPlus, Users } from 'lucide-react';
+import { Award, BookOpen, CheckCircle2, Download, GraduationCap, Languages, MessageCircle, Mic, Search, Square, Trash2, UserCheck, UserPlus, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { ConnectionMessage, ConnectionProfile, MemberConnection } from '../types/connection';
 import './ConnectionHub.css';
@@ -232,7 +232,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
     if (mode !== 'connections' || !selectedGroup) { setGroupMessages([]); return; }
     void loadGroupMessages(selectedGroup);
     const channel = supabase.channel(`connection-group-${selectedGroup}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'connection_group_messages', filter: `room_id=eq.${selectedGroup}` }, () => { void loadGroupMessages(selectedGroup); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'connection_group_messages', filter: `room_id=eq.${selectedGroup}` }, () => { void loadGroupMessages(selectedGroup); })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, [mode, selectedGroup]);
@@ -268,6 +268,18 @@ function MemberHub({ mode }: { mode: HubMode }) {
     const { error } = await supabase.from('connection_group_messages').insert({ room_id: selectedGroup, sender_id: me, body: groupDraft.trim() });
     if (error) setNotice(error.message);
     else { setGroupDraft(''); await loadGroupMessages(selectedGroup); }
+  }
+
+  async function deleteGroupMessage(message: GroupMessage) {
+    if (!selectedGroup || message.sender_id !== me) return;
+    if (!window.confirm('Delete this message for everyone in the room?')) return;
+    const { data: voicePath, error } = await supabase.rpc('delete_own_connection_group_message', { target_message_id: message.id });
+    if (error) { setNotice('The message could not be deleted. Please try again.'); return; }
+    setGroupMessages((current) => current.filter((item) => item.id !== message.id));
+    if (voicePath) {
+      const removed = await supabase.storage.from('connection-voice-notes').remove([voicePath]);
+      if (removed.error) setNotice('The message was deleted, but its voice-note file could not be removed.');
+    }
   }
 
   function stopRecording() {
@@ -376,7 +388,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
         <nav className="group-room-list" aria-label="Group rooms">{groupRooms.map((room) => <button className={selectedGroup === room.id ? 'selected' : ''} type="button" key={room.id} onClick={() => setSelectedGroup(room.id)}><strong>{room.name}</strong><span>{room.description}</span></button>)}</nav>
         <div className="group-conversation">
           <h3>{groupRooms.find((room) => room.id === selectedGroup)?.name ?? 'Group conversation'}</h3>
-          <div className="group-message-list" aria-live="polite">{groupMessages.length ? groupMessages.map((message) => <article className={message.sender_id === me ? 'mine' : ''} key={message.id}><strong>{message.sender?.full_name ?? 'Association member'}</strong>{message.body && <p>{message.body}</p>}{message.voice_url && <audio controls preload="metadata" src={message.voice_url}>Your browser cannot play this voice note.</audio>}<time>{new Date(message.created_at).toLocaleString()}</time></article>) : <p className="connection-empty">No messages yet. Start the group conversation respectfully.</p>}</div>
+          <div className="group-message-list" aria-live="polite">{groupMessages.length ? groupMessages.map((message) => <article className={message.sender_id === me ? 'mine' : ''} key={message.id}><strong>{message.sender?.full_name ?? 'Association member'}</strong>{message.body && <p>{message.body}</p>}{message.voice_url && <audio controls preload="metadata" src={message.voice_url}>Your browser cannot play this voice note.</audio>}<div className="group-message-meta"><time>{new Date(message.created_at).toLocaleString()}</time>{message.sender_id === me && <button type="button" onClick={() => void deleteGroupMessage(message)} aria-label="Delete this message"><Trash2 size={14} aria-hidden="true"/> Delete</button>}</div></article>) : <p className="connection-empty">No messages yet. Start the group conversation respectfully.</p>}</div>
           <form className="group-message-form" onSubmit={sendGroupMessage}><label htmlFor="group-message">Message</label><textarea id="group-message" maxLength={2000} value={groupDraft} onChange={(event) => setGroupDraft(event.target.value)} placeholder="Write a message to the group"/><div><button className="primary-button" disabled={!groupDraft.trim()}>Send message</button>{recording ? <button className="voice-button recording" type="button" onClick={stopRecording}><Square size={17}/> Stop · {recordingSeconds}s</button> : <button className="voice-button" type="button" onClick={() => void startRecording()} disabled={uploadingVoice}><Mic size={18}/> {uploadingVoice ? 'Uploading…' : 'Record voice note'}</button>}</div></form>
         </div>
       </div> : <p className="connection-empty">No active group rooms are available yet.</p>}

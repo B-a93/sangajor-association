@@ -50,3 +50,17 @@ test('voice Storage policies use a security-definer room-access check', async ()
   assert.match(repair, /split_part\(name, '\/', 2\) = auth\.uid\(\)::text/);
   assert.match(repair, /grant execute on function public\.can_access_connection_group_room\(text, uuid\) to authenticated/);
 });
+
+test('members can delete only their own group messages and clean up voice files', async () => {
+  const migration = await read('supabase/migrations/202608150002_delete_own_group_messages.sql');
+  const page = await read('src/pages/ConnectionHub.tsx');
+  assert.match(migration, /function public\.delete_own_connection_group_message/);
+  assert.match(migration, /message\.sender_id = auth\.uid\(\)/);
+  assert.match(migration, /delete from public\.connection_group_messages/);
+  assert.match(migration, /grant execute on function public\.delete_own_connection_group_message\(uuid\)\s+to authenticated/);
+  assert.match(page, /deleteGroupMessage/);
+  assert.match(page, /delete_own_connection_group_message/);
+  assert.match(page, /\.remove\(\[voicePath\]\)/);
+  assert.match(page, /message\.sender_id === me && <button/);
+  assert.match(page, /event: '\*'/);
+});
