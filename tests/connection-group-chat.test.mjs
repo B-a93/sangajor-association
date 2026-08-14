@@ -33,3 +33,11 @@ test('Connection Hub exposes group text chat and two-minute voice recording', as
   assert.match(page, /createSignedUrl\(message\.voice_path, 900\)/);
   assert.match(page, /next >= 120/);
 });
+
+test('browser codec parameters are normalized for the Supabase MIME allow-list', async () => {
+  const page = await read('src/pages/ConnectionHub.tsx');
+  assert.match(page, /function normalizeVoiceMimeType/);
+  assert.match(page, /mimeType\.toLowerCase\(\)\.split\(';'\)\[0\]\.trim\(\)/);
+  assert.match(page, /contentType: storageMimeType/);
+  assert.doesNotMatch(page, /contentType: blob\.type/);
+});
