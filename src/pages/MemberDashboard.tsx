@@ -112,7 +112,8 @@ export function MemberDashboard() {
       <article><span>Profile</span><strong>Complete or update your member profile</strong><a href="#/dashboard/profile">Open profile</a></article>
       <article><span>Events</span><strong>RSVP and review your attendance</strong><a href="#/dashboard/events">View member events</a></article>
       <article><span>Directory</span><strong>Connect with fellow members</strong><a href="#/dashboard/members">Browse members</a></article>
-      <article><span>Connection Hub</span><strong>Find support, exchange skills and message connections privately</strong><a href="#/dashboard/connections">Open Connection Hub</a></article>
+      <article><span>Connection Hub</span><strong>Connect and message fellow members privately</strong><a href="#/dashboard/connections">Open Connection Hub</a></article>
+      <article><span>Skills Exchange Programme</span><strong>Learn practical skills, find tutors or volunteer to teach</strong><a href="#/dashboard/skills-exchange">Open Skills Exchange</a></article>
       <article><span>Communication</span>{unreadAnnouncements > 0 && <span className="notification-badge" aria-label={`${unreadAnnouncements} unread announcements`}>{unreadAnnouncements > 99 ? '99+' : unreadAnnouncements}</span>}<strong>Read official member announcements</strong><a href="#/dashboard/communications">Open communication centre</a></article>
       <article><span>Knowledge</span><strong>Browse minutes, policies, forms and resources</strong><a href="#/dashboard/documents">Open Knowledge Centre</a></article>
       <article><span>Service</span><strong>Join committees and volunteer for Association projects</strong><a href="#/dashboard/volunteering">Explore opportunities</a></article>
