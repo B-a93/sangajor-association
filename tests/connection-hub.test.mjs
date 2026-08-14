@@ -48,6 +48,20 @@ test('Connection Hub presents one skills exchange with learning and teaching pat
   assert.match(page, /connection_messages/);
 });
 
+test('Skills Exchange is a separate member tool and route', async () => {
+  const page = await read('src/pages/ConnectionHub.tsx');
+  const app = await read('src/App.tsx');
+  const dashboard = await read('src/pages/MemberDashboard.tsx');
+  assert.match(page, /export function SkillsExchange/);
+  assert.match(page, /mode === 'skills'/);
+  assert.match(page, /mode === 'connections'/);
+  assert.match(page, /The Skills Exchange Programme could not be loaded/);
+  assert.match(app, /\/dashboard\/skills-exchange/);
+  assert.match(dashboard, /Skills Exchange Programme/);
+  assert.match(dashboard, /Open Skills Exchange/);
+  assert.match(dashboard, /Connect and message fellow members privately/);
+});
+
 test('education support pathways and moderated teacher network are complete and respectful', async () => {
   const page = await read('src/pages/ConnectionHub.tsx');
   const migration = await read('supabase/migrations/202608080004_member_teacher_network.sql');
