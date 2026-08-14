@@ -77,6 +77,15 @@ test('education support pathways and moderated teacher network are complete and 
   assert.match(migration, /Executives can moderate teacher profiles/);
 });
 
+test('production repair grants authenticated access without exposing teacher profiles anonymously', async () => {
+  const repair = await read('supabase/migrations/202608150003_repair_member_teacher_network_access.sql');
+  assert.match(repair, /grant select, insert, update\s+on table public\.member_teacher_network\s+to authenticated/);
+  assert.match(repair, /revoke all\s+on table public\.member_teacher_network\s+from anon/);
+  assert.match(repair, /using \(status = 'approved'\)/);
+  assert.match(repair, /auth\.uid\(\) = member_id/);
+  assert.match(repair, /public\.is_executive\(auth\.uid\(\)\)/);
+});
+
 test('learning-system plan defines controlled, non-accredited certificates', async () => {
   const roadmap = await read('docs/ROADMAP.md');
   assert.match(roadmap, /Certificate of Completion/);
