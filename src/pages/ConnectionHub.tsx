@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { Award, BookOpen, CheckCircle2, Download, GraduationCap, Languages, MessageCircle, Search, UserCheck, UserPlus } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { Award, BookOpen, CheckCircle2, Download, GraduationCap, Languages, MessageCircle, Mic, Search, Square, UserCheck, UserPlus, Users } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { ConnectionMessage, ConnectionProfile, MemberConnection } from '../types/connection';
 import './ConnectionHub.css';
@@ -121,6 +121,8 @@ const learningCategories = [
 ] as const;
 
 type TeacherListing = { id: string; subjects: string; learner_levels: string; languages: string; availability: string; teaching_format: string; teacher: { full_name: string } | null };
+type GroupRoom = { id: string; name: string; description: string | null };
+type GroupMessage = { id: string; room_id: string; sender_id: string; body: string | null; voice_path: string | null; voice_duration_seconds: number | null; voice_url?: string; created_at: string; sender: { full_name: string; avatar_url: string | null } | null };
 
 type HubMode = 'connections' | 'skills';
 
@@ -147,6 +149,18 @@ function MemberHub({ mode }: { mode: HubMode }) {
   const [teachers, setTeachers] = useState<TeacherListing[]>([]);
   const [teacherProfile, setTeacherProfile] = useState({ subjects: '', learner_levels: '', languages: '', availability: '', teaching_format: '' });
   const [submittingTeacher, setSubmittingTeacher] = useState(false);
+  const [groupRooms, setGroupRooms] = useState<GroupRoom[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState('');
+  const [groupMessages, setGroupMessages] = useState<GroupMessage[]>([]);
+  const [groupDraft, setGroupDraft] = useState('');
+  const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [uploadingVoice, setUploadingVoice] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordingChunksRef = useRef<Blob[]>([]);
+  const recordingSecondsRef = useRef(0);
+  const recordingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingStreamRef = useRef<MediaStream | null>(null);
 
   async function load() {
     const { data: auth } = await supabase.auth.getSession();
@@ -158,12 +172,18 @@ function MemberHub({ mode }: { mode: HubMode }) {
       if (teacherListings.error) setNotice('The Skills Exchange Programme could not be loaded. Please try again.');
       else setTeachers((teacherListings.data ?? []) as unknown as TeacherListing[]);
     } else {
-      const [profiles, links] = await Promise.all([
+      const [profiles, links, rooms] = await Promise.all([
         supabase.from('profiles').select('id, full_name, avatar_url, role').eq('is_active', true).neq('id', userId).order('full_name'),
         supabase.from('member_connections').select('id, requester_id, recipient_id, status, created_at, requester:profiles!member_connections_requester_id_fkey(id, full_name, avatar_url, role), recipient:profiles!member_connections_recipient_id_fkey(id, full_name, avatar_url, role)').order('created_at', { ascending: false }),
+        supabase.from('connection_group_rooms').select('id, name, description').eq('is_active', true).order('created_at'),
       ]);
-      if (profiles.error || links.error) setNotice('The Connection Hub could not be loaded. Please try again.');
-      else { setMembers((profiles.data ?? []) as ConnectionProfile[]); setConnections((links.data ?? []) as unknown as MemberConnection[]); }
+      if (profiles.error || links.error || rooms.error) setNotice('The Connection Hub could not be loaded. Please try again.');
+      else {
+        setMembers((profiles.data ?? []) as ConnectionProfile[]);
+        setConnections((links.data ?? []) as unknown as MemberConnection[]);
+        setGroupRooms((rooms.data ?? []) as GroupRoom[]);
+        setSelectedGroup((current) => current || rooms.data?.[0]?.id || '');
+      }
     }
     setLoading(false);
   }
@@ -188,6 +208,33 @@ function MemberHub({ mode }: { mode: HubMode }) {
     });
   }, [mode, selected]);
 
+  async function loadGroupMessages(roomId: string) {
+    const { data, error } = await supabase.from('connection_group_messages')
+      .select('id, room_id, sender_id, body, voice_path, voice_duration_seconds, created_at, sender:profiles!connection_group_messages_sender_id_fkey(full_name, avatar_url)')
+      .eq('room_id', roomId).is('deleted_at', null).order('created_at');
+    if (error) { setNotice('Group messages could not be loaded. Please try again.'); return; }
+    const signedMessages = await Promise.all(((data ?? []) as unknown as GroupMessage[]).map(async (message) => {
+      if (!message.voice_path) return message;
+      const signed = await supabase.storage.from('connection-voice-notes').createSignedUrl(message.voice_path, 900);
+      return { ...message, voice_url: signed.data?.signedUrl };
+    }));
+    setGroupMessages(signedMessages);
+  }
+
+  useEffect(() => {
+    if (mode !== 'connections' || !selectedGroup) { setGroupMessages([]); return; }
+    void loadGroupMessages(selectedGroup);
+    const channel = supabase.channel(`connection-group-${selectedGroup}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'connection_group_messages', filter: `room_id=eq.${selectedGroup}` }, () => { void loadGroupMessages(selectedGroup); })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [mode, selectedGroup]);
+
+  useEffect(() => () => {
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    recordingStreamRef.current?.getTracks().forEach((track) => track.stop());
+  }, []);
+
   const connectedIds = new Set(connections.filter((item) => item.status !== 'declined').flatMap((item) => [item.requester_id, item.recipient_id]));
   const discover = useMemo(() => members.filter((member) => !connectedIds.has(member.id) && member.full_name.toLowerCase().includes(search.toLowerCase())), [members, connections, search]);
   const accepted = connections.filter((item) => item.status === 'accepted');
@@ -206,6 +253,64 @@ function MemberHub({ mode }: { mode: HubMode }) {
     event.preventDefault(); if (!draft.trim() || !selected) return;
     const { error } = await supabase.from('connection_messages').insert({ connection_id: selected, sender_id: me, body: draft.trim() });
     if (error) setNotice(error.message); else { setDraft(''); const { data } = await supabase.from('connection_messages').select('*').eq('connection_id', selected).order('created_at'); setMessages((data ?? []) as ConnectionMessage[]); }
+  }
+
+  async function sendGroupMessage(event: FormEvent) {
+    event.preventDefault();
+    if (!groupDraft.trim() || !selectedGroup) return;
+    const { error } = await supabase.from('connection_group_messages').insert({ room_id: selectedGroup, sender_id: me, body: groupDraft.trim() });
+    if (error) setNotice(error.message);
+    else { setGroupDraft(''); await loadGroupMessages(selectedGroup); }
+  }
+
+  function stopRecording() {
+    if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+  }
+
+  async function startRecording() {
+    if (!selectedGroup || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setNotice('Voice recording is not supported by this browser.'); return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const preferredType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, preferredType ? { mimeType: preferredType } : undefined);
+      recorderRef.current = recorder;
+      recordingStreamRef.current = stream;
+      recordingChunksRef.current = [];
+      recordingSecondsRef.current = 0;
+      setRecordingSeconds(0);
+      recorder.ondataavailable = (event) => { if (event.data.size) recordingChunksRef.current.push(event.data); };
+      recorder.onstop = async () => {
+        if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false);
+        const duration = Math.max(1, recordingSecondsRef.current || 1);
+        const blob = new Blob(recordingChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        if (!blob.size || blob.size > 5 * 1024 * 1024) { setNotice('Voice notes must be under 5 MB.'); return; }
+        setUploadingVoice(true);
+        const extension = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
+        const path = `${selectedGroup}/${me}/${crypto.randomUUID()}.${extension}`;
+        const uploaded = await supabase.storage.from('connection-voice-notes').upload(path, blob, { contentType: blob.type, upsert: false });
+        if (uploaded.error) setNotice('The voice note could not be uploaded. Please try again.');
+        else {
+          const inserted = await supabase.from('connection_group_messages').insert({ room_id: selectedGroup, sender_id: me, voice_path: path, voice_duration_seconds: Math.min(duration, 120) });
+          if (inserted.error) { await supabase.storage.from('connection-voice-notes').remove([path]); setNotice(inserted.error.message); }
+          else await loadGroupMessages(selectedGroup);
+        }
+        setUploadingVoice(false);
+      };
+      recorder.start(1000);
+      setRecording(true);
+      recordingTimerRef.current = setInterval(() => setRecordingSeconds((seconds) => {
+        const next = Math.min(seconds + 1, 120);
+        recordingSecondsRef.current = next;
+        if (next >= 120) stopRecording();
+        return next;
+      }), 1000);
+    } catch {
+      setNotice('Microphone permission is required to record a voice note.');
+    }
   }
 
   async function volunteerToTeach(event: FormEvent<HTMLFormElement>) {
@@ -254,7 +359,19 @@ function MemberHub({ mode }: { mode: HubMode }) {
         </div><p className="approval-note">For learner safety and trust, the Association reviews every profile before it is listed.</p><button className="primary-button" disabled={submittingTeacher}>{submittingTeacher ? 'Submitting…' : 'Submit teacher profile'}</button></form>
       </section>
     </section>}
-    {mode === 'connections' && <>{requests.length > 0 && <section><h2><UserPlus size={21}/> Connection requests</h2><div className="connection-cards">{requests.map((item) => <article key={item.id}><Avatar profile={item.requester}/><div><strong>{item.requester.full_name}</strong><span>{item.requester.role.replaceAll('_', ' ')}</span></div><div className="connection-actions"><button onClick={() => respond(item.id, 'accepted')}>Accept</button><button onClick={() => respond(item.id, 'declined')}>Decline</button></div></article>)}</div></section>}
+    {mode === 'connections' && <>
+    <section className="group-chat" aria-labelledby="group-chat-title">
+      <div className="group-chat-heading"><div><p className="eyebrow">Member communication</p><h2 id="group-chat-title"><Users size={22}/> Group rooms</h2><p>Join respectful conversations with active Association members. Voice notes are limited to two minutes.</p></div></div>
+      {groupRooms.length ? <div className="group-chat-layout">
+        <nav className="group-room-list" aria-label="Group rooms">{groupRooms.map((room) => <button className={selectedGroup === room.id ? 'selected' : ''} type="button" key={room.id} onClick={() => setSelectedGroup(room.id)}><strong>{room.name}</strong><span>{room.description}</span></button>)}</nav>
+        <div className="group-conversation">
+          <h3>{groupRooms.find((room) => room.id === selectedGroup)?.name ?? 'Group conversation'}</h3>
+          <div className="group-message-list" aria-live="polite">{groupMessages.length ? groupMessages.map((message) => <article className={message.sender_id === me ? 'mine' : ''} key={message.id}><strong>{message.sender?.full_name ?? 'Association member'}</strong>{message.body && <p>{message.body}</p>}{message.voice_url && <audio controls preload="metadata" src={message.voice_url}>Your browser cannot play this voice note.</audio>}<time>{new Date(message.created_at).toLocaleString()}</time></article>) : <p className="connection-empty">No messages yet. Start the group conversation respectfully.</p>}</div>
+          <form className="group-message-form" onSubmit={sendGroupMessage}><label htmlFor="group-message">Message</label><textarea id="group-message" maxLength={2000} value={groupDraft} onChange={(event) => setGroupDraft(event.target.value)} placeholder="Write a message to the group"/><div><button className="primary-button" disabled={!groupDraft.trim()}>Send message</button>{recording ? <button className="voice-button recording" type="button" onClick={stopRecording}><Square size={17}/> Stop · {recordingSeconds}s</button> : <button className="voice-button" type="button" onClick={() => void startRecording()} disabled={uploadingVoice}><Mic size={18}/> {uploadingVoice ? 'Uploading…' : 'Record voice note'}</button>}</div></form>
+        </div>
+      </div> : <p className="connection-empty">No active group rooms are available yet.</p>}
+    </section>
+    {requests.length > 0 && <section><h2><UserPlus size={21}/> Connection requests</h2><div className="connection-cards">{requests.map((item) => <article key={item.id}><Avatar profile={item.requester}/><div><strong>{item.requester.full_name}</strong><span>{item.requester.role.replaceAll('_', ' ')}</span></div><div className="connection-actions"><button onClick={() => respond(item.id, 'accepted')}>Accept</button><button onClick={() => respond(item.id, 'declined')}>Decline</button></div></article>)}</div></section>}
     <div className="connection-layout"><section><h2><UserCheck size={21}/> My connections</h2>{accepted.length ? <div className="connection-cards">{accepted.map((item) => <article className={selected === item.id ? 'selected' : ''} key={item.id}><Avatar profile={other(item)}/><div><strong>{other(item).full_name}</strong><span>{other(item).role.replaceAll('_', ' ')}</span></div><button aria-label={`Message ${other(item).full_name}`} onClick={() => setSelected(item.id)}><MessageCircle size={19}/></button></article>)}</div> : <p className="connection-empty">Accepted connections will appear here.</p>}</section>
       <section className="conversation"><h2>Private conversation</h2>{selected ? <><div className="message-list" aria-live="polite">{messages.length ? messages.map((message) => <p className={message.sender_id === me ? 'mine' : ''} key={message.id}>{message.body}<time>{new Date(message.created_at).toLocaleString()}</time></p>) : <span>Start the conversation with a friendly hello.</span>}</div><form onSubmit={send}><label htmlFor="connection-message">Message</label><textarea id="connection-message" maxLength={2000} required value={draft} onChange={(event) => setDraft(event.target.value)}/><button className="primary-button">Send message</button></form></> : <p className="connection-empty">Choose a connection to view your conversation.</p>}</section></div>
     <section><h2><Search size={21}/> Discover members</h2><label className="member-search"><span>Search by name</span><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a classmate"/></label><div className="connection-cards discover">{discover.map((member) => <article key={member.id}><Avatar profile={member}/><div><strong>{member.full_name}</strong><span>{member.role.replaceAll('_', ' ')}</span></div><button onClick={() => connect(member.id)}>Connect</button></article>)}</div>{!discover.length && <p className="connection-empty">No new members match your search.</p>}</section></>}
