@@ -124,6 +124,13 @@ type TeacherListing = { id: string; subjects: string; learner_levels: string; la
 type GroupRoom = { id: string; name: string; description: string | null };
 type GroupMessage = { id: string; room_id: string; sender_id: string; body: string | null; voice_path: string | null; voice_duration_seconds: number | null; voice_url?: string; created_at: string; sender: { full_name: string; avatar_url: string | null } | null };
 
+function normalizeVoiceMimeType(mimeType: string) {
+  const baseType = mimeType.toLowerCase().split(';')[0].trim();
+  return ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav'].includes(baseType)
+    ? baseType
+    : 'audio/webm';
+}
+
 type HubMode = 'connections' | 'skills';
 
 export function ConnectionHub() {
@@ -286,12 +293,15 @@ function MemberHub({ mode }: { mode: HubMode }) {
         stream.getTracks().forEach((track) => track.stop());
         setRecording(false);
         const duration = Math.max(1, recordingSecondsRef.current || 1);
-        const blob = new Blob(recordingChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        // Browsers often report values such as audio/webm;codecs=opus. Supabase
+        // bucket MIME allow-lists require the normalized base media type.
+        const storageMimeType = normalizeVoiceMimeType(recorder.mimeType || 'audio/webm');
+        const blob = new Blob(recordingChunksRef.current, { type: storageMimeType });
         if (!blob.size || blob.size > 5 * 1024 * 1024) { setNotice('Voice notes must be under 5 MB.'); return; }
         setUploadingVoice(true);
         const extension = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm';
         const path = `${selectedGroup}/${me}/${crypto.randomUUID()}.${extension}`;
-        const uploaded = await supabase.storage.from('connection-voice-notes').upload(path, blob, { contentType: blob.type, upsert: false });
+        const uploaded = await supabase.storage.from('connection-voice-notes').upload(path, blob, { contentType: storageMimeType, upsert: false });
         if (uploaded.error) setNotice('The voice note could not be uploaded. Please try again.');
         else {
           const inserted = await supabase.from('connection_group_messages').insert({ room_id: selectedGroup, sender_id: me, voice_path: path, voice_duration_seconds: Math.min(duration, 120) });
