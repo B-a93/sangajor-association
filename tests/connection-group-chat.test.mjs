@@ -41,3 +41,12 @@ test('browser codec parameters are normalized for the Supabase MIME allow-list',
   assert.match(page, /contentType: storageMimeType/);
   assert.doesNotMatch(page, /contentType: blob\.type/);
 });
+
+test('voice Storage policies use a security-definer room-access check', async () => {
+  const repair = await read('supabase/migrations/202608150001_repair_connection_voice_storage_rls.sql');
+  assert.match(repair, /function public\.can_access_connection_group_room/);
+  assert.match(repair, /security definer/);
+  assert.match(repair, /public\.is_active_member\(user_id\)/);
+  assert.match(repair, /split_part\(name, '\/', 2\) = auth\.uid\(\)::text/);
+  assert.match(repair, /grant execute on function public\.can_access_connection_group_room\(text, uuid\) to authenticated/);
+});
