@@ -38,7 +38,7 @@ test('Connection Hub presents one skills exchange with learning and teaching pat
   assert.match(page, /category\.introduction/);
   assert.match(page, /category\.skills\.map/);
   assert.match(page, /skill\.description/);
-  for (const skill of ['Everyday Digital Literacy', 'Starting a Small Business', 'CV & Application Writing', 'Budgeting & Saving', 'Public Speaking', 'Food Safety & Hygiene', 'Sewing & Garment Repair', 'Crop Planning', 'Healthy Communication', 'Project Planning']) {
+  for (const skill of ['Everyday Digital & Technology Skills', 'Starting a Small Business', 'CV & Application Writing', 'Budgeting & Saving', 'Public Speaking', 'Food Safety & Hygiene', 'Sewing & Garment Repair', 'Crop Planning', 'Healthy Communication', 'Project Planning']) {
     assert.match(page, new RegExp(skill.replace('&', '\\&')));
   }
   assert.match(page, /Teach a Skill/);
