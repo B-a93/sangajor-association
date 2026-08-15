@@ -86,6 +86,18 @@ test('production repair grants authenticated access without exposing teacher pro
   assert.match(repair, /public\.is_executive\(auth\.uid\(\)\)/);
 });
 
+test('approved teachers load through an active-member RPC without relationship-name coupling', async () => {
+  const repair = await read('supabase/migrations/202608150004_repair_skills_exchange_listing_rpc.sql');
+  const page = await read('src/pages/ConnectionHub.tsx');
+  assert.match(repair, /function public\.list_approved_member_teachers\(\)/);
+  assert.match(repair, /security definer/);
+  assert.match(repair, /public\.is_active_member\(\)/);
+  assert.match(repair, /teacher\.status = 'approved'/);
+  assert.match(repair, /grant execute\s+on function public\.list_approved_member_teachers\(\)\s+to authenticated/);
+  assert.match(page, /rpc\('list_approved_member_teachers'\)/);
+  assert.doesNotMatch(page, /member_teacher_network_member_id_fkey/);
+});
+
 test('learning-system plan defines controlled, non-accredited certificates', async () => {
   const roadmap = await read('docs/ROADMAP.md');
   assert.match(roadmap, /Certificate of Completion/);
