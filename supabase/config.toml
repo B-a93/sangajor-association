@@ -10,6 +10,8 @@ verify_jwt = true
 # is validated against its SHA-256 digest inside the function.
 [functions.accept-invitation]
 verify_jwt = false
+[functions.member-login]
+verify_jwt = false
 [functions.member-assistant]
 # Authentication is performed inside the function with auth.getUser(). The
 # gateway's legacy JWT verifier cannot validate tokens issued by projects using

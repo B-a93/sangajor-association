@@ -50,12 +50,12 @@ export function MemberInvitations() {
     setForm(emptyForm); setShowForm(false); void load();
   }
 
-  async function action(actionName: 'cancel' | 'resend', id: string) {
+  async function action(actionName: 'cancel' | 'resend' | 'convert-membership-login', id: string) {
     setBusy(true); setMessage('');
     const { data, error } = await supabase.functions.invoke('manage-invitation', { body: { action: actionName, invitationId: id } });
     setBusy(false);
     if (!error && !data?.error && data?.invitation_url) setLinks((current) => ({ ...current, [id]: data.invitation_url }));
-    setMessage(data?.error ?? error?.message ?? (actionName === 'cancel' ? 'Invitation cancelled.' : data.email_sent ? 'Invitation email resent; a new secure link is available.' : 'A new secure link was created. Share it manually.'));
+    setMessage(data?.error ?? error?.message ?? (actionName === 'cancel' ? 'Invitation cancelled.' : actionName === 'convert-membership-login' ? `Membership login enabled: ${data.membership_number}.` : data.email_sent ? 'Invitation email resent; a new secure link is available.' : 'A new secure link was created. Share it manually.'));
     if (!error && !data?.error) void load();
   }
 
@@ -79,7 +79,7 @@ export function MemberInvitations() {
     </form>}
     {message && <p className="invitation-message" role="status">{message}</p>}
     {groups.map(({ status, title }) => { const items = invitations.filter((item) => item.status === status); return <section className="invitation-section" key={status}><h2>{title} <span>{items.length}</span></h2>
-      {items.length === 0 ? <p className="invitation-empty">No {status} invitations.</p> : <div className="invitation-list">{items.map((item) => <article key={item.id}><div><strong>{item.full_name}</strong>{item.email && <a href={`mailto:${item.email}`}>{item.email}</a>}{item.phone && <a href={`tel:${item.phone}`}>{item.phone}</a>}<small>{item.membership_number || 'No membership number'} · {item.executive_position ?? 'Member'}</small></div><div className="invitation-meta"><span className={`invitation-status ${item.status}`}>{item.status}</span><small>{status === 'accepted' ? `Accepted ${new Date(item.accepted_at!).toLocaleDateString()}` : `Expires ${new Date(item.expires_at).toLocaleDateString()}`}</small>{links[item.id] && <div className="share-actions"><button disabled={busy} onClick={() => void copyLink(links[item.id])}>Copy Invitation Link</button>{item.phone && <a target="_blank" rel="noreferrer" href={whatsappShareUrl(item.phone, item.full_name, links[item.id])}>Send via WhatsApp</a>}</div>}{status !== 'accepted' && <div><button disabled={busy} onClick={() => void action('resend', item.id)}>Create New Link</button>{status === 'pending' && <button disabled={busy} onClick={() => void action('cancel', item.id)}>Cancel</button>}</div>}</div></article>)}</div>}
+      {items.length === 0 ? <p className="invitation-empty">No {status} invitations.</p> : <div className="invitation-list">{items.map((item) => <article key={item.id}><div><strong>{item.full_name}</strong>{item.email && <a href={`mailto:${item.email}`}>{item.email}</a>}{item.phone && <a href={`tel:${item.phone}`}>{item.phone}</a>}<small>{item.membership_number || 'Membership number assigned on activation'} · {item.executive_position ?? 'Member'}</small></div><div className="invitation-meta"><span className={`invitation-status ${item.status}`}>{item.status}</span><small>{status === 'accepted' ? `Accepted ${new Date(item.accepted_at!).toLocaleDateString()}` : `Expires ${new Date(item.expires_at).toLocaleDateString()}`}</small>{links[item.id] && <div className="share-actions"><button disabled={busy} onClick={() => void copyLink(links[item.id])}>Copy Invitation Link</button>{item.phone && <a target="_blank" rel="noreferrer" href={whatsappShareUrl(item.phone, item.full_name, links[item.id])}>Send via WhatsApp</a>}</div>}{status === 'accepted' && !item.email && <button disabled={busy} onClick={() => void action('convert-membership-login', item.id)}>Enable Membership Login</button>}{status !== 'accepted' && <div><button disabled={busy} onClick={() => void action('resend', item.id)}>Create New Link</button>{status === 'pending' && <button disabled={busy} onClick={() => void action('cancel', item.id)}>Cancel</button>}</div>}</div></article>)}</div>}
     </section>; })}
   </section>;
 }

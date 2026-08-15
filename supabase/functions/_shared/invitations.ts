@@ -24,6 +24,14 @@ export function secureToken() {
   return btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
+export const membershipNumberPattern = /^SBC-\d{4}-\d{5}$/;
+
+export function membershipLoginEmail(membershipNumber: string) {
+  const normalized = membershipNumber.trim().toUpperCase();
+  if (!membershipNumberPattern.test(normalized)) throw new Error('A valid membership number is required.');
+  return `${normalized.toLowerCase()}@members.sangajorbcs8.invalid`;
+}
+
 /** Resolve the caller, then delegate authorization to the database's canonical RPC. */
 export async function invitationManagerFromRequest(request: Request) {
   const authorization = request.headers.get('Authorization');
