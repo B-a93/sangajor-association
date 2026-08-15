@@ -176,3 +176,13 @@ test('invitation token query parameters do not turn the acceptance route into th
   assert.match(router, /hashPath\.split\('\?'\)\[0\]/);
   assert.match(app, /'\/accept-invitation': <InvitationAcceptance \/>/);
 });
+
+test('successful activation does not become an Edge Function error when automatic login fails', async () => {
+  const acceptance = await read('supabase/functions/accept-invitation/index.ts');
+  const page = await read('src/pages/InvitationAcceptance.tsx');
+  assert.match(acceptance, /activated: true, requires_sign_in: true/);
+  assert.doesNotMatch(acceptance, /Account activated\. Please sign in\.' }, 500/);
+  assert.match(page, /data\?\.activated && data\?\.requires_sign_in/);
+  assert.match(page, /Sign in with the email address or phone number used for your invitation/);
+  assert.match(page, /href="#\/login"/);
+});

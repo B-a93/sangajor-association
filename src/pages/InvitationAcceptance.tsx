@@ -9,6 +9,7 @@ export function InvitationAcceptance() {
   const [message, setMessage] = useState(token ? '' : 'This invitation link is invalid.');
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const [requiresSignIn, setRequiresSignIn] = useState(false);
 
   async function accept(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -18,6 +19,11 @@ export function InvitationAcceptance() {
     setMessage('');
     const { data, error } = await supabase.functions.invoke('accept-invitation', { body: { token, password } });
     setLoading(false);
+    if (!error && data?.activated && data?.requires_sign_in) {
+      setRequiresSignIn(true);
+      setAccepted(true);
+      return;
+    }
     if (error || !data?.access_token) {
       setMessage(data?.error ?? error?.message ?? 'This invitation is invalid or has expired.');
       return;
@@ -33,7 +39,7 @@ export function InvitationAcceptance() {
   return <section className="auth-page"><div className="auth-card">
     <p className="eyebrow">Member invitation</p>
     <h1>{accepted ? 'Welcome to SANGAJOR' : 'Activate your account'}</h1>
-    {accepted ? <><p>Your account is active. Complete your member profile to get started.</p><a className="primary-button auth-submit" href="#/dashboard/profile">Complete profile</a></> : <form onSubmit={accept}>
+    {accepted ? requiresSignIn ? <><p>Your account is active. Sign in with the email address or phone number used for your invitation.</p><a className="primary-button auth-submit" href="#/login">Sign in</a></> : <><p>Your account is active. Complete your member profile to get started.</p><a className="primary-button auth-submit" href="#/dashboard/profile">Complete profile</a></> : <form onSubmit={accept}>
       <p className="auth-intro">Create a secure password to accept your invitation.</p>
       <label>Password<input type="password" minLength={8} required autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
       <label>Confirm password<input type="password" minLength={8} required autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label>

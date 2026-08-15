@@ -66,6 +66,6 @@ Deno.serve(async (request) => {
   }
   const loginIdentity = invitation.email ? { email: invitation.email } : { phone: invitation.phone };
   const { data: session, error: loginError } = await admin.auth.signInWithPassword({ ...loginIdentity, password });
-  if (loginError || !session.session) return json({ error: 'Account activated. Please sign in.' }, 500);
+  if (loginError || !session.session) return json({ activated: true, requires_sign_in: true });
   return json({ access_token: session.session.access_token, refresh_token: session.session.refresh_token });
 });
