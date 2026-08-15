@@ -120,7 +120,7 @@ const learningCategories = [
   },
 ] as const;
 
-type TeacherListing = { id: string; subjects: string; learner_levels: string; languages: string; availability: string; teaching_format: string; teacher: { full_name: string } | null };
+type TeacherListing = { id: string; subjects: string; learner_levels: string; languages: string; availability: string; teaching_format: string; teacher_name: string };
 type GroupRoom = { id: string; name: string; description: string | null };
 type GroupMessage = { id: string; room_id: string; sender_id: string; body: string | null; voice_path: string | null; voice_duration_seconds: number | null; voice_url?: string; created_at: string; sender: { full_name: string; avatar_url: string | null } | null };
 
@@ -175,9 +175,9 @@ function MemberHub({ mode }: { mode: HubMode }) {
     if (!userId) { window.location.hash = '/login'; return; }
     setMe(userId);
     if (mode === 'skills') {
-      const teacherListings = await supabase.from('member_teacher_network').select('id, subjects, learner_levels, languages, availability, teaching_format, teacher:profiles!member_teacher_network_member_id_fkey(full_name)').eq('status', 'approved').order('approved_at', { ascending: false });
+      const teacherListings = await supabase.rpc('list_approved_member_teachers');
       if (teacherListings.error) setNotice('The Skills Exchange Programme could not be loaded. Please try again.');
-      else setTeachers((teacherListings.data ?? []) as unknown as TeacherListing[]);
+      else setTeachers((teacherListings.data ?? []) as TeacherListing[]);
     } else {
       const [profiles, links, rooms] = await Promise.all([
         supabase.from('profiles').select('id, full_name, avatar_url, role').eq('is_active', true).neq('id', userId).order('full_name'),
@@ -375,7 +375,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
       </div>
       <section className="teacher-network" aria-labelledby="teacher-network-title">
         <div className="teacher-network-heading"><GraduationCap aria-hidden="true"/><div><p className="eyebrow">Approved member educators</p><h3 id="teacher-network-title">Member Teacher Network</h3><p>Members with teaching experience can offer respectful learning support. Profiles only appear here after Association approval.</p></div></div>
-        {teachers.length > 0 ? <div className="teacher-listings">{teachers.map((teacher) => <article key={teacher.id}><h4>{teacher.teacher?.full_name ?? 'Approved member teacher'}</h4><dl><div><dt>Subjects</dt><dd>{teacher.subjects}</dd></div><div><dt>Learner levels</dt><dd>{teacher.learner_levels}</dd></div><div><dt><Languages size={15}/> Languages</dt><dd>{teacher.languages}</dd></div><div><dt>Availability</dt><dd>{teacher.availability}</dd></div><div><dt>Teaching format</dt><dd>{teacher.teaching_format}</dd></div></dl></article>)}</div> : <p className="connection-empty">Approved teacher profiles will appear here as the network grows.</p>}
+        {teachers.length > 0 ? <div className="teacher-listings">{teachers.map((teacher) => <article key={teacher.id}><h4>{teacher.teacher_name || 'Approved member teacher'}</h4><dl><div><dt>Subjects</dt><dd>{teacher.subjects}</dd></div><div><dt>Learner levels</dt><dd>{teacher.learner_levels}</dd></div><div><dt><Languages size={15}/> Languages</dt><dd>{teacher.languages}</dd></div><div><dt>Availability</dt><dd>{teacher.availability}</dd></div><div><dt>Teaching format</dt><dd>{teacher.teaching_format}</dd></div></dl></article>)}</div> : <p className="connection-empty">Approved teacher profiles will appear here as the network grows.</p>}
         <form className="teacher-network-form" onSubmit={joinTeacherNetwork}><h4>Apply to join the network</h4><p>Share your teaching profile for review. Please describe the learners you support by level or learning goal—never by a negative label.</p><div>
           <label>Subjects<input required maxLength={300} value={teacherProfile.subjects} onChange={(event) => setTeacherProfile({ ...teacherProfile, subjects: event.target.value })}/></label><label>Learner levels<input required maxLength={300} placeholder="For example: foundational, primary, secondary or adult learning" value={teacherProfile.learner_levels} onChange={(event) => setTeacherProfile({ ...teacherProfile, learner_levels: event.target.value })}/></label><label>Languages<input required maxLength={300} value={teacherProfile.languages} onChange={(event) => setTeacherProfile({ ...teacherProfile, languages: event.target.value })}/></label><label>Availability<input required maxLength={300} value={teacherProfile.availability} onChange={(event) => setTeacherProfile({ ...teacherProfile, availability: event.target.value })}/></label><label>Teaching format<input required maxLength={120} placeholder="Online, in person or blended" value={teacherProfile.teaching_format} onChange={(event) => setTeacherProfile({ ...teacherProfile, teaching_format: event.target.value })}/></label>
         </div><p className="approval-note">For learner safety and trust, the Association reviews every profile before it is listed.</p><button className="primary-button" disabled={submittingTeacher}>{submittingTeacher ? 'Submitting…' : 'Submit teacher profile'}</button></form>
