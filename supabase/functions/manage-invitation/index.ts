@@ -1,6 +1,6 @@
 const executivePositions: Record<string, string> = { chairman: 'Chairman', vice_chairlady: 'Vice Chairlady', secretary_general: 'Secretary General', assistant_secretary_general: 'Assistant Secretary General', treasurer: 'Treasurer', assistant_treasurer: 'Assistant Treasurer', auditor_general: 'Auditor General', assistant_auditor_general: 'Assistant Auditor General', assistant_auditor: 'Assistant Auditor', ipro: 'IPRO', assistant_ipro: 'Assistant IPRO', programme_officer: 'Programme Officer', assistant_programme_officer: 'Assistant Programme Officer', adviser_1: 'Adviser 1', adviser_2: 'Adviser 2', adviser_3: 'Adviser 3', adviser_4: 'Adviser 4' };
 
-import { adminClient, corsHeaders, deliverInvitation, invitationManagerFromRequest, json, secureToken, sha256 } from '../_shared/invitations.ts';
+import { adminClient, corsHeaders, deliverInvitation, invitationManagerFromRequest, json, membershipLoginEmail, secureToken, sha256 } from '../_shared/invitations.ts';
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -14,6 +14,25 @@ Deno.serve(async (request) => {
   if (body.action === 'cancel') {
     const { error } = await admin.from('invitations').update({ status: 'cancelled' }).eq('id', body.invitationId).eq('status', 'pending');
     return error ? json({ error: error.message }, 400) : json({ success: true });
+  }
+
+  if (body.action === 'convert-membership-login') {
+    const { data: invitation, error: invitationError } = await admin.from('invitations')
+      .select('id, email, phone, status, accepted_user_id')
+      .eq('id', body.invitationId).eq('status', 'accepted').maybeSingle();
+    if (invitationError || !invitation?.accepted_user_id || invitation.email || !invitation.phone) {
+      return json({ error: 'This is not an accepted phone-only invitation.' }, 400);
+    }
+    const { data: member, error: memberError } = await admin.from('Members')
+      .select('membership_number, status').eq('auth_user_id', invitation.accepted_user_id).maybeSingle();
+    if (memberError || !member?.membership_number || String(member.status).toLowerCase() !== 'active') {
+      return json({ error: 'The active member or membership number could not be found.' }, 409);
+    }
+    const { error } = await admin.auth.admin.updateUserById(invitation.accepted_user_id, {
+      email: membershipLoginEmail(member.membership_number),
+      email_confirm: true,
+    });
+    return error ? json({ error: 'The existing account could not be converted.' }, 409) : json({ success: true, membership_number: member.membership_number });
   }
 
   const token = secureToken();

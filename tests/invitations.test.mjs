@@ -6,9 +6,10 @@ import { validateAcceptance } from '../supabase/functions/_shared/invitation-pol
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
 test('public registration is disabled without removing login or reset', async () => {
-  const [authPage, config] = await Promise.all([read('src/pages/Auth.tsx'), read('supabase/config.toml')]);
+  const [authPage, loginFunction, config] = await Promise.all([read('src/pages/Auth.tsx'), read('supabase/functions/member-login/index.ts'), read('supabase/config.toml')]);
   assert.doesNotMatch(authPage, /auth\.signUp/);
-  assert.match(authPage, /signInWithPassword/);
+  assert.match(authPage, /functions\.invoke\('member-login'/);
+  assert.match(loginFunction, /signInWithPassword/);
   assert.match(authPage, /resetPasswordForEmail/);
   assert.match(config, /enable_signup = false/);
 });
@@ -117,11 +118,12 @@ test('manager resolves authoritative member and returns a shareable URL without 
   assert.match(migration, /array|can_manage_invitations/);
 });
 
-test('phone-only acceptance uses supported phone Auth identity and never invents email', async () => {
+test('phone-only acceptance creates membership login without requiring SMS', async () => {
   const acceptance = await read('supabase/functions/accept-invitation/index.ts');
-  assert.match(acceptance, /phone: invitation\.phone, phone_confirm: true/);
-  assert.match(acceptance, /signInWithPassword\(\{ \.\.\.loginIdentity, password \}\)/);
-  assert.doesNotMatch(acceptance, /@.*phone|placeholder.*email|invent/i);
+  assert.match(acceptance, /temporaryMembershipEmail/);
+  assert.match(acceptance, /membershipLoginEmail\(member\.membership_number/);
+  assert.match(acceptance, /email_confirm: true/);
+  assert.doesNotMatch(acceptance, /phone_confirm: true/);
 });
 
 test('WhatsApp sharing launches wa.me with name and secure invitation URL', async () => {
@@ -183,6 +185,6 @@ test('successful activation does not become an Edge Function error when automati
   assert.match(acceptance, /activated: true, requires_sign_in: true/);
   assert.doesNotMatch(acceptance, /Account activated\. Please sign in\.' }, 500/);
   assert.match(page, /data\?\.activated && data\?\.requires_sign_in/);
-  assert.match(page, /Sign in with the email address or phone number used for your invitation/);
+  assert.match(page, /Sign in with your email address or membership number/);
   assert.match(page, /href="#\/login"/);
 });

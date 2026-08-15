@@ -10,6 +10,7 @@ export function InvitationAcceptance() {
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [requiresSignIn, setRequiresSignIn] = useState(false);
+  const [membershipNumber, setMembershipNumber] = useState<string | null>(null);
 
   async function accept(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,6 +21,7 @@ export function InvitationAcceptance() {
     const { data, error } = await supabase.functions.invoke('accept-invitation', { body: { token, password } });
     setLoading(false);
     if (!error && data?.activated && data?.requires_sign_in) {
+      setMembershipNumber(data.membership_number ?? null);
       setRequiresSignIn(true);
       setAccepted(true);
       return;
@@ -33,13 +35,14 @@ export function InvitationAcceptance() {
       refresh_token: data.refresh_token,
     });
     if (sessionError) return setMessage(sessionError.message);
+    setMembershipNumber(data.membership_number ?? null);
     setAccepted(true);
   }
 
   return <section className="auth-page"><div className="auth-card">
     <p className="eyebrow">Member invitation</p>
     <h1>{accepted ? 'Welcome to SANGAJOR' : 'Activate your account'}</h1>
-    {accepted ? requiresSignIn ? <><p>Your account is active. Sign in with the email address or phone number used for your invitation.</p><a className="primary-button auth-submit" href="#/login">Sign in</a></> : <><p>Your account is active. Complete your member profile to get started.</p><a className="primary-button auth-submit" href="#/dashboard/profile">Complete profile</a></> : <form onSubmit={accept}>
+    {accepted ? requiresSignIn ? <><p>Your account is active.</p>{membershipNumber && <p><strong>Your membership number: {membershipNumber}</strong><br />Save this number. You will use it with your password to sign in.</p>}<p>Sign in with your email address or membership number.</p><a className="primary-button auth-submit" href="#/login">Sign in</a></> : <><p>Your account is active. {membershipNumber && <>Your membership number is <strong>{membershipNumber}</strong>. Save it for future sign-in. </>}Complete your member profile to get started.</p><a className="primary-button auth-submit" href="#/dashboard/profile">Complete profile</a></> : <form onSubmit={accept}>
       <p className="auth-intro">Create a secure password to accept your invitation.</p>
       <label>Password<input type="password" minLength={8} required autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
       <label>Confirm password<input type="password" minLength={8} required autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label>

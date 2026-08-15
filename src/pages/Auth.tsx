@@ -5,19 +5,6 @@ import './Auth.css';
 
 type Mode = 'login' | 'reset';
 
-function loginIdentity(identifier: string) {
-  const value = identifier.trim();
-
-  if (value.includes('@')) return { email: value.toLowerCase() };
-
-  const phone = value.replace(/[\s().-]/g, '');
-  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
-    throw new Error('Enter an email address or a phone number in international format, for example +2203145237.');
-  }
-
-  return { phone };
-}
-
 export function Auth() {
   const [mode, setMode] = useState<Mode>('login');
   const [identifier, setIdentifier] = useState('');
@@ -32,9 +19,15 @@ export function Auth() {
 
     try {
       if (mode === 'login') {
-        const identity = loginIdentity(identifier);
-        const { error } = await supabase.auth.signInWithPassword({ ...identity, password });
-        if (error) throw error;
+        const { data, error } = await supabase.functions.invoke('member-login', {
+          body: { identifier: identifier.trim(), password },
+        });
+        if (error || data?.error || !data?.access_token) throw new Error(data?.error ?? 'The login details are incorrect.');
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+        if (sessionError) throw sessionError;
         window.location.hash = '/dashboard';
       }
 
@@ -65,17 +58,17 @@ export function Auth() {
 
         <form onSubmit={handleSubmit}>
           <label>
-            {mode === 'login' ? 'Email address or phone number' : 'Email address'}
+            {mode === 'login' ? 'Email address or membership number' : 'Email address'}
             <input
               type={mode === 'login' ? 'text' : 'email'}
               inputMode={mode === 'login' ? 'email' : undefined}
               value={identifier}
               onChange={(event) => setIdentifier(event.target.value)}
-              placeholder={mode === 'login' ? 'Email or +2203145237' : 'Your email address'}
+              placeholder={mode === 'login' ? 'Email or SBC-2026-00010' : 'Your email address'}
               required
               autoComplete="username"
             />
-            {mode === 'login' && <small>Use the email or international-format phone number attached to your invitation.</small>}
+            {mode === 'login' && <small>Members without email should use the membership number issued during activation.</small>}
           </label>
 
           {mode !== 'reset' && (
