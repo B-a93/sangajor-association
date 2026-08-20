@@ -136,7 +136,7 @@ export function About() {
         </div>
         <aside className="legacy-card">
           <span>Our 2031 Commitment</span>
-          <strong>Leave a stronger institution than the one we inherited.</strong>
+          <strong>Build a strong institution from the ground up for future generations.</strong>
           <p>Every programme, partnership and digital tool should contribute to a more organised, inclusive and sustainable Association.</p>
         </aside>
       </section>

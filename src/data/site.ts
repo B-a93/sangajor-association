@@ -10,7 +10,7 @@ export const impactAreas = [
 ];
 
 export const reasonsToJoin = [
-  { icon: Network, title: 'Reconnect With Classmates', text: 'Renew friendships and strengthen the personal and professional relationships formed during our school years.' },
+  { icon: Network, title: 'Reconnect With Classmates', text: 'Renew friendships and strengthen the personal and professional connections formed during our school years.' },
   { icon: HeartHandshake, title: 'Member Welfare Support', text: 'Belong to a caring network that can respond during illness, bereavement, emergencies and other difficult moments.' },
   { icon: BriefcaseBusiness, title: 'Professional & Business Network', text: 'Discover the experience, skills and businesses of fellow members through secure members-only services.' },
   { icon: GraduationCap, title: 'Learning & Mentorship', text: 'Share knowledge, receive career guidance and support younger generations through education and mentorship.' },
