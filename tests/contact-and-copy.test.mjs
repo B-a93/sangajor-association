@@ -38,3 +38,23 @@ test('public Association copy matches the logo and founding story', async () => 
   assert.match(membership, /access to friendships, opportunities/);
   assert.match(site, /personal and professional connections/);
 });
+
+test('contact enquiries are limited to IPRO and Secretariat offices', async () => {
+  const [migration, inbox, app, dashboard] = await Promise.all([
+    read('supabase/migrations/202608200002_contact_enquiry_office_inbox.sql'),
+    read('src/pages/ContactEnquiries.tsx'),
+    read('src/App.tsx'),
+    read('src/pages/MemberDashboard.tsx'),
+  ]);
+
+  assert.match(migration, /'ipro'[\s\S]*'assistant_ipro'[\s\S]*'secretary_general'[\s\S]*'assistant_secretary_general'/);
+  assert.match(migration, /public\.can_manage_contact_enquiries\(auth\.uid\(\)\)/);
+  assert.match(migration, /for select\s+to authenticated/);
+  assert.match(migration, /for update\s+to authenticated/);
+  assert.match(migration, /unread_contact_enquiry_count/);
+  assert.match(inbox, /\.from\('contact_messages'\)/);
+  assert.match(inbox, /status === 'new' \? null : new Date\(\)\.toISOString\(\)/);
+  assert.match(app, /'\/dashboard\/contact-enquiries': <ContactEnquiries \/>/);
+  assert.match(dashboard, /can_manage_contact_enquiries/);
+  assert.match(dashboard, /Open contact inbox/);
+});
