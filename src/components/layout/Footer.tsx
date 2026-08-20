@@ -24,7 +24,7 @@ export function Footer() {
               <span>Class of 2008 Association</span>
             </div>
           </div>
-          <p>Together since childhood. United for life.</p>
+          <p>Together for a Better Future.</p>
         </div>
 
         <nav aria-label="Footer — Explore">
