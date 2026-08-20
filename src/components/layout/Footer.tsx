@@ -1,4 +1,5 @@
 import './Footer.css';
+import { EmailActions } from '../ui/EmailActions';
 import { associationEmail } from '../../config/site';
 
 const officialLogo = '/sangajorr-association-logo.png.jpeg';
@@ -45,7 +46,13 @@ export function Footer() {
 
         <div className="footer-contact">
           <h3>Connect</h3>
-          <a href={`mailto:${associationEmail}`}>{associationEmail}</a>
+          <span className="footer-email-address">{associationEmail}</span>
+          <EmailActions
+            email={associationEmail}
+            subject="Enquiry for SANGAJOR B.C.S. Class of 2008 Association"
+            compact
+            inverse
+          />
           <span>The Gambia and beyond</span>
           <a href="#/contact">Contact the Association</a>
         </div>
