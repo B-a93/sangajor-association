@@ -18,12 +18,14 @@ export function MemberDashboard() {
   const [canManageFinances, setCanManageFinances] = useState(false);
   const [canManageEvents, setCanManageEvents] = useState(false);
   const [canManageCommunications, setCanManageCommunications] = useState(false);
+  const [canManageContactEnquiries, setCanManageContactEnquiries] = useState(false);
   const [canManageDocuments, setCanManageDocuments] = useState(false);
   const [canManageVolunteers, setCanManageVolunteers] = useState(false);
   const [canViewAnalytics, setCanViewAnalytics] = useState(false);
   const [canModerateVillage, setCanModerateVillage] = useState(false);
   const [canApproveCertificates, setCanApproveCertificates] = useState(false);
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
+  const [unreadContactEnquiries, setUnreadContactEnquiries] = useState(0);
   const [pendingTeachingRequests, setPendingTeachingRequests] = useState(0);
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export function MemberDashboard() {
         const permissionChecks = [
           ['invitations', 'can_manage_invitations', setCanInvite], ['members', 'can_manage_members', setCanManage], ['finances', 'can_manage_finances', setCanManageFinances],
           ['events', 'can_manage_events', setCanManageEvents], ['announcements', 'can_manage_announcements', setCanManageCommunications],
+          ['contact enquiries', 'can_manage_contact_enquiries', setCanManageContactEnquiries],
           ['documents', 'can_manage_documents', setCanManageDocuments], ['volunteers', 'can_manage_volunteers', setCanManageVolunteers],
           ['analytics', 'can_view_executive_analytics', setCanViewAnalytics], ['village moderation', 'can_moderate_village', setCanModerateVillage],
         ] as const;
@@ -70,6 +73,8 @@ export function MemberDashboard() {
           return check.error ? label : null;
         }));
         const unreadResult = await supabase.rpc('unread_announcement_count');
+        const contactEnquiryCount = await supabase.rpc('unread_contact_enquiry_count');
+        if (!contactEnquiryCount.error) setUnreadContactEnquiries(Number(contactEnquiryCount.data ?? 0));
         const certificateAccess = await supabase.rpc('is_active_chairman');
         if (!certificateAccess.error) setCanApproveCertificates(Boolean(certificateAccess.data));
         if (!certificateAccess.error && certificateAccess.data) {
@@ -79,7 +84,7 @@ export function MemberDashboard() {
         }
         if (!unreadResult.error) setUnreadAnnouncements(Number(unreadResult.data ?? 0));
         const failedChecks = checkResults.filter((label): label is Exclude<typeof label, null> => label !== null);
-        setAuthorizationWarnings((current) => [...current, ...failedChecks, ...(unreadResult.error ? ['announcement badge'] : [])]);
+        setAuthorizationWarnings((current) => [...current, ...failedChecks, ...(unreadResult.error ? ['announcement badge'] : []), ...(contactEnquiryCount.error ? ['contact enquiry badge'] : [])]);
       }
       setLoading(false);
       if (!data.session) window.location.hash = '/login';
@@ -101,6 +106,7 @@ export function MemberDashboard() {
     { allowed: canManageFinances, label: 'Finance', description: 'Manage dues periods, receipts and reporting', href: '#/dashboard/finance', link: 'Financial management' },
     { allowed: canManageEvents, label: 'Programme', description: 'Publish events and manage attendance', href: '#/dashboard/events/manage', link: 'Event management' },
     { allowed: canManageCommunications, label: 'Communications', description: 'Publish notices and monitor readership', href: '#/dashboard/communications/manage', link: 'Manage communications' },
+    { allowed: canManageContactEnquiries, label: 'Contact enquiries', description: unreadContactEnquiries > 0 ? `${unreadContactEnquiries} new public ${unreadContactEnquiries === 1 ? 'enquiry' : 'enquiries'} awaiting review` : 'Review and manage public website enquiries', href: '#/dashboard/contact-enquiries', link: 'Open contact inbox' },
     { allowed: canManageDocuments, label: 'Documents', description: 'Upload, version and publish Association files', href: '#/dashboard/documents/manage', link: 'Manage documents' },
     { allowed: canManageVolunteers, label: 'Volunteers', description: 'Manage committees, applications and service hours', href: '#/dashboard/volunteering/manage', link: 'Manage volunteers' },
     { allowed: canViewAnalytics, label: 'Intelligence', description: 'Monitor membership, finance and engagement trends', href: '#/dashboard/analytics', link: 'Executive analytics' },
