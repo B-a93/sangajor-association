@@ -16,7 +16,7 @@ export function Membership() {
         <div className="section-heading">
           <span className="eyebrow">Membership Benefits</span>
           <h2>More than belonging — a community that supports you</h2>
-          <p>Members gain access to relationships, opportunities and secure services designed to help classmates connect, contribute and support one another.</p>
+          <p>Members gain access to friendships, opportunities and secure services designed to help classmates connect, contribute and support one another.</p>
         </div>
 
         <div className="card-grid membership-benefits-grid">
