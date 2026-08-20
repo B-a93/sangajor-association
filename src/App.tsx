@@ -16,6 +16,7 @@ const InvitationAcceptance = lazy(() => import('./pages/InvitationAcceptance').t
 const MemberInvitations = lazy(() => import('./pages/MemberInvitations').then((module) => ({ default: module.MemberInvitations })));
 const MemberAdministration = lazy(() => import('./pages/MemberAdministration').then((module) => ({ default: module.MemberAdministration })));
 const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })));
+const ContactEnquiries = lazy(() => import('./pages/ContactEnquiries').then((module) => ({ default: module.ContactEnquiries })));
 const CommunicationAdministration = lazy(() => import('./pages/CommunicationAdministration').then((module) => ({ default: module.CommunicationAdministration })));
 const CommunicationCenter = lazy(() => import('./pages/CommunicationCenter').then((module) => ({ default: module.CommunicationCenter })));
 const CommitteesVolunteering = lazy(() => import('./pages/CommitteesVolunteering').then((module) => ({ default: module.CommitteesVolunteering })));
@@ -162,6 +163,7 @@ const pages: Record<string, ReactElement> = {
   '/updates': <Updates />,
   '/journey': <Journey />,
   '/contact': <Contact />,
+  '/dashboard/contact-enquiries': <ContactEnquiries />,
   '/login': <Auth />,
   '/accept-invitation': <InvitationAcceptance />,
   '/dashboard': <MemberDashboard />,
