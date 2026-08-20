@@ -4,16 +4,24 @@ import test from 'node:test';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('public contact page provides a persistent enquiry form and email fallback', async () => {
-  const [contact, styles, migration] = await Promise.all([
+test('public contact page provides a persistent enquiry form and reliable email options', async () => {
+  const [contact, styles, migration, emailActions, footer, inbox] = await Promise.all([
     read('src/pages/Contact.tsx'),
     read('src/pages/Contact.css'),
     read('supabase/migrations/202608200001_public_contact_enquiries.sql'),
+    read('src/components/ui/EmailActions.tsx'),
+    read('src/components/layout/Footer.tsx'),
+    read('src/pages/ContactEnquiries.tsx'),
   ]);
 
   assert.match(contact, /supabase\.from\('contact_messages'\)\.insert/);
-  assert.match(contact, /href=\{\`mailto:\$\{associationEmail\}\`\}/);
-  assert.match(contact, /navigator\.clipboard\.writeText\(associationEmail\)/);
+  assert.match(contact, /<EmailActions[\s\S]*email=\{associationEmail\}/);
+  assert.match(emailActions, /https:\/\/mail\.google\.com\/mail\/\?view=cm&fs=1/);
+  assert.match(emailActions, /https:\/\/outlook\.office\.com\/mail\/deeplink\/compose/);
+  assert.match(emailActions, /navigator\.clipboard\.writeText\(email\)/);
+  assert.match(emailActions, /href=\{\`mailto:\$\{email\}/);
+  assert.match(footer, /<EmailActions[\s\S]*email=\{associationEmail\}/);
+  assert.match(inbox, /<EmailActions[\s\S]*email=\{enquiry\.email\}/);
   assert.match(contact, /Please provide either an email address or phone number/);
   assert.match(styles, /\.contact-form-layout/);
   assert.match(styles, /@media \(max-width: 700px\)/);
