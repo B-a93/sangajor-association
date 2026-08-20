@@ -121,6 +121,7 @@ const learningCategories = [
 ] as const;
 
 type TeacherListing = { id: string; subjects: string; learner_levels: string; languages: string; availability: string; teaching_format: string; teacher_name: string };
+type MyTeachingRequest = { id: string; skill: string; status: 'pending'|'approved'|'declined'; created_at: string; reviewed_at: string|null; decline_reason: string|null };
 type GroupRoom = { id: string; name: string; description: string | null };
 type GroupMessage = { id: string; room_id: string; sender_id: string; body: string | null; voice_path: string | null; voice_duration_seconds: number | null; voice_url?: string; created_at: string; sender: { full_name: string; avatar_url: string | null } | null };
 
@@ -153,6 +154,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
   const [loading, setLoading] = useState(true);
   const [teaching, setTeaching] = useState({ skill: '', experience: '', format: '', availability: '', resources: '' });
   const [submittingSkill, setSubmittingSkill] = useState(false);
+  const [myTeachingRequests, setMyTeachingRequests] = useState<MyTeachingRequest[]>([]);
   const [teachers, setTeachers] = useState<TeacherListing[]>([]);
   const [teacherProfile, setTeacherProfile] = useState({ subjects: '', learner_levels: '', languages: '', availability: '', teaching_format: '' });
   const [submittingTeacher, setSubmittingTeacher] = useState(false);
@@ -175,9 +177,12 @@ function MemberHub({ mode }: { mode: HubMode }) {
     if (!userId) { window.location.hash = '/login'; return; }
     setMe(userId);
     if (mode === 'skills') {
-      const teacherListings = await supabase.rpc('list_approved_member_teachers');
-      if (teacherListings.error) setNotice('The Skills Exchange Programme could not be loaded. Please try again.');
-      else setTeachers((teacherListings.data ?? []) as TeacherListing[]);
+      const [teacherListings, ownRequests] = await Promise.all([
+        supabase.rpc('list_approved_member_teachers'),
+        supabase.from('skill_teaching_submissions').select('id, skill, status, created_at, reviewed_at, decline_reason').eq('member_id', userId).order('created_at', { ascending: false }),
+      ]);
+      if (teacherListings.error || ownRequests.error) setNotice('The Skills Exchange Programme could not be loaded. Please try again.');
+      else { setTeachers((teacherListings.data ?? []) as TeacherListing[]); setMyTeachingRequests((ownRequests.data ?? []) as MyTeachingRequest[]); }
     } else {
       const [profiles, links, rooms] = await Promise.all([
         supabase.from('profiles').select('id, full_name, avatar_url, role').eq('is_active', true).neq('id', userId).order('full_name'),
@@ -338,12 +343,13 @@ function MemberHub({ mode }: { mode: HubMode }) {
   async function volunteerToTeach(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmittingSkill(true);
-    const { error } = await supabase.from('skill_teaching_submissions').insert({ member_id: me, ...teaching });
+    const { data, error } = await supabase.from('skill_teaching_submissions').insert({ member_id: me, ...teaching }).select('id, skill, status, created_at, reviewed_at, decline_reason').single();
     setSubmittingSkill(false);
     if (error) setNotice(error.message);
     else {
       setTeaching({ skill: '', experience: '', format: '', availability: '', resources: '' });
-      setNotice('Thank you for volunteering. Your submission is awaiting approval before publication.');
+      setMyTeachingRequests((current) => [data as MyTeachingRequest, ...current]);
+      setNotice(`Teaching request submitted on ${new Date(data.created_at).toLocaleString()}. Status: Pending Chairman review.`);
     }
   }
 
@@ -357,7 +363,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
         <article className="skill-pathway learn-pathway"><BookOpen aria-hidden="true"/><h3>Learn a Skill</h3><p>Explore learning areas supported by community knowledge, trusted resources and approved volunteer teachers.</p><div className="learning-formats" aria-label="Certificate availability by learning format"><div><strong>Structured courses</strong><span className="certificate-badge"><Award size={15} aria-hidden="true"/> Certificate of Completion Available</span></div><div><strong>Workshops</strong><span className="certificate-badge participation"><Award size={15} aria-hidden="true"/> Certificate of Participation Available</span></div></div>
           <div className="learning-categories">{learningCategories.map((category) => <section className={'pathways' in category ? 'education-category' : ''} key={category.title}><h4>{category.title}</h4><p className="category-introduction">{category.introduction}</p>{'pathways' in category ? <div className="education-pathways">{category.pathways.map((pathway) => <div key={pathway.title}><h5>{pathway.title}</h5><ul>{pathway.skills.map((skill) => <CourseCard key={skill.name} skill={skill}/>)}</ul></div>)}</div> : <ul>{category.skills.map((skill) => <CourseCard key={skill.name} skill={skill}/>)}</ul>}</section>)}</div>
         </article>
-        <article className="skill-pathway teach-pathway"><GraduationCap aria-hidden="true"/><h3>Teach a Skill</h3><p>Volunteer to share practical knowledge with fellow SANGAJOR members. Tell us how you can help.</p>
+        <article className="skill-pathway teach-pathway"><GraduationCap aria-hidden="true"/><h3>Volunteer to Teach</h3><p><strong>Teach a Skill:</strong> propose a specific skill or workshop for Chairman review. This form does not create a public teacher profile.</p>
           <form onSubmit={volunteerToTeach}>
             <label>Skill you can teach<input required maxLength={120} value={teaching.skill} onChange={(event) => setTeaching({ ...teaching, skill: event.target.value })}/></label>
             <label>Your experience<textarea required maxLength={1000} value={teaching.experience} onChange={(event) => setTeaching({ ...teaching, experience: event.target.value })}/></label>
@@ -367,6 +373,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
             <p className="approval-note">All submissions require approval before publication.</p>
             <button className="primary-button" disabled={submittingSkill}>{submittingSkill ? 'Submitting…' : 'Volunteer to teach'}</button>
           </form>
+          <section className="my-teaching-requests" aria-labelledby="my-teaching-requests-title"><h4 id="my-teaching-requests-title">My teaching requests</h4>{myTeachingRequests.length?myTeachingRequests.map(request=><article key={request.id}><div><strong>{request.skill}</strong><span className={`teaching-status ${request.status}`}>{request.status}</span></div><small>Submitted {new Date(request.created_at).toLocaleString()}</small>{request.decline_reason&&<p><strong>Decline reason:</strong> {request.decline_reason}</p>}</article>):<p>You have not submitted a teaching request yet.</p>}</section>
         </article>
       </div>
       <div className="certificate-information">
@@ -376,7 +383,7 @@ function MemberHub({ mode }: { mode: HubMode }) {
       <section className="teacher-network" aria-labelledby="teacher-network-title">
         <div className="teacher-network-heading"><GraduationCap aria-hidden="true"/><div><p className="eyebrow">Approved member educators</p><h3 id="teacher-network-title">Member Teacher Network</h3><p>Members with teaching experience can offer respectful learning support. Profiles only appear here after Association approval.</p></div></div>
         {teachers.length > 0 ? <div className="teacher-listings">{teachers.map((teacher) => <article key={teacher.id}><h4>{teacher.teacher_name || 'Approved member teacher'}</h4><dl><div><dt>Subjects</dt><dd>{teacher.subjects}</dd></div><div><dt>Learner levels</dt><dd>{teacher.learner_levels}</dd></div><div><dt><Languages size={15}/> Languages</dt><dd>{teacher.languages}</dd></div><div><dt>Availability</dt><dd>{teacher.availability}</dd></div><div><dt>Teaching format</dt><dd>{teacher.teaching_format}</dd></div></dl></article>)}</div> : <p className="connection-empty">Approved teacher profiles will appear here as the network grows.</p>}
-        <form className="teacher-network-form" onSubmit={joinTeacherNetwork}><h4>Apply to join the network</h4><p>Share your teaching profile for review. Please describe the learners you support by level or learning goal—never by a negative label.</p><div>
+        <form className="teacher-network-form" onSubmit={joinTeacherNetwork}><h4>Apply to Join the Teacher Network</h4><p>Create a teacher profile for the approved educator directory. This is separate from proposing a specific skill or workshop through Volunteer to Teach. Please describe the learners you support by level or learning goal—never by a negative label.</p><div>
           <label>Subjects<input required maxLength={300} value={teacherProfile.subjects} onChange={(event) => setTeacherProfile({ ...teacherProfile, subjects: event.target.value })}/></label><label>Learner levels<input required maxLength={300} placeholder="For example: foundational, primary, secondary or adult learning" value={teacherProfile.learner_levels} onChange={(event) => setTeacherProfile({ ...teacherProfile, learner_levels: event.target.value })}/></label><label>Languages<input required maxLength={300} value={teacherProfile.languages} onChange={(event) => setTeacherProfile({ ...teacherProfile, languages: event.target.value })}/></label><label>Availability<input required maxLength={300} value={teacherProfile.availability} onChange={(event) => setTeacherProfile({ ...teacherProfile, availability: event.target.value })}/></label><label>Teaching format<input required maxLength={120} placeholder="Online, in person or blended" value={teacherProfile.teaching_format} onChange={(event) => setTeacherProfile({ ...teacherProfile, teaching_format: event.target.value })}/></label>
         </div><p className="approval-note">For learner safety and trust, the Association reviews every profile before it is listed.</p><button className="primary-button" disabled={submittingTeacher}>{submittingTeacher ? 'Submitting…' : 'Submit teacher profile'}</button></form>
       </section>

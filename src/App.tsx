@@ -29,6 +29,7 @@ const EverydayDigitalTechnologySkillsDashboard = lazy(() => import('./pages/Ever
 const EverydayDigitalTechnologySkillsLesson = lazy(() => import('./pages/EverydayDigitalTechnologySkillsCourse').then((module) => ({ default: module.EverydayDigitalTechnologySkillsLesson })));
 const EverydayDigitalTechnologySkillsFinalAssessment = lazy(() => import('./pages/EverydayDigitalTechnologySkillsCourse').then((module) => ({ default: module.EverydayDigitalTechnologySkillsFinalAssessment })));
 const ChairmanCertificateApproval = lazy(() => import('./pages/ChairmanCertificateApproval').then((module) => ({ default: module.ChairmanCertificateApproval })));
+const TeachingRequests = lazy(() => import('./pages/TeachingRequests').then((module) => ({ default: module.TeachingRequests })));
 const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
 const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
@@ -171,6 +172,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/analytics': <ExecutiveAnalytics />,
   '/dashboard/executive-progress': <ExecutiveOfficeProgress />,
   '/dashboard/certificates/approval': <ChairmanCertificateApproval />,
+  '/dashboard/teaching-requests': <TeachingRequests />,
   '/dashboard/assistant': <AssistantErrorBoundary><SmartAssistant /></AssistantErrorBoundary>,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,
