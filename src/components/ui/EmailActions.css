@@ -1,0 +1,73 @@
+.email-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+}
+
+.email-actions a,
+.email-actions button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(7, 68, 54, .22);
+  border-radius: 999px;
+  color: var(--navy);
+  background: #fff;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 750;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+
+.email-actions a:hover,
+.email-actions button:hover {
+  border-color: var(--green);
+  color: var(--green);
+  transform: none;
+}
+
+.email-actions a:focus-visible,
+.email-actions button:focus-visible {
+  outline: 3px solid rgba(239, 215, 125, .65);
+  outline-offset: 2px;
+}
+
+.email-actions.compact {
+  gap: 7px;
+}
+
+.email-actions.compact a,
+.email-actions.compact button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: .76rem;
+}
+
+.email-actions.inverse a,
+.email-actions.inverse button {
+  color: #fff;
+  border-color: rgba(255, 255, 255, .3);
+  background: rgba(255, 255, 255, .08);
+}
+
+.email-actions.inverse a:hover,
+.email-actions.inverse button:hover {
+  color: #efd77d;
+  border-color: #efd77d;
+  background: rgba(255, 255, 255, .13);
+}
+
+@media (max-width: 520px) {
+  .email-actions:not(.compact) a,
+  .email-actions:not(.compact) button {
+    flex: 1 1 calc(50% - 9px);
+  }
+}
