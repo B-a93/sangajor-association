@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { CheckCircle2, Clock3, Copy, Mail, MapPin, Send, Users } from 'lucide-react';
+import { Clock3, Mail, MapPin, Send, Users } from 'lucide-react';
 import { PageHero } from '../components/ui/PageHero';
+import { EmailActions } from '../components/ui/EmailActions';
 import { supabase } from '../lib/supabase';
 import './Contact.css';
 import { associationEmail } from '../config/site';
@@ -28,20 +29,9 @@ export function Contact() {
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState('');
   const [noticeType, setNoticeType] = useState<'success' | 'error' | ''>('');
-  const [emailCopied, setEmailCopied] = useState(false);
 
   const updateField = (field: keyof ContactForm, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
-  };
-
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(associationEmail);
-      setEmailCopied(true);
-      window.setTimeout(() => setEmailCopied(false), 2500);
-    } catch {
-      setEmailCopied(false);
-    }
   };
 
   const submitContact = async (event: FormEvent<HTMLFormElement>) => {
@@ -108,11 +98,11 @@ export function Contact() {
           <article>
             <Mail />
             <h3>Email</h3>
-            <a className="contact-email-link" href={`mailto:${associationEmail}`}>{associationEmail}</a>
-            <button className="copy-email-button" type="button" onClick={copyEmail}>
-              {emailCopied ? <CheckCircle2 size={16} /> : <Copy size={16} />}
-              {emailCopied ? 'Email copied' : 'Copy email'}
-            </button>
+            <p className="contact-email-address">{associationEmail}</p>
+            <EmailActions
+              email={associationEmail}
+              subject="Enquiry for SANGAJOR B.C.S. Class of 2008 Association"
+            />
           </article>
           <article>
             <MapPin />
@@ -130,7 +120,7 @@ export function Contact() {
           <div>
             <span className="eyebrow">Send an Enquiry</span>
             <h2>Contact the Association directly</h2>
-            <p>Use this form if an email application does not open on your device. Your enquiry will be stored securely for the Association to review.</p>
+            <p>Use this form if you prefer not to use email. Your enquiry will be stored securely for the Association to review.</p>
           </div>
 
           <form className="contact-form" onSubmit={submitContact}>
