@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock3, Mail, MessageSquareText, Phone, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, Clock3, MessageSquareText, Phone, ShieldAlert } from 'lucide-react';
+import { EmailActions } from '../components/ui/EmailActions';
 import { supabase } from '../lib/supabase';
 import './ContactEnquiries.css';
 
@@ -158,7 +159,15 @@ export function ContactEnquiries() {
 
             <div className="contact-enquiry-details">
               {enquiry.email && (
-                <a href={`mailto:${enquiry.email}`}><Mail size={17} />{enquiry.email}</a>
+                <div className="contact-enquiry-email">
+                  <strong>{enquiry.email}</strong>
+                  <EmailActions
+                    email={enquiry.email}
+                    subject={`Re: ${enquiry.subject}`}
+                    body={`Hello ${enquiry.full_name},\n\nThank you for contacting SANGAJOR B.C.S. Class of 2008 Association.\n\n`}
+                    compact
+                  />
+                </div>
               )}
               {enquiry.phone && (
                 <a href={`tel:${enquiry.phone}`}><Phone size={17} />{enquiry.phone}</a>

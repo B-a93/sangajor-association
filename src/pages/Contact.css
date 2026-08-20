@@ -1,29 +1,10 @@
 .contact-section { display: grid; gap: 48px; }
 
-.contact-email-link {
-  overflow-wrap: anywhere;
-}
-
-.copy-email-button {
-  display: inline-flex;
-  gap: 7px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 12px;
-  padding: 8px 12px;
-  border: 1px solid rgba(7, 68, 54, .22);
-  border-radius: 999px;
+.contact-email-address {
+  margin: 0 0 14px;
   color: var(--navy);
-  background: #fff;
-  font: inherit;
-  font-size: .86rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.copy-email-button:hover {
-  border-color: var(--green);
-  color: var(--green);
+  font-weight: 750;
+  overflow-wrap: anywhere;
 }
 
 .contact-form-layout {

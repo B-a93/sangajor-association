@@ -128,10 +128,20 @@
   border-top: 1px solid rgba(7, 68, 54, .1);
 }
 
-.contact-enquiry-details a {
+.contact-enquiry-details > a {
   display: inline-flex;
   gap: 8px;
   align-items: center;
+  overflow-wrap: anywhere;
+}
+
+.contact-enquiry-email {
+  display: grid;
+  gap: 10px;
+  flex: 1 1 100%;
+}
+
+.contact-enquiry-email > strong {
   overflow-wrap: anywhere;
 }
 

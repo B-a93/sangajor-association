@@ -34,6 +34,23 @@
 .footer-grid a { transition: color .2s ease, transform .2s ease; }
 .footer-grid a:hover { color: #efd77d; transform: translateX(3px); }
 .footer-grid a:focus-visible { outline: 2px solid #efd77d; outline-offset: 4px; border-radius: 2px; }
+
+.footer-email-address {
+  color: #efd77d;
+  overflow-wrap: anywhere;
+}
+
+.footer-contact .email-actions {
+  margin: 12px 0 18px;
+}
+
+.footer-contact .email-actions a,
+.footer-contact .email-actions button {
+  display: inline-flex;
+  margin: 0;
+  font-size: .76rem;
+}
+
 .footer-bottom { margin-top: 60px; padding-top: 24px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid rgba(255,255,255,.12); font-size: .75rem; }
 .studio-credit { opacity: .72; font-size: .72rem; }
 
