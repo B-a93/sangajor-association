@@ -2,30 +2,31 @@
   "name": "SANGAJOR B.C.S. Class of 2008 Association",
   "short_name": "MySANGAJOR",
   "description": "The digital home of the SANGAJOR B.C.S. Class of 2008 Association.",
-  "id": "https://sangajorbcs8.org/",
-  "start_url": "https://sangajorbcs8.org/#/",
-  "scope": "https://sangajorbcs8.org/",
+  "id": "/",
+  "start_url": "/#/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#082f49",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "https://sangajorbcs8.org/sangajorr-association-logo.png.jpeg",
+      "src": "/mysangajor-icon.svg",
       "sizes": "any",
-      "type": "image/jpeg",
-      "purpose": "any"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://sangajorbcs8.org/sangajorr-association-logo.png.jpeg",
-      "sizes": "any",
+      "src": "/sangajorr-association-logo.png.jpeg",
+      "sizes": "1254x1254",
       "type": "image/jpeg",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ],
   "shortcuts": [
-    { "name": "Member dashboard", "short_name": "Dashboard", "url": "https://sangajorbcs8.org/#/dashboard" },
-    { "name": "Association events", "short_name": "Events", "url": "https://sangajorbcs8.org/#/events" },
-    { "name": "Member login", "short_name": "Login", "url": "https://sangajorbcs8.org/#/login" }
+    { "name": "Member dashboard", "short_name": "Dashboard", "url": "/#/dashboard" },
+    { "name": "Association events", "short_name": "Events", "url": "/#/events" },
+    { "name": "Member login", "short_name": "Login", "url": "/#/login" }
   ]
 }
