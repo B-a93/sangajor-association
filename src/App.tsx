@@ -7,6 +7,7 @@ import { AssistantErrorBoundary } from './components/AssistantErrorBoundary';
 import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { supabase } from './lib/supabase';
+import { bakingCourse, cookingCourse } from './data/cookingBakingCourses';
 import './pages/MemberDirectory.css';
 
 // Pages are loaded on demand so mobile visitors only download the route they open.
@@ -16,7 +17,6 @@ const InvitationAcceptance = lazy(() => import('./pages/InvitationAcceptance').t
 const MemberInvitations = lazy(() => import('./pages/MemberInvitations').then((module) => ({ default: module.MemberInvitations })));
 const MemberAdministration = lazy(() => import('./pages/MemberAdministration').then((module) => ({ default: module.MemberAdministration })));
 const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })));
-const ContactEnquiries = lazy(() => import('./pages/ContactEnquiries').then((module) => ({ default: module.ContactEnquiries })));
 const CommunicationAdministration = lazy(() => import('./pages/CommunicationAdministration').then((module) => ({ default: module.CommunicationAdministration })));
 const CommunicationCenter = lazy(() => import('./pages/CommunicationCenter').then((module) => ({ default: module.CommunicationCenter })));
 const CommitteesVolunteering = lazy(() => import('./pages/CommitteesVolunteering').then((module) => ({ default: module.CommitteesVolunteering })));
@@ -29,8 +29,10 @@ const DigitalIncomeFinalAssessment = lazy(() => import('./pages/DigitalIncomeCou
 const EverydayDigitalTechnologySkillsDashboard = lazy(() => import('./pages/EverydayDigitalTechnologySkillsCourse').then((module) => ({ default: module.EverydayDigitalTechnologySkillsDashboard })));
 const EverydayDigitalTechnologySkillsLesson = lazy(() => import('./pages/EverydayDigitalTechnologySkillsCourse').then((module) => ({ default: module.EverydayDigitalTechnologySkillsLesson })));
 const EverydayDigitalTechnologySkillsFinalAssessment = lazy(() => import('./pages/EverydayDigitalTechnologySkillsCourse').then((module) => ({ default: module.EverydayDigitalTechnologySkillsFinalAssessment })));
+const PracticalCourseDashboard = lazy(() => import('./pages/PracticalCourse').then((module) => ({ default: module.PracticalCourseDashboard })));
+const PracticalCourseLesson = lazy(() => import('./pages/PracticalCourse').then((module) => ({ default: module.PracticalCourseLesson })));
+const PracticalCourseFinalAssessment = lazy(() => import('./pages/PracticalCourse').then((module) => ({ default: module.PracticalCourseFinalAssessment })));
 const ChairmanCertificateApproval = lazy(() => import('./pages/ChairmanCertificateApproval').then((module) => ({ default: module.ChairmanCertificateApproval })));
-const TeachingRequests = lazy(() => import('./pages/TeachingRequests').then((module) => ({ default: module.TeachingRequests })));
 const EditMemberProfile = lazy(() => import('./pages/EditMemberProfile').then((module) => ({ default: module.EditMemberProfile })));
 const Events = lazy(() => import('./pages/Events').then((module) => ({ default: module.Events })));
 const EventAdministration = lazy(() => import('./pages/EventAdministration').then((module) => ({ default: module.EventAdministration })));
@@ -163,7 +165,6 @@ const pages: Record<string, ReactElement> = {
   '/updates': <Updates />,
   '/journey': <Journey />,
   '/contact': <Contact />,
-  '/dashboard/contact-enquiries': <ContactEnquiries />,
   '/login': <Auth />,
   '/accept-invitation': <InvitationAcceptance />,
   '/dashboard': <MemberDashboard />,
@@ -174,7 +175,6 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/analytics': <ExecutiveAnalytics />,
   '/dashboard/executive-progress': <ExecutiveOfficeProgress />,
   '/dashboard/certificates/approval': <ChairmanCertificateApproval />,
-  '/dashboard/teaching-requests': <TeachingRequests />,
   '/dashboard/assistant': <AssistantErrorBoundary><SmartAssistant /></AssistantErrorBoundary>,
   '/dashboard/dues': <MemberDues />,
   '/dashboard/finance': <FinanceAdministration />,
@@ -193,6 +193,10 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/learning/digital-income/final-assessment': <DigitalIncomeFinalAssessment />,
   '/dashboard/learning/everyday-digital-technology-skills': <EverydayDigitalTechnologySkillsDashboard />,
   '/dashboard/learning/everyday-digital-technology-skills/final-assessment': <EverydayDigitalTechnologySkillsFinalAssessment />,
+  '/dashboard/learning/everyday-cooking-skills': <PracticalCourseDashboard course={cookingCourse} />,
+  '/dashboard/learning/everyday-cooking-skills/final-assessment': <PracticalCourseFinalAssessment course={cookingCourse} />,
+  '/dashboard/learning/practical-baking-skills': <PracticalCourseDashboard course={bakingCourse} />,
+  '/dashboard/learning/practical-baking-skills/final-assessment': <PracticalCourseFinalAssessment course={bakingCourse} />,
   '/dashboard/village': <VillageSquare />,
   '/dashboard/village/moderation': <VillageModeration />,
 };
@@ -203,6 +207,8 @@ export default function App() {
   const memberProfileMatch = route.match(/^\/dashboard\/members\/([^/]+)$/);
   const digitalIncomeLessonMatch = route.match(/^\/dashboard\/learning\/digital-income\/lesson-([2-6])$/);
   const everydayDigitalTechnologyLessonMatch = route.match(/^\/dashboard\/learning\/everyday-digital-technology-skills\/lesson-([1-6])$/);
+  const cookingLessonMatch = route.match(/^\/dashboard\/learning\/everyday-cooking-skills\/lesson-([1-6])$/);
+  const bakingLessonMatch = route.match(/^\/dashboard\/learning\/practical-baking-skills\/lesson-([1-6])$/);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -218,6 +224,10 @@ export default function App() {
     page = <DigitalIncomeCourseLesson lessonNumber={Number(digitalIncomeLessonMatch[1])} />;
   } else if (everydayDigitalTechnologyLessonMatch) {
     page = <EverydayDigitalTechnologySkillsLesson lessonNumber={Number(everydayDigitalTechnologyLessonMatch[1])} />;
+  } else if (cookingLessonMatch) {
+    page = <PracticalCourseLesson course={cookingCourse} lessonNumber={Number(cookingLessonMatch[1])} />;
+  } else if (bakingLessonMatch) {
+    page = <PracticalCourseLesson course={bakingCourse} lessonNumber={Number(bakingLessonMatch[1])} />;
   } else {
     page = pages[route] ?? <Home />;
   }
