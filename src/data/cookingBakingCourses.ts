@@ -2,9 +2,13 @@ export type PracticalQuestion = { id: string; prompt: string; options: string[];
 export type PracticalLesson = { number: number; title: string; introduction: string; objectives: string[]; sections: { id: string; title: string; body: string; example: string }[]; activity: { prompt: string; hint: string }; questions: PracticalQuestion[] };
 export type PracticalCourse = { slug: string; category: string; title: string; description: string; certificateTitle: string; assignmentTitle: string; assignmentPrompt: string; lessons: PracticalLesson[]; finalQuestions: PracticalQuestion[] };
 
-const q=(id:string,prompt:string,correct:string,...wrong:string[]):PracticalQuestion=>({id,prompt,options:[correct,...wrong],answer:0});
-const quiz=(answers:[string,string,string][])=>answers.map((a,i)=>q(`q${i+1}`,a[0],a[1],a[2],i%2?'Ignore the instructions':'Guess without checking'));
-const final=(items:[string,string,string][])=>items.map((a,i)=>q(`f${i+1}`,a[0],a[1],a[2],'Choose at random'));
+const q=(id:string,prompt:string,correct:string,answer:number,...wrong:string[]):PracticalQuestion=>{
+ const options=wrong.slice(0,3);
+ options.splice(answer,0,correct);
+ return {id,prompt,options,answer};
+};
+const quiz=(answers:[string,string,string][])=>answers.map((a,i)=>q(`q${i+1}`,a[0],a[1],(i+1)%4,a[2],i%2?'Ignore the instructions':'Guess without checking','Choose the longest answer'));
+const final=(items:[string,string,string][])=>items.map((a,i)=>q(`f${i+1}`,a[0],a[1],(i+2)%4,a[2],'Choose at random','Skip the safety check'));
 
 export const cookingCourse:PracticalCourse={
  slug:'everyday-cooking-skills',category:'Cooking & Baking',title:'Everyday Cooking Skills',description:'Learn safe food handling, kitchen organisation and reliable methods for preparing balanced, flavourful everyday meals.',certificateTitle:'Certificate of Completion in Everyday Cooking Skills',assignmentTitle:'Plan and prepare a complete balanced meal',assignmentPrompt:'Submit a detailed meal plan for at least four people. Include ingredients and quantities, food-safety controls, preparation order, cooking methods, timing, portioning, presentation, storage of leftovers and a short reflection on the result. Do not upload identifiable photographs of other people without permission.',

@@ -20,3 +20,22 @@ test('both practical courses reuse secure learning and certificate infrastructur
  assert.match(migration,/Only an approved tutor may verify course requirements/);assert.match(migration,/Pending Chairman Approval/);
  assert.match(migration,/Only the current active Chairman may approve or reject certificates/);
 });
+
+test('practical lesson knowledge checks expose scores, retries, and immediate progression',async()=>{
+ const [page,data,migration]=await Promise.all([read('src/pages/PracticalCourse.tsx'),read('src/data/cookingBakingCourses.ts'),read('supabase/migrations/202609010001_cooking_and_baking_courses.sql')]);
+ assert.match(page,/submit_practical_course_knowledge_check',\{target_course:course\.slug,lesson_number:lessonNumber,submitted_answers:answers\}/);
+ assert.match(page,/const value=Number\(data\);setSubmitted\(value\)/);
+ assert.match(page,/Your score: \$\{value\}% — Passed/);
+ assert.match(page,/Your score: \$\{value\}% — Please try again/);
+ assert.match(page,/passed=submitted!==null&&submitted>=70/);
+ assert.match(page,/ready=lesson\.sections\.every\(s=>read\.includes\(s\.id\)\)&&activity\.trim\(\)\.length>=40&&passed/);
+ assert.match(page,/complete_practical_course_lesson/);
+ assert.match(page,/Lesson progress could not be refreshed: \$\{refreshed\.error\.message\}/);
+ assert.match(page,/setCompleted\(Boolean\(row\.completed_at\)\)/);
+ assert.match(page,/lessonNumber\+1.*Next Lesson/s);
+ assert.match(page,/role="alert"/);
+ assert.match(page,/error\.message/);
+ assert.match(page,/optionIndex===question\.answer\?'0'/);
+ assert.match(data,/\(i\+1\)%4/);
+ assert.match(migration,/submitted_answers->>\('q'\|\|n\)='0'/);
+});
