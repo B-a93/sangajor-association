@@ -28,14 +28,31 @@ test('practical lesson knowledge checks expose scores, retries, and immediate pr
  assert.match(page,/Your score: \$\{value\}% — Passed/);
  assert.match(page,/Your score: \$\{value\}% — Please try again/);
  assert.match(page,/passed=submitted!==null&&submitted>=70/);
- assert.match(page,/ready=lesson\.sections\.every\(s=>read\.includes\(s\.id\)\)&&activity\.trim\(\)\.length>=40&&passed/);
+ assert.match(page,/ready=sectionIds\.length===4&&activityLength>=40&&passed/);
  assert.match(page,/complete_practical_course_lesson/);
- assert.match(page,/Lesson progress could not be refreshed: \$\{refreshed\.error\.message\}/);
- assert.match(page,/setCompleted\(Boolean\(row\.completed_at\)\)/);
+ assert.match(page,/Lesson completion could not be verified\. Supabase query error/);
+ assert.match(page,/setCompleted\(true\)/);
  assert.match(page,/lessonNumber\+1.*Next Lesson/s);
  assert.match(page,/role="alert"/);
  assert.match(page,/error\.message/);
  assert.match(page,/optionIndex===question\.answer\?'0'/);
  assert.match(data,/\(i\+1\)%4/);
  assert.match(migration,/submitted_answers->>\('q'\|\|n\)='0'/);
+});
+
+test('both practical courses only complete after the exact RPC succeeds and completed_at is verified',async()=>{
+ const page=await read('src/pages/PracticalCourse.tsx');
+ assert.match(page,/uniqueLessonSections\(read,lesson\)/);
+ assert.match(page,/sectionIds\.length===4&&activityLength>=40&&passed/);
+ assert.match(page,/4-sectionIds\.length.*lesson sections still need to be marked as read/);
+ assert.match(page,/40-activityLength.*more character/);
+ assert.match(page,/const rpcParameters=\{target_course:course\.slug,lesson_number:lessonNumber,section_ids:sectionIds,activity_response:activity\.trim\(\)\}/);
+ assert.match(page,/supabase\.rpc\('complete_practical_course_lesson',rpcParameters\)/);
+ assert.match(page,/Supabase RPC error: \$\{fullSupabaseError\(error\)\}/);
+ assert.match(page,/if\(!row\.completed_at\)/);
+ assert.match(page,/lesson_progress\.completed_at is still NULL/);
+ assert.match(page,/setCompleted\(true\);setNotice\(`Lesson \$\{lessonNumber\} completed/);
+ assert.match(page,/!completed&&!ready.*completion-requirements/s);
+ const data=await read('src/data/cookingBakingCourses.ts');
+ for(const slug of ['everyday-cooking-skills','practical-baking-skills']) assert.match(data,new RegExp(`slug:'${slug}'`));
 });
