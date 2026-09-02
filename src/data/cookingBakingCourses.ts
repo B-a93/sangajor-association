@@ -1,11 +1,11 @@
-export type PracticalQuestion = { id: string; prompt: string; options: string[]; answer: number };
+export type PracticalQuestion = { id: string; prompt: string; options: string[] };
 export type PracticalLesson = { number: number; title: string; introduction: string; objectives: string[]; sections: { id: string; title: string; body: string; example: string }[]; activity: { prompt: string; hint: string }; questions: PracticalQuestion[] };
 export type PracticalCourse = { slug: string; category: string; title: string; description: string; certificateTitle: string; assignmentTitle: string; assignmentPrompt: string; lessons: PracticalLesson[]; finalQuestions: PracticalQuestion[] };
 
 const q=(id:string,prompt:string,correct:string,answer:number,...wrong:string[]):PracticalQuestion=>{
  const options=wrong.slice(0,3);
  options.splice(answer,0,correct);
- return {id,prompt,options,answer};
+ return {id,prompt,options};
 };
 const quiz=(answers:[string,string,string][])=>answers.map((a,i)=>q(`q${i+1}`,a[0],a[1],(i+1)%4,a[2],i%2?'Ignore the instructions':'Guess without checking','Choose the longest answer'));
 const final=(items:[string,string,string][])=>items.map((a,i)=>q(`f${i+1}`,a[0],a[1],(i+2)%4,a[2],'Choose at random','Skip the safety check'));

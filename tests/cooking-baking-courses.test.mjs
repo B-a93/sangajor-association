@@ -22,12 +22,12 @@ test('both practical courses reuse secure learning and certificate infrastructur
 });
 
 test('practical lesson knowledge checks expose scores, retries, and immediate progression',async()=>{
- const [page,data,migration]=await Promise.all([read('src/pages/PracticalCourse.tsx'),read('src/data/cookingBakingCourses.ts'),read('supabase/migrations/202609010001_cooking_and_baking_courses.sql')]);
+ const [page,data,migration]=await Promise.all([read('src/pages/PracticalCourse.tsx'),read('src/data/cookingBakingCourses.ts'),read('supabase/migrations/202609020001_practical_course_answer_indices.sql')]);
  assert.match(page,/submit_practical_course_knowledge_check',\{target_course:course\.slug,lesson_number:lessonNumber,submitted_answers:answers\}/);
- assert.match(page,/const value=Number\(data\);setSubmitted\(value\)/);
+ assert.match(page,/const value=Number\(data\);setScore\(value\);setKnowledgeSubmitted\(true\)/);
  assert.match(page,/Your score: \$\{value\}% — Passed/);
  assert.match(page,/Your score: \$\{value\}% — Please try again/);
- assert.match(page,/passed=submitted!==null&&submitted>=70/);
+ assert.match(page,/passed=knowledgeSubmitted&&score!==null&&score>=70/);
  assert.match(page,/ready=sectionIds\.length===4&&activityLength>=40&&passed/);
  assert.match(page,/complete_practical_course_lesson/);
  assert.match(page,/Lesson completion could not be verified\. Supabase query error/);
@@ -35,9 +35,9 @@ test('practical lesson knowledge checks expose scores, retries, and immediate pr
  assert.match(page,/lessonNumber\+1.*Next Lesson/s);
  assert.match(page,/role="alert"/);
  assert.match(page,/error\.message/);
- assert.match(page,/optionIndex===question\.answer\?'0'/);
+ assert.match(page,/checked=\{answers\[questionId\] === optionIndex\}/);
  assert.match(data,/\(i\+1\)%4/);
- assert.match(migration,/submitted_answers->>\('q'\|\|n\)='0'/);
+ assert.match(migration,/submitted_answers->>\('q'\|\|n\)=\(\(n\+1\)%4\)::text/);
 });
 
 test('both practical courses only complete after the exact RPC succeeds and completed_at is verified',async()=>{
@@ -55,4 +55,19 @@ test('both practical courses only complete after the exact RPC succeeds and comp
  assert.match(page,/!completed&&!ready.*completion-requirements/s);
  const data=await read('src/data/cookingBakingCourses.ts');
  for(const slug of ['everyday-cooking-skills','practical-baking-skills']) assert.match(data,new RegExp(`slug:'${slug}'`));
+});
+
+
+test('practical lessons reset and restore only lesson-specific learner answers',async()=>{
+ const [page,app,data]=await Promise.all([read('src/pages/PracticalCourse.tsx'),read('src/App.tsx'),read('src/data/cookingBakingCourses.ts')]);
+ assert.match(page,/const \[answers,setAnswers\]=useState<Record<string,number>>\(\{\}\)/);
+ assert.match(page,/setAnswers\(\{\}\);\s*setScore\(null\);\s*setKnowledgeSubmitted\(false\);\s*\}, \[courseSlug, lessonNumber\]\)/);
+ assert.match(page,/eq\('lesson_slug',currentLessonSlug\)\.maybeSingle\(\)/);
+ assert.match(page,/if\(data\?\.lesson_slug===currentLessonSlug\)/);
+ assert.doesNotMatch(page,/correctAnswer|correctIndex|answerValue|question\.answer/);
+ assert.doesNotMatch(data,/answer: number|return \{id,prompt,options,answer\}/);
+ assert.match(page,/key=\{currentSlug\} data-lesson-slug=\{currentSlug\}/);
+ assert.match(app,/key=\{`\$\{cookingCourse\.slug\}-lesson-\$\{cookingLessonMatch\[1\]\}`\}/);
+ assert.match(app,/cookingLessonMatch = route\.match\(\/\^.*lesson-\(\[1-6\]\)/);
+ assert.match(app,/bakingLessonMatch = route\.match\(\/\^.*lesson-\(\[1-6\]\)/);
 });
