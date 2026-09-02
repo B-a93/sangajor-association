@@ -225,9 +225,9 @@ export default function App() {
   } else if (everydayDigitalTechnologyLessonMatch) {
     page = <EverydayDigitalTechnologySkillsLesson lessonNumber={Number(everydayDigitalTechnologyLessonMatch[1])} />;
   } else if (cookingLessonMatch) {
-    page = <PracticalCourseLesson course={cookingCourse} lessonNumber={Number(cookingLessonMatch[1])} />;
+    page = <PracticalCourseLesson key={`${cookingCourse.slug}-lesson-${cookingLessonMatch[1]}`} course={cookingCourse} lessonNumber={Number(cookingLessonMatch[1])} />;
   } else if (bakingLessonMatch) {
-    page = <PracticalCourseLesson course={bakingCourse} lessonNumber={Number(bakingLessonMatch[1])} />;
+    page = <PracticalCourseLesson key={`${bakingCourse.slug}-lesson-${bakingLessonMatch[1]}`} course={bakingCourse} lessonNumber={Number(bakingLessonMatch[1])} />;
   } else {
     page = pages[route] ?? <Home />;
   }
