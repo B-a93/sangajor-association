@@ -1,50 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock3, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock3, HelpCircle, XCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './TeachingRequests.css';
 
-type TeachingRequest = { id:string; member_name:string; skill:string; experience:string; teaching_format:string; availability:string; resources:string; status:'pending'|'approved'|'declined'; submitted_at:string; reviewed_at:string|null; decline_reason:string|null };
+type TeachingRequest = { id:string; source:'member'|'public'; reference_number:string|null; applicant_name:string; email:string|null; telephone:string|null; location:string|null; title:string; description:string|null; experience:string; intended_audience:string|null; teaching_format:string; availability:string; resources:string; supporting_link:string|null; status:'pending'|'approved'|'declined'; submitted_at:string; reviewed_at:string|null; decision_reason:string|null; information_request:string|null };
 type Filter = 'pending'|'approved'|'declined';
 
 export function TeachingRequests() {
-  const [rows,setRows]=useState<TeachingRequest[]>([]);
-  const [filter,setFilter]=useState<Filter>('pending');
-  const [reasons,setReasons]=useState<Record<string,string>>({});
-  const [loading,setLoading]=useState(true);
-  const [message,setMessage]=useState('');
-  const [saving,setSaving]=useState('');
-
-  async function load() {
-    setLoading(true);
-    const {data,error}=await supabase.rpc('chairman_teaching_request_queue');
-    if(error){setMessage('Teaching requests could not be loaded. This dashboard is restricted to the current active Chairman.');setRows([]);}
-    else {setRows((data??[]) as TeachingRequest[]);setMessage('');await supabase.rpc('mark_teaching_request_notifications_read');}
-    setLoading(false);
-  }
-  useEffect(()=>{void load();},[]);
-  const visible=useMemo(()=>rows.filter(row=>row.status===filter),[rows,filter]);
-
-  async function decide(id:string,decision:'approved'|'declined') {
-    const reason=reasons[id]?.trim()||null;
-    if(decision==='declined'&&!reason){setMessage('Enter a reason before declining this request.');return;}
-    setSaving(id);setMessage('');
-    const {error}=await supabase.rpc('decide_teaching_request',{request_id:id,decision,reason});
-    setSaving('');
-    if(error)setMessage(error.message);else {setMessage(`Teaching request ${decision}.`);await load();}
-  }
-
+  const [rows,setRows]=useState<TeachingRequest[]>([]); const [filter,setFilter]=useState<Filter>('pending');
+  const [reasons,setReasons]=useState<Record<string,string>>({}); const [loading,setLoading]=useState(true); const [message,setMessage]=useState(''); const [saving,setSaving]=useState('');
+  async function load(){setLoading(true);const {data,error}=await supabase.rpc('skill_exchange_teaching_request_queue');if(error){setMessage('Teaching requests could not be loaded. Access is limited to the active Chairman and authorised programme officers.');setRows([]);}else{setRows((data??[]) as TeachingRequest[]);setMessage('');}setLoading(false);}
+  useEffect(()=>{void load();},[]); const visible=useMemo(()=>rows.filter(row=>row.status===filter),[rows,filter]);
+  async function review(row:TeachingRequest,action:'request_information'|'approved'|'declined'){const reason=reasons[row.id]?.trim();if(!reason){setMessage('Record a reason or message before taking this action.');return;}setSaving(row.id);setMessage('');const {error}=await supabase.rpc('review_skill_exchange_application',{request_id:row.id,request_source:row.source,action,reason});setSaving('');if(error)setMessage(error.message);else{setMessage(action==='request_information'?'Further information requested; the application remains Pending Review.':`Teaching request ${action}.`);await load();}}
   if(loading)return <section className="teaching-request-state">Loading teaching requests…</section>;
-  return <section className="teaching-requests-page">
-    <header><div><p className="eyebrow">Executive Portal · Chairman only</p><h1>Teaching Requests</h1><p>Review proposed skills and workshops submitted through Volunteer to Teach.</p></div><a className="secondary-button" href="#/dashboard">Back to dashboard</a></header>
-    {message&&<p className="dashboard-alert" role="status">{message}</p>}
-    <nav className="request-filters" aria-label="Teaching request status">
-      {(['pending','approved','declined'] as const).map(status=><button type="button" className={filter===status?'active':''} onClick={()=>setFilter(status)} key={status}>{status==='pending'?<Clock3/>:status==='approved'?<CheckCircle2/>:<XCircle/>}{status[0].toUpperCase()+status.slice(1)} <strong>{rows.filter(row=>row.status===status).length}</strong></button>)}
-    </nav>
-    <div className="teaching-request-list">{visible.map(row=><article key={row.id}>
-      <div className="request-heading"><div><p className="eyebrow">{row.member_name}</p><h2>{row.skill}</h2></div><span className={`request-status ${row.status}`}>{row.status}</span></div>
-      <dl><div><dt>Experience</dt><dd>{row.experience}</dd></div><div><dt>Teaching format</dt><dd>{row.teaching_format}</dd></div><div><dt>Availability</dt><dd>{row.availability}</dd></div><div><dt>Resources</dt><dd>{row.resources}</dd></div><div><dt>Submission date</dt><dd><time dateTime={row.submitted_at}>{new Date(row.submitted_at).toLocaleString()}</time></dd></div>{row.reviewed_at&&<div><dt>Decision date</dt><dd>{new Date(row.reviewed_at).toLocaleString()}</dd></div>}</dl>
-      {row.decline_reason&&<p className="decline-reason"><strong>Decline reason:</strong> {row.decline_reason}</p>}
-      {row.status==='pending'&&<div className="request-actions"><label>Reason for declining<textarea maxLength={1000} value={reasons[row.id]??''} onChange={event=>setReasons({...reasons,[row.id]:event.target.value})} placeholder="Required only when declining"/></label><div><button className="primary-button" disabled={saving===row.id} onClick={()=>void decide(row.id,'approved')}>Approve</button><button className="secondary-button" disabled={saving===row.id} onClick={()=>void decide(row.id,'declined')}>Decline</button></div></div>}
-    </article>)}{visible.length===0&&<p className="empty-requests">No {filter} teaching requests.</p>}</div>
-  </section>;
+  return <section className="teaching-requests-page"><header><div><p className="eyebrow">Executive Portal · authorised reviewers</p><h1>Teaching Requests</h1><p>Review member proposals and verified public volunteer applications. Approval does not automatically publish a teacher or create a course.</p></div><a className="secondary-button" href="#/dashboard">Back to dashboard</a></header>
+    {message&&<p className="dashboard-alert" role="status">{message}</p>}<nav className="request-filters" aria-label="Teaching request status">{(['pending','approved','declined'] as const).map(status=><button type="button" className={filter===status?'active':''} onClick={()=>setFilter(status)} key={status}>{status==='pending'?<Clock3/>:status==='approved'?<CheckCircle2/>:<XCircle/>}{status==='pending'?'Pending Review':status[0].toUpperCase()+status.slice(1)} <strong>{rows.filter(row=>row.status===status).length}</strong></button>)}</nav>
+    <div className="teaching-request-list">{visible.map(row=><article key={`${row.source}-${row.id}`}><div className="request-heading"><div><p className="eyebrow">{row.source==='public'?'Public volunteer':'Association member'} · {row.applicant_name}{row.reference_number&&` · ${row.reference_number}`}</p><h2>{row.title}</h2></div><span className={`request-status ${row.status}`}>{row.status==='pending'?'Pending Review':row.status}</span></div>
+      <dl>{row.email&&<div><dt>Email</dt><dd>{row.email}</dd></div>}{row.telephone&&<div><dt>Telephone / WhatsApp</dt><dd>{row.telephone}</dd></div>}{row.location&&<div><dt>Location</dt><dd>{row.location}</dd></div>}{row.description&&<div><dt>Teaching description</dt><dd>{row.description}</dd></div>}<div><dt>Experience</dt><dd>{row.experience}</dd></div>{row.intended_audience&&<div><dt>Intended audience</dt><dd>{row.intended_audience}</dd></div>}<div><dt>Teaching format</dt><dd>{row.teaching_format}</dd></div><div><dt>Availability</dt><dd>{row.availability}</dd></div><div><dt>Resources</dt><dd>{row.resources}</dd></div>{row.supporting_link&&<div><dt>Supporting portfolio</dt><dd><a href={row.supporting_link} target="_blank" rel="noreferrer">Open supporting link</a></dd></div>}<div><dt>Submission date</dt><dd><time dateTime={row.submitted_at}>{new Date(row.submitted_at).toLocaleString()}</time></dd></div>{row.reviewed_at&&<div><dt>Decision date</dt><dd>{new Date(row.reviewed_at).toLocaleString()}</dd></div>}</dl>
+      {row.information_request&&<p className="information-reason"><strong>Further information requested:</strong> {row.information_request}</p>}{row.decision_reason&&<p className="decline-reason"><strong>Recorded decision reason:</strong> {row.decision_reason}</p>}
+      {row.status==='pending'&&<div className="request-actions"><label>Reason for declining or approving<textarea required maxLength={2000} value={reasons[row.id]??''} onChange={event=>setReasons({...reasons,[row.id]:event.target.value})} placeholder="Required for approval, decline or a request for more information"/></label><div><button className="primary-button" disabled={saving===row.id} onClick={()=>void review(row,'approved')}>Approve</button>{row.source==='public'&&<button className="secondary-button" disabled={saving===row.id} onClick={()=>void review(row,'request_information')}><HelpCircle/> Request information</button>}<button className="secondary-button" disabled={saving===row.id} onClick={()=>void review(row,'declined')}>Decline</button></div>{row.source==='public'&&<p>Approved applicants receive safeguarding, conduct, scheduling and course-preparation instructions through their secure status result.</p>}</div>}
+    </article>)}{visible.length===0&&<p className="empty-requests">No {filter==='pending'?'Pending Review':filter} teaching requests.</p>}</div></section>;
 }

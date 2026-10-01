@@ -12,6 +12,10 @@ verify_jwt = true
 verify_jwt = false
 [functions.member-login]
 verify_jwt = false
+[functions.public-skill-verification]
+# Public visitors use this rate-limited bootstrap to obtain an Auth OTP identity;
+# it never creates a Members row or Association membership.
+verify_jwt = false
 [functions.member-assistant]
 # Authentication is performed inside the function with auth.getUser(). The
 # gateway's legacy JWT verifier cannot validate tokens issued by projects using
