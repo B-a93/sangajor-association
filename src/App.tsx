@@ -8,6 +8,7 @@ import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { supabase } from './lib/supabase';
 import { bakingCourse, cookingCourse } from './data/cookingBakingCourses';
+import { publicCourses } from './data/publicCourses';
 import './pages/MemberDirectory.css';
 
 // Pages are loaded on demand so mobile visitors only download the route they open.
@@ -168,6 +169,8 @@ const pages: Record<string, ReactElement> = {
   '/journey': <Journey />,
   '/contact': <Contact />,
   '/skill-exchange': <PublicSkillExchange />,
+  '/skill-exchange/learn': <PublicSkillExchange panel="learn" />,
+  '/skill-exchange/teach': <PublicSkillExchange panel="teach" />,
   '/login': <Auth />,
   '/accept-invitation': <InvitationAcceptance />,
   '/dashboard': <MemberDashboard />,
@@ -213,13 +216,17 @@ export default function App() {
   const everydayDigitalTechnologyLessonMatch = route.match(/^\/dashboard\/learning\/everyday-digital-technology-skills\/lesson-([1-6])$/);
   const cookingLessonMatch = route.match(/^\/dashboard\/learning\/everyday-cooking-skills\/lesson-([1-6])$/);
   const bakingLessonMatch = route.match(/^\/dashboard\/learning\/practical-baking-skills\/lesson-([1-6])$/);
+  const publicCourseMatch = route.match(/^\/skill-exchange\/courses\/([^/]+)$/);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [route]);
 
   let page: ReactElement;
-  if (leadershipProfileMatch) {
+  if (publicCourseMatch) {
+    const course = publicCourses.find((item) => item.slug === publicCourseMatch[1]);
+    page = course ? <PublicSkillExchange panel="learn" courseSlug={course.slug} /> : <PublicSkillExchange />;
+  } else if (leadershipProfileMatch) {
     const executive = executives.find((item) => item.slug === leadershipProfileMatch[1]);
     page = executive ? <ExecutiveProfile executive={executive} /> : <Leadership />;
   } else if (memberProfileMatch) {
