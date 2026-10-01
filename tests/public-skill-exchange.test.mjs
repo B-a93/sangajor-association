@@ -9,9 +9,10 @@ test('public Skill Exchange has both prominent actions, free programme statement
   assert.match(page, /Join a Free Class/);
   assert.match(page, /Apply to Teach for Free/);
   assert.match(page, /Courses are offered free of charge, and approved instructors volunteer their knowledge and time without payment/);
-  for (const field of ['Full name','Email address','Telephone / WhatsApp number','Location','Skill or workshop title','Description of what you want to teach','Relevant experience','Intended audience','Preferred format','Availability','Required resources','Supporting document or portfolio link']) assert.match(page, new RegExp(field));
+  for (const field of ['Full name','Email address','Location','Skill or workshop title','Description of what you want to teach','Relevant experience','Intended audience','Preferred format','Availability','Required resources','Supporting document or portfolio link']) assert.match(page, new RegExp(field));
   assert.match(page, /voluntary and unpaid/);
   assert.match(page, /Pending Review/);
+  assert.match(page, /signInWithOAuth/);
   assert.match(page, /signInWithOtp/);
   assert.match(page, /verifyOtp/);
   assert.match(page, /public-skill-verification/);
