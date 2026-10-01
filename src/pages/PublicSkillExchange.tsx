@@ -1,16 +1,12 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { BookOpen, CheckCircle2, GraduationCap, ShieldCheck } from 'lucide-react';
+import { publicCourses, type PublicCourseSlug } from '../data/publicCourses';
 import { supabase } from '../lib/supabase';
 import './PublicSkillExchange.css';
 
 const programmeStatement = 'SANGAJOR Skill Exchange is a community learning initiative. Courses are offered free of charge, and approved instructors volunteer their knowledge and time without payment.';
 
-const publicCourses = [
-  { slug: 'everyday-digital-technology-skills', title: 'Everyday Digital & Technology Skills', summary: 'Build confidence with devices, email, documents, online safety and introductory AI tools.', format: 'Online self-paced course' },
-  { slug: 'digital-income-online-work', title: 'Digital Income & Online Work', summary: 'Explore legitimate online work, digital payments, freelancing and scam awareness.', format: 'Online self-paced course' },
-  { slug: 'everyday-cooking-skills', title: 'Everyday Cooking Skills', summary: 'Learn kitchen safety, organisation and practical methods for balanced everyday meals.', format: 'Practical course' },
-  { slug: 'practical-baking-skills', title: 'Practical Baking Skills', summary: 'Learn measuring, ingredient science, oven control, decoration and safe production.', format: 'Practical course' },
-] as const;
+type PublicSkillExchangeProps = { panel?: 'learn' | 'teach'; courseSlug?: PublicCourseSlug };
 
 type VerificationChannel = 'email' | 'telephone';
 type VerificationProps = { email: string; telephone: string; channel: VerificationChannel; onChannel: (value: VerificationChannel) => void; onVerified: () => void };
@@ -25,25 +21,31 @@ function ContactVerification({ email, telephone, channel, onChannel, onVerified 
   async function sendCode() {
     if (!destination) { setNotice(`Enter your ${channel === 'email' ? 'email address' : 'telephone number'} first.`); return; }
     setBusy(true); setNotice('');
-    const prepared = await supabase.functions.invoke('public-skill-verification', { body: { channel, destination, website: '' } });
-    if (prepared.error) { setBusy(false); setNotice('Verification is temporarily unavailable. Please try again later.'); return; }
-    const result = channel === 'email'
-      ? await supabase.auth.signInWithOtp({ email: destination, options: { shouldCreateUser: true } })
-      : await supabase.auth.signInWithOtp({ phone: destination, options: { shouldCreateUser: true } });
-    setBusy(false);
-    if (result.error) setNotice(result.error.message);
-    else { setSent(true); setNotice(`We sent a one-time verification code to ${destination}.`); }
+    try {
+      const prepared = await supabase.functions.invoke('public-skill-verification', { body: { channel, destination, website: '' } });
+      if (prepared.error) { setNotice('Verification is temporarily unavailable. Please try again later.'); return; }
+      const result = channel === 'email'
+        ? await supabase.auth.signInWithOtp({ email: destination, options: { shouldCreateUser: true } })
+        : await supabase.auth.signInWithOtp({ phone: destination, options: { shouldCreateUser: true } });
+      if (result.error) setNotice(result.error.message);
+      else { setSent(true); setNotice(`We sent a one-time verification code to ${destination}.`); }
+    } catch {
+      setNotice('Verification is temporarily unavailable. Please try again later.');
+    } finally { setBusy(false); }
   }
 
   async function verifyCode() {
     if (!code.trim()) return;
     setBusy(true); setNotice('');
-    const result = channel === 'email'
-      ? await supabase.auth.verifyOtp({ email: destination, token: code.trim(), type: 'email' })
-      : await supabase.auth.verifyOtp({ phone: destination, token: code.trim(), type: 'sms' });
-    setBusy(false);
-    if (result.error) setNotice(result.error.message);
-    else { setNotice('Contact verified. You may now submit the form.'); onVerified(); }
+    try {
+      const result = channel === 'email'
+        ? await supabase.auth.verifyOtp({ email: destination, token: code.trim(), type: 'email' })
+        : await supabase.auth.verifyOtp({ phone: destination, token: code.trim(), type: 'sms' });
+      if (result.error) setNotice(result.error.message);
+      else { setNotice('Contact verified. You may now submit the form.'); onVerified(); }
+    } catch {
+      setNotice('Verification is temporarily unavailable. Please try again later.');
+    } finally { setBusy(false); }
   }
 
   return <fieldset className="verification-box"><legend>Verify your contact</legend>
@@ -57,9 +59,8 @@ function ContactVerification({ email, telephone, channel, onChannel, onVerified 
 const contactDefaults = { full_name: '', email: '', telephone: '', location: '', website: '' };
 const teachingDefaults = { ...contactDefaults, title: '', description: '', experience: '', intended_audience: '', preferred_format: 'online', availability: '', required_resources: '', supporting_link: '', voluntary_unpaid_consent: false };
 
-export function PublicSkillExchange() {
-  const [panel, setPanel] = useState<'learn' | 'teach' | 'status' | null>(null);
-  const [learner, setLearner] = useState({ ...contactDefaults, course_slug: publicCourses[0].slug as string });
+export function PublicSkillExchange({ panel = undefined, courseSlug = publicCourses[0].slug }: PublicSkillExchangeProps) {
+  const [learner, setLearner] = useState({ ...contactDefaults, course_slug: courseSlug as string });
   const [teaching, setTeaching] = useState(teachingDefaults);
   const [learnerChannel, setLearnerChannel] = useState<VerificationChannel>('email');
   const [teacherChannel, setTeacherChannel] = useState<VerificationChannel>('email');
@@ -73,36 +74,47 @@ export function PublicSkillExchange() {
   const [statusVerified, setStatusVerified] = useState(false);
   const [statusResult, setStatusResult] = useState<{ title:string; status:string; information_request:string|null; decision_reason:string|null; instructions:string|null } | null>(null);
 
+  useEffect(() => {
+    if (!panel) return;
+    document.getElementById(panel === 'learn' ? 'join-class' : 'teach')?.scrollIntoView({ block: 'start' });
+  }, [panel]);
+
   const updateLearner = (field: string, value: string) => setLearner((current) => ({ ...current, [field]: value }));
   const updateTeaching = (field: string, value: string | boolean) => setTeaching((current) => ({ ...current, [field]: value }));
 
   async function registerLearner(event: FormEvent) {
     event.preventDefault(); if (!learnerVerified) { setConfirmation('Please verify your email or telephone before registering.'); return; }
     setBusy(true); setConfirmation('');
-    const { data, error } = await supabase.rpc('register_public_skill_learner', { registration: { ...learner, verification_channel: learnerChannel } });
-    setBusy(false);
-    if (error) setConfirmation(error.message); else setConfirmation(`Registration received. Your learner reference is ${data?.[0]?.reference_number}. The programme team will contact you about availability and next steps.`);
+    try {
+      const { data, error } = await supabase.rpc('register_public_skill_learner', { registration: { ...learner, verification_channel: learnerChannel } });
+      if (error) setConfirmation(error.message); else setConfirmation(`Registration received. Your learner reference is ${data?.[0]?.reference_number}. The programme team will contact you about availability and next steps.`);
+    } catch { setConfirmation('Registration is temporarily unavailable. Please try again later.'); }
+    finally { setBusy(false); }
   }
 
   async function submitTeaching(event: FormEvent) {
     event.preventDefault(); if (!teacherVerified) { setConfirmation('Please verify your email or telephone before submitting.'); return; }
     setBusy(true); setConfirmation('');
-    const { data, error } = await supabase.rpc('submit_public_skill_application', { application: { ...teaching, verification_channel: teacherChannel } });
-    setBusy(false);
-    if (error) setConfirmation(error.message); else { const reference = data?.[0]?.reference_number; setConfirmation(`Application received. Your reference is ${reference}. It will remain Pending Review until an authorised reviewer makes a decision. Save this reference to check your status securely.`); setStatusReference(reference ?? ''); }
+    try {
+      const { data, error } = await supabase.rpc('submit_public_skill_application', { application: { ...teaching, verification_channel: teacherChannel } });
+      if (error) setConfirmation(error.message); else { const reference = data?.[0]?.reference_number; setConfirmation(`Application received. Your reference is ${reference}. It will remain Pending Review until an authorised reviewer makes a decision. Save this reference to check your status securely.`); setStatusReference(reference ?? ''); }
+    } catch { setConfirmation('The application service is temporarily unavailable. Please try again later.'); }
+    finally { setBusy(false); }
   }
 
   async function checkStatus(event: FormEvent) {
     event.preventDefault(); if (!statusVerified) { setConfirmation('Verify the same contact used on your application before checking its status.'); return; } setBusy(true); setStatusResult(null); setConfirmation('');
-    const { data, error } = await supabase.rpc('public_skill_application_status', { reference: statusReference.trim() });
-    setBusy(false);
-    if (error) setConfirmation(error.message); else if (!data?.length) setConfirmation('No application was found for this reference and your verified contact. Verify with the same email or telephone used to apply.'); else setStatusResult(data[0]);
+    try {
+      const { data, error } = await supabase.rpc('public_skill_application_status', { reference: statusReference.trim() });
+      if (error) setConfirmation(error.message); else if (!data?.length) setConfirmation('No application was found for this reference and your verified contact. Verify with the same email or telephone used to apply.'); else setStatusResult(data[0]);
+    } catch { setConfirmation('Application status is temporarily unavailable. Please try again later.'); }
+    finally { setBusy(false); }
   }
 
   return <main className="public-skills-page">
-    <section className="public-skills-hero"><div><p className="eyebrow light">Open to everyone</p><h1>Learn a skill. Share a skill. Strengthen our community.</h1><p className="initiative-statement">{programmeStatement}</p><div className="public-skill-actions"><button className="primary-button" onClick={() => setPanel('learn')}><BookOpen/> Join a Free Class</button><button className="button-outline-light" onClick={() => setPanel('teach')}><GraduationCap/> Apply to Teach for Free</button></div></div></section>
+    <section className="public-skills-hero"><div><p className="eyebrow light">Open to everyone</p><h1>Learn a skill. Share a skill. Strengthen our community.</h1><p className="initiative-statement">{programmeStatement}</p><div className="public-skill-actions"><a className="primary-button" href="#/skill-exchange/learn"><BookOpen/> Learn a Skill</a><a className="button-outline-light" href="#/skill-exchange/teach"><GraduationCap/> Teach a Skill</a></div></div></section>
 
-    <section className="public-course-section" aria-labelledby="public-courses-title"><div className="section-heading"><p className="eyebrow">Free learning</p><h2 id="public-courses-title">Browse courses and workshops</h2><p>Explore current learning pathways. Registration is free and does not require Association membership.</p></div><div className="public-course-grid">{publicCourses.map((course) => <article key={course.slug}><BookOpen/><span>{course.format}</span><h3>{course.title}</h3><p>{course.summary}</p><button type="button" onClick={() => { setLearner((current) => ({ ...current, course_slug: course.slug })); setPanel('learn'); }}>Join this free class</button></article>)}</div></section>
+    <section className="public-course-section" aria-labelledby="public-courses-title"><div className="section-heading"><p className="eyebrow">Free learning</p><h2 id="public-courses-title">Browse courses and workshops</h2><p>Explore current learning pathways. Registration is free and does not require Association membership.</p></div><div className="public-course-grid">{publicCourses.map((course) => <article key={course.slug}><BookOpen/><span>{course.format}</span><h3>{course.title}</h3><p>{course.summary}</p><a href={`#/skill-exchange/courses/${course.slug}`}>Join this free class</a></article>)}</div></section>
 
     <section className="public-skills-assurance"><ShieldCheck/><div><h2>Safe, reviewed and genuinely free</h2><p>{programmeStatement}</p><p>Teaching proposals are private and stay <strong>Pending Review</strong>. Applying does not publish a teacher profile or create a course. Approved volunteers receive safeguarding, conduct, scheduling and course-preparation instructions before teaching.</p></div></section>
 
