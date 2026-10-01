@@ -7,7 +7,7 @@ Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405, headers: cors });
   try {
     const { channel, destination, website } = await request.json();
-    if (website || !['email', 'telephone'].includes(channel) || typeof destination !== 'string') throw new Error('Invalid verification request');
+    if (website || channel !== 'email' || typeof destination !== 'string') throw new Error('Invalid verification request');
     const normalized = destination.trim().toLowerCase();
     if (normalized.length < 5 || normalized.length > 254) throw new Error('Invalid verification contact');
 
@@ -20,10 +20,7 @@ Deno.serve(async (request) => {
 
     // This creates only a Supabase verification identity, never a Members row
     // or Association membership account. Duplicate-user errors are expected.
-    const attributes = channel === 'email'
-      ? { email: normalized, email_confirm: true }
-      : { phone: destination.trim(), phone_confirm: true };
-    const created = await admin.auth.admin.createUser(attributes);
+    const created = await admin.auth.admin.createUser({ email: normalized, email_confirm: true });
     if (created.error && !/already|registered|exists/i.test(created.error.message)) throw created.error;
     return new Response(JSON.stringify({ ready: true }), { headers: { ...cors, 'Content-Type': 'application/json' } });
   } catch (error) {
