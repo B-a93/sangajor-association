@@ -29,7 +29,37 @@ test('every public course card changes URL to a route whose slug selects its reg
   assert.match(app, /publicCourseMatch = route\.match\(\/\^\\\/skill-exchange\\\/courses/);
   assert.match(app, /publicCourses\.find\(\(item\) => item\.slug === publicCourseMatch\[1\]\)/);
   assert.match(app, /<PublicSkillExchange panel="learn" courseSlug=\{course\.slug\}/);
+  assert.match(app, /courseSlug=\{course\.slug\} key=\{course\.slug\}/);
   for (const slug of courses) assert.match(data, new RegExp(`slug: '${slug}'`));
+});
+
+test('learn, teach and every course navigation expose and focus the destination heading', async () => {
+  const [page, styles] = await Promise.all([
+    read('src/pages/PublicSkillExchange.tsx'),
+    read('src/pages/PublicSkillExchange.css'),
+  ]);
+
+  // Both dedicated form routes use the same destination ref, so course routes receive
+  // the learner-heading behavior as well as the selected course.
+  assert.match(page, /const destinationHeading = useRef<HTMLHeadingElement>\(null\)/);
+  assert.match(page, /destinationHeading\.current\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(page, /destinationHeading\.current\?\.scrollIntoView\(\{ block: 'start', behavior: 'auto' \}\)/);
+  assert.match(page, /\[courseSlug, displayPanel\]/);
+  assert.match(page, /<h2 ref=\{destinationHeading\} tabIndex=\{-1\}>Join a Free Class<\/h2>/);
+  assert.match(page, /<h2 ref=\{destinationHeading\} tabIndex=\{-1\}>Apply to Teach for Free<\/h2>/);
+  assert.match(page, /if \(panel === 'learn'\) setLearner\(\(current\) => \(\{ \.\.\.current, course_slug: courseSlug \}\)\)/);
+
+  // The fixed desktop/mobile header cannot cover a scrolled heading, and narrow
+  // layouts retain the existing single-column form behavior.
+  assert.match(styles, /scroll-margin-top:110px/);
+  assert.match(styles, /@media\(max-width:620px\).*\.public-form-grid\{grid-template-columns:1fr\}/s);
+});
+
+test('form routes are dedicated views with a visible return path', async () => {
+  const page = await read('src/pages/PublicSkillExchange.tsx');
+  assert.match(page, /\{!displayPanel && <>/);
+  assert.match(page, /\{displayPanel && <div className="public-form-route">/);
+  assert.match(page, /href="#\/skill-exchange"><ArrowLeft\/> Back to Skill Exchange/);
 });
 
 test('Supabase failures always release busy states and Hostinger has an SPA refresh fallback', async () => {
