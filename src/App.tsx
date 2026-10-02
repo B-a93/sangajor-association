@@ -225,7 +225,7 @@ export default function App() {
   let page: ReactElement;
   if (publicCourseMatch) {
     const course = publicCourses.find((item) => item.slug === publicCourseMatch[1]);
-    page = course ? <PublicSkillExchange panel="learn" courseSlug={course.slug} /> : <PublicSkillExchange />;
+    page = course ? <PublicSkillExchange panel="learn" courseSlug={course.slug} key={course.slug} /> : <PublicSkillExchange />;
   } else if (leadershipProfileMatch) {
     const executive = executives.find((item) => item.slug === leadershipProfileMatch[1]);
     page = executive ? <ExecutiveProfile executive={executive} /> : <Leadership />;
