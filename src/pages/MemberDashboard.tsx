@@ -25,9 +25,11 @@ export function MemberDashboard() {
   const [canModerateVillage, setCanModerateVillage] = useState(false);
   const [canApproveCertificates, setCanApproveCertificates] = useState(false);
   const [canReviewTeaching, setCanReviewTeaching] = useState(false);
+  const [canReviewLearners, setCanReviewLearners] = useState(false);
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
   const [unreadContactEnquiries, setUnreadContactEnquiries] = useState(0);
   const [pendingTeachingRequests, setPendingTeachingRequests] = useState(0);
+  const [pendingLearningRequests, setPendingLearningRequests] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data, error: sessionError }) => {
@@ -85,6 +87,13 @@ export function MemberDashboard() {
           if (!teachingCount.error) setPendingTeachingRequests(Number(teachingCount.data ?? 0));
           else setAuthorizationWarnings((current) => [...current, 'teaching request badge']);
         }
+        const learnerAccess = await supabase.rpc('can_review_learning_requests');
+        if (!learnerAccess.error) setCanReviewLearners(Boolean(learnerAccess.data));
+        if (!learnerAccess.error && learnerAccess.data) {
+          const learnerCount = await supabase.rpc('unread_learner_request_count');
+          if (!learnerCount.error) setPendingLearningRequests(Number(learnerCount.data ?? 0));
+          else setAuthorizationWarnings((current) => [...current, 'learner request badge']);
+        }
         if (!unreadResult.error) setUnreadAnnouncements(Number(unreadResult.data ?? 0));
         const failedChecks = checkResults.filter((label): label is Exclude<typeof label, null> => label !== null);
         setAuthorizationWarnings((current) => [...current, ...failedChecks, ...(unreadResult.error ? ['announcement badge'] : []), ...(contactEnquiryCount.error ? ['contact enquiry badge'] : [])]);
@@ -138,5 +147,6 @@ export function MemberDashboard() {
     {isExecutive && <section className="executive-portal" aria-labelledby="executive-progress-title"><div><p className="eyebrow">Shared executive oversight</p><h2 id="executive-progress-title">Executive Work Register</h2><p>See completed, ongoing and pending work across every executive office.</p></div><div className="dashboard-grid"><article><span>Office progress</span><strong>Record your office tasks and follow Association-wide delivery</strong><a href="#/dashboard/executive-progress">Open work register</a></article></div></section>}
     {canApproveCertificates && <section className="executive-portal"><div><p className="eyebrow">Chairman only</p><h2>Certificate approvals</h2><p>Give final approval to tutor-verified course completions.</p></div><div className="dashboard-grid"><article><span>Certificates</span><strong>Review the pending Chairman approval queue</strong><a href="#/dashboard/certificates/approval">Open approval dashboard</a></article></div></section>}
     {canReviewTeaching && <section className="executive-portal"><div><p className="eyebrow">Authorised programme review</p><h2>Teaching Requests</h2><p>Review member and verified public proposals in one secure queue.</p></div><div className="dashboard-grid"><article><span>Teaching requests</span>{pendingTeachingRequests>0&&<span className="notification-badge" aria-label={`${pendingTeachingRequests} unread pending teaching requests`}>{pendingTeachingRequests>99?'99+':pendingTeachingRequests}</span>}<strong>{pendingTeachingRequests>0?`${pendingTeachingRequests} pending request${pendingTeachingRequests===1?'':'s'} need review`:'No pending requests'}</strong><a href="#/dashboard/teaching-requests">Open Teaching Requests</a></article></div></section>}
+    {canReviewLearners && <section className="executive-portal"><div><p className="eyebrow">Chairman · Secretary · IPRO</p><h2>Learner Requests</h2><p>Review verified public requests to join free Skill Exchange classes.</p></div><div className="dashboard-grid"><article><span>Learner requests</span>{pendingLearningRequests>0&&<span className="notification-badge" aria-label={`${pendingLearningRequests} pending learner requests`}>{pendingLearningRequests>99?'99+':pendingLearningRequests}</span>}<strong>{pendingLearningRequests>0?`${pendingLearningRequests} pending request${pendingLearningRequests===1?'':'s'} need review`:'No pending requests'}</strong><a href="#/dashboard/learner-requests">Open Learner Requests</a></article></div></section>}
   </section>;
 }

@@ -20,6 +20,7 @@ const MemberAdministration = lazy(() => import('./pages/MemberAdministration').t
 const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })));
 const PublicSkillExchange = lazy(() => import('./pages/PublicSkillExchange').then((module) => ({ default: module.PublicSkillExchange })));
 const TeachingRequests = lazy(() => import('./pages/TeachingRequests').then((module) => ({ default: module.TeachingRequests })));
+const LearnerRequests = lazy(() => import('./pages/LearnerRequests').then((module) => ({ default: module.LearnerRequests })));
 const CommunicationAdministration = lazy(() => import('./pages/CommunicationAdministration').then((module) => ({ default: module.CommunicationAdministration })));
 const CommunicationCenter = lazy(() => import('./pages/CommunicationCenter').then((module) => ({ default: module.CommunicationCenter })));
 const CommitteesVolunteering = lazy(() => import('./pages/CommitteesVolunteering').then((module) => ({ default: module.CommitteesVolunteering })));
@@ -195,6 +196,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/connections': <ConnectionHub />,
   '/dashboard/skills-exchange': <SkillsExchange />,
   '/dashboard/teaching-requests': <TeachingRequests />,
+  '/dashboard/learner-requests': <LearnerRequests />,
   '/dashboard/learning/digital-income/lesson-1': <DigitalIncomeLesson />,
   '/dashboard/learning/digital-income': <DigitalIncomeCourseDashboard />,
   '/dashboard/learning/digital-income/final-assessment': <DigitalIncomeFinalAssessment />,
