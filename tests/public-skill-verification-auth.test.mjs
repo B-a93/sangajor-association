@@ -14,7 +14,9 @@ test('Skill Exchange offers Google and email verification with production return
 
 test('verification reports safe actionable auth failures', async () => {
   const page = await read('src/pages/PublicSkillExchange.tsx');
-  for (const text of ['Google verification was cancelled', 'verification email could not be sent', 'Too many verification attempts', 'not configured for this return address']) assert.match(page, new RegExp(text));
+  for (const text of ['Google verification was cancelled', 'verification email could not be sent', 'Too many verification attempts', 'not configured for this return address', 'invalid or has expired']) assert.match(page, new RegExp(text));
+  assert.match(page, /optional preflight function must not prevent/);
+  assert.match(page, /supabase\.auth\.signInWithOtp/);
 });
 
 test('database and preparation endpoint accept only verified email identities', async () => {
