@@ -32,7 +32,9 @@ test('learner request completes immediately after email or Google verification',
   assert.match(page, /autoComplete beforeOAuth/);
   assert.match(page, /await completeLearnerRegistration\(verifiedLearner\)/);
   assert.match(page, /draft\.target === 'learner'[\s\S]*completeLearnerRegistration\(verifiedLearner\)/);
-  assert.match(page, /Learning request submitted successfully/);
+  assert.match(page, /Registration complete/);
+  assert.match(page, /Start Course/);
+  assert.doesNotMatch(page, /remain Pending Review until the Chairman/);
   assert.match(page, /learnerSubmissionStarted/);
   assert.doesNotMatch(page, /Email verified\. You may now submit the form\.'); onVerified/);
 });
