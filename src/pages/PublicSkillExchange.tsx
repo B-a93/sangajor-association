@@ -22,7 +22,9 @@ function verificationMessage(error: { message?: string; status?: number } | null
   if (error?.status === 429 || /rate|too many|over.*limit/.test(message)) return 'Too many verification attempts. Please wait before trying again.';
   if (/redirect|callback|url.*allow|not allowed/.test(message)) return 'Google verification is not configured for this return address. Please use email verification or contact the site administrator.';
   if (source === 'oauth' && /cancel|denied|access_denied/.test(message)) return 'Google verification was cancelled. Your form has been preserved and you can try again.';
+  if (source === 'email' && /not authorized/.test(message)) return 'Email delivery is not yet authorised for public addresses. Please use Google verification or contact the site administrator.';
   if (source === 'email' && /smtp|email.*send|sending|mailer|provider/.test(message)) return 'The verification email could not be sent. Please check the address and try again later.';
+  if (source === 'email' && /expired|invalid.*token|token.*invalid/.test(message)) return 'That verification code is invalid or has expired. Request one new code and try again.';
   return source === 'oauth' ? 'Google verification could not be completed. Please try again or verify by email.' : 'Email verification could not be completed. Please try again later.';
 }
 
@@ -34,7 +36,10 @@ function ContactVerification({ email, verified, onVerified, beforeOAuth }: Verif
     if (!destination) { setNotice('Enter your email address first.'); return; } setBusy(true); setNotice('');
     try {
       const prepared = await supabase.functions.invoke('public-skill-verification', { body: { channel: 'email', destination, website: '' } });
-      if (prepared.error) { setNotice(verificationMessage(prepared.error, 'email')); return; }
+      const preflightStatus = (prepared.error as { context?: { status?: number } } | null)?.context?.status;
+      if (preflightStatus === 429) { setNotice('Too many verification attempts. Please wait before trying again.'); return; }
+      // Supabase Auth already rate-limits OTP delivery. A missing or temporarily unavailable
+      // optional preflight function must not prevent a correctly configured SMTP service.
       const result = await supabase.auth.signInWithOtp({ email: destination, options: { shouldCreateUser: true } });
       if (result.error) setNotice(verificationMessage(result.error, 'email')); else { setSent(true); setNotice(`We sent a one-time verification code to ${destination}.`); }
     } catch { setNotice('The verification email could not be sent. Please try again later.'); } finally { setBusy(false); }
