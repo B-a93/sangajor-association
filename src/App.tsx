@@ -18,6 +18,7 @@ const InvitationAcceptance = lazy(() => import('./pages/InvitationAcceptance').t
 const MemberInvitations = lazy(() => import('./pages/MemberInvitations').then((module) => ({ default: module.MemberInvitations })));
 const MemberAdministration = lazy(() => import('./pages/MemberAdministration').then((module) => ({ default: module.MemberAdministration })));
 const Contact = lazy(() => import('./pages/Contact').then((module) => ({ default: module.Contact })));
+const ContactEnquiries = lazy(() => import('./pages/ContactEnquiries').then((module) => ({ default: module.ContactEnquiries })));
 const PublicSkillExchange = lazy(() => import('./pages/PublicSkillExchange').then((module) => ({ default: module.PublicSkillExchange })));
 const TeachingRequests = lazy(() => import('./pages/TeachingRequests').then((module) => ({ default: module.TeachingRequests })));
 const LearnerRequests = lazy(() => import('./pages/LearnerRequests').then((module) => ({ default: module.LearnerRequests })));
@@ -188,6 +189,7 @@ const pages: Record<string, ReactElement> = {
   '/dashboard/events': <MemberEvents />,
   '/dashboard/events/manage': <EventAdministration />,
   '/dashboard/communications': <CommunicationCenter />,
+  '/dashboard/contact-enquiries': <ContactEnquiries />,
   '/dashboard/communications/manage': <CommunicationAdministration />,
   '/dashboard/documents': <KnowledgeCenter />,
   '/dashboard/documents/manage': <DocumentAdministration />,
