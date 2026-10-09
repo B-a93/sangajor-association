@@ -25,3 +25,14 @@ test('database and preparation endpoint accept only verified email identities', 
   assert.match(migration, /alter column telephone drop not null/); assert.match(migration, /,null,btrim\(application->>'location'\)/);
   assert.match(edge, /channel !== 'email'/); assert.doesNotMatch(edge, /phone_confirm|channel === 'email'/);
 });
+
+
+test('learner request completes immediately after email or Google verification', async () => {
+  const page = await read('src/pages/PublicSkillExchange.tsx');
+  assert.match(page, /autoComplete beforeOAuth/);
+  assert.match(page, /await completeLearnerRegistration\(verifiedLearner\)/);
+  assert.match(page, /draft\.target === 'learner'[\s\S]*completeLearnerRegistration\(verifiedLearner\)/);
+  assert.match(page, /Learning request submitted successfully/);
+  assert.match(page, /learnerSubmissionStarted/);
+  assert.doesNotMatch(page, /Email verified\. You may now submit the form\.'); onVerified/);
+});
