@@ -36,3 +36,12 @@ test('learner request completes immediately after email or Google verification',
   assert.match(page, /learnerSubmissionStarted/);
   assert.doesNotMatch(page, /Email verified\. You may now submit the form\.'); onVerified/);
 });
+
+
+test('learner form is validated before verification and hides raw constraint errors', async () => {
+  const page = await read('src/pages/PublicSkillExchange.tsx');
+  assert.match(page, /ready=\{learner\.full_name\.trim\(\)\.length >= 2/);
+  assert.match(page, /Complete your full name, location and course selection before verifying your email/);
+  assert.match(page, /Enter your full name using at least two characters/);
+  assert.match(page, /details\.location\.trim\(\)\.length < 2/);
+});
