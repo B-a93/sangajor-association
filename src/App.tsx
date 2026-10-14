@@ -78,7 +78,6 @@ function MemberProfile({ memberId }: { memberId: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [member, setMember] = useState<MemberProfileRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -92,16 +91,6 @@ function MemberProfile({ memberId }: { memberId: string }) {
       }
 
       setSession(currentSession);
-
-      const { data: hasDirectoryAccess, error: authorizationError } = await supabase
-        .rpc('current_member_directory_access');
-      if (authorizationError || !hasDirectoryAccess) {
-        setMessage('Member profiles are available only to active SANGAJOR members.');
-        setLoading(false);
-        return;
-      }
-
-      setAuthorized(true);
 
       const { data, error } = await supabase
         .from('Members')
@@ -121,18 +110,6 @@ function MemberProfile({ memberId }: { memberId: string }) {
   }, [memberId]);
 
   if (loading || !session) return <section className="member-profile-loading">Loading member profile…</section>;
-
-  if (!authorized) {
-    return (
-      <section className="member-profile-page">
-        <a className="secondary-button" href="#/dashboard">Back to dashboard</a>
-        <div className="member-profile-state" role="alert">
-          <h1>Internal member access</h1>
-          <p>{message}</p>
-        </div>
-      </section>
-    );
-  }
 
   if (!member) {
     return (
