@@ -23,21 +23,6 @@
 .member-profile-header h1 { margin: .35rem 0 .75rem; }
 .directory-header p { max-width: 720px; }
 
-.directory-privacy-note {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  margin-top: .7rem;
-  padding: .45rem .75rem;
-  border-radius: 999px;
-  background: #e4f1eb;
-  color: #165b46;
-  font-size: .78rem;
-  font-weight: 800;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
 .directory-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -164,19 +149,13 @@
 .directory-profile-link:hover { text-decoration: underline; }
 
 .directory-empty,
-.member-profile-state,
-.directory-access-state {
+.member-profile-state {
   margin-top: 2rem;
   padding: 4rem 1rem;
   text-align: center;
   border-radius: 1rem;
   background: #f3f7f5;
 }
-
-.directory-access-state svg { color: #165b46; }
-.directory-access-state .eyebrow { margin-top: 1rem; }
-.directory-access-state h1 { margin: .35rem 0 .75rem; }
-.directory-access-state .secondary-button { display: inline-flex; margin-top: 1rem; }
 
 .member-profile-card {
   display: grid;
