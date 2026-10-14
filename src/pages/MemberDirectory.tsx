@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { ArrowRight, BriefcaseBusiness, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { resolveMemberPhotoUrl } from '../lib/memberPhoto';
 import './MemberDirectory.css';
 
 type DirectoryMember = {
@@ -41,7 +42,13 @@ export function MemberDirectory() {
         .order('last_name', { ascending: true });
 
       if (error) setMessage('The member directory could not be loaded. Please try again.');
-      else setMembers(data ?? []);
+      else {
+        const directory = await Promise.all((data ?? []).map(async (member) => ({
+          ...member,
+          profile_photo: await resolveMemberPhotoUrl(member.profile_photo),
+        })));
+        setMembers(directory);
+      }
 
       setLoading(false);
     }
