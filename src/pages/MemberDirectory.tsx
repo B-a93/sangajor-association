@@ -20,7 +20,6 @@ export function MemberDirectory() {
   const [members, setMembers] = useState<DirectoryMember[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -34,16 +33,6 @@ export function MemberDirectory() {
       }
 
       setSession(currentSession);
-
-      const { data: hasDirectoryAccess, error: authorizationError } = await supabase
-        .rpc('current_member_directory_access');
-      if (authorizationError || !hasDirectoryAccess) {
-        setMessage('This directory is available only to active SANGAJOR members.');
-        setLoading(false);
-        return;
-      }
-
-      setAuthorized(true);
 
       const { data, error } = await supabase
         .from('Members')
@@ -75,20 +64,6 @@ export function MemberDirectory() {
   }, [members, search]);
 
   if (loading || !session) return <section className="directory-loading">Loading the member directory…</section>;
-
-  if (!authorized) {
-    return (
-      <section className="member-directory-page">
-        <div className="directory-access-state" role="alert">
-          <LockKeyhole size={34} aria-hidden="true" />
-          <p className="eyebrow">Internal member access</p>
-          <h1>Member Directory</h1>
-          <p>{message}</p>
-          <a className="secondary-button" href="#/dashboard">Back to dashboard</a>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="member-directory-page">
