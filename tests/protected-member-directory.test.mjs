@@ -4,20 +4,20 @@ import test from 'node:test';
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 
-test('member directory and profiles require an active internal member', async () => {
+test('member directory and profiles require an invitation-only authenticated session', async () => {
   const [directory, app, migration] = await Promise.all([
     read('src/pages/MemberDirectory.tsx'),
     read('src/App.tsx'),
-    read('supabase/migrations/202610140001_repair_member_directory_access.sql'),
+    read('supabase/migrations/202610140002_authenticated_directory_access.sql'),
   ]);
 
-  assert.match(directory, /rpc\('current_member_directory_access'\)/);
-  assert.match(directory, /if \(authorizationError \|\| !hasDirectoryAccess\)/);
-  assert.match(app, /rpc\('current_member_directory_access'\)/);
-  assert.match(migration, /create or replace function public\.current_member_directory_access\(\)/);
-  assert.match(migration, /lower\(trim\(m\.email\)\) = lower\(trim\(u\.email\)\)/);
-  assert.match(migration, /trim\(lower\(coalesce\(m\.status, ''\)\)\) = 'active'/);
+  assert.match(directory, /supabase\.auth\.getSession\(\)/);
+  assert.match(directory, /window\.location\.hash = '\/login'/);
+  assert.doesNotMatch(directory, /current_member_directory_access/);
+  assert.doesNotMatch(app, /current_member_directory_access/);
   assert.match(migration, /create policy "Active members can view the member directory"/);
+  assert.match(migration, /for select to authenticated/);
+  assert.match(migration, /trim\(lower\(coalesce\(status, ''\)\)\) = 'active'/);
 });
 
 test('directory uses portrait cards without publishing static member records', async () => {
