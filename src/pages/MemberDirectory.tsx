@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
+import { ArrowRight, BriefcaseBusiness, LockKeyhole, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './MemberDirectory.css';
 
@@ -19,6 +20,7 @@ export function MemberDirectory() {
   const [members, setMembers] = useState<DirectoryMember[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -32,6 +34,15 @@ export function MemberDirectory() {
       }
 
       setSession(currentSession);
+
+      const { data: isActiveMember, error: authorizationError } = await supabase.rpc('is_active_member');
+      if (authorizationError || !isActiveMember) {
+        setMessage('This directory is available only to active SANGAJOR members.');
+        setLoading(false);
+        return;
+      }
+
+      setAuthorized(true);
 
       const { data, error } = await supabase
         .from('Members')
@@ -64,6 +75,20 @@ export function MemberDirectory() {
 
   if (loading || !session) return <section className="directory-loading">Loading the member directory…</section>;
 
+  if (!authorized) {
+    return (
+      <section className="member-directory-page">
+        <div className="directory-access-state" role="alert">
+          <LockKeyhole size={34} aria-hidden="true" />
+          <p className="eyebrow">Internal member access</p>
+          <h1>Member Directory</h1>
+          <p>{message}</p>
+          <a className="secondary-button" href="#/dashboard">Back to dashboard</a>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="member-directory-page">
       <div className="directory-header">
@@ -71,6 +96,7 @@ export function MemberDirectory() {
           <p className="eyebrow">MySANGAJOR Digital Village</p>
           <h1>Member Directory</h1>
           <p>Find and connect with active members of the SANGAJOR B.C.S. Class of 2008 Association.</p>
+          <div className="directory-privacy-note"><LockKeyhole size={16} aria-hidden="true" /> Internal members only</div>
         </div>
         <a className="secondary-button" href="#/dashboard">Back to dashboard</a>
       </div>
@@ -102,17 +128,19 @@ export function MemberDirectory() {
 
             return (
               <article className="directory-member-card" key={member.id}>
-                {member.profile_photo ? (
-                  <img src={member.profile_photo} alt={`${fullName} profile`} loading="lazy" decoding="async" />
-                ) : (
-                  <div className="directory-member-initials" aria-hidden="true">{initials}</div>
-                )}
+                <div className="directory-member-portrait">
+                  {member.profile_photo ? (
+                    <img src={member.profile_photo} alt={`${fullName} profile`} loading="lazy" decoding="async" />
+                  ) : (
+                    <div className="directory-member-initials" aria-hidden="true">{initials}</div>
+                  )}
+                </div>
                 <div className="directory-member-content">
                   <span className="directory-member-number">{member.membership_number || 'Membership number pending'}</span>
                   <h2>{fullName}</h2>
-                  <p>{member.occupation || 'Occupation not provided'}</p>
-                  <small>{member.country || 'Country not provided'}</small>
-                  <a className="directory-profile-link" href={`#/dashboard/members/${member.id}`}>View profile</a>
+                  <p><BriefcaseBusiness size={15} aria-hidden="true" />{member.occupation || 'Occupation not provided'}</p>
+                  <p><MapPin size={15} aria-hidden="true" />{member.country || 'Country not provided'}</p>
+                  <a className="directory-profile-link" href={`#/dashboard/members/${member.id}`}>View profile <ArrowRight size={16} aria-hidden="true" /></a>
                 </div>
               </article>
             );
