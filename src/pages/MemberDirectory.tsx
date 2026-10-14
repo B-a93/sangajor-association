@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { ArrowRight, BriefcaseBusiness, LockKeyhole, MapPin } from 'lucide-react';
+import { ArrowRight, BriefcaseBusiness, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './MemberDirectory.css';
 
@@ -72,7 +72,6 @@ export function MemberDirectory() {
           <p className="eyebrow">MySANGAJOR Digital Village</p>
           <h1>Member Directory</h1>
           <p>Find and connect with active members of the SANGAJOR B.C.S. Class of 2008 Association.</p>
-          <div className="directory-privacy-note"><LockKeyhole size={16} aria-hidden="true" /> Internal members only</div>
         </div>
         <a className="secondary-button" href="#/dashboard">Back to dashboard</a>
       </div>
