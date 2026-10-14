@@ -23,6 +23,21 @@
 .member-profile-header h1 { margin: .35rem 0 .75rem; }
 .directory-header p { max-width: 720px; }
 
+.directory-privacy-note {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin-top: .7rem;
+  padding: .45rem .75rem;
+  border-radius: 999px;
+  background: #e4f1eb;
+  color: #165b46;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 .directory-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -60,25 +75,51 @@
 }
 
 .directory-member-card {
-  display: grid;
-  grid-template-columns: 78px minmax(0, 1fr);
-  gap: 1rem;
-  align-items: center;
-  padding: 1.25rem;
+  overflow: hidden;
   border: 1px solid rgba(18, 77, 60, .12);
-  border-radius: 1rem;
+  border-radius: 1.5rem;
   background: #fff;
   box-shadow: 0 14px 35px rgba(19, 57, 46, .06);
+  transition: transform .25s ease, box-shadow .25s ease;
 }
 
-.directory-member-card img,
+.directory-member-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(7, 47, 73, .1);
+}
+
+.directory-member-portrait {
+  position: relative;
+  height: 285px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #041f31, #082f49 70%, #0c5634);
+}
+
+.directory-member-portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 70% 20%, rgba(255, 255, 255, .14), transparent 38%);
+}
+
+.directory-member-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
 .directory-member-initials {
-  width: 78px;
-  height: 78px;
+  position: relative;
+  z-index: 1;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
 }
 
-.directory-member-card img { object-fit: cover; }
 .directory-member-initials,
 .member-profile-initials {
   display: grid;
@@ -89,10 +130,18 @@
   letter-spacing: .05em;
 }
 
-.directory-member-card h2 { margin: .35rem 0; font-size: 1.2rem; }
-.directory-member-card p { margin: 0 0 .25rem; color: #4d625b; }
-.directory-member-card small { color: #71807b; }
-.directory-member-content { min-width: 0; }
+.directory-member-card h2 { margin: .55rem 0 .85rem; font-size: 1.3rem; }
+.directory-member-card p {
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+  margin: .45rem 0;
+  color: #4d625b;
+  font-size: .88rem;
+  line-height: 1.4;
+}
+.directory-member-card p svg { flex: 0 0 auto; margin-top: .08rem; color: #165b46; }
+.directory-member-content { min-width: 0; padding: 1.5rem; }
 .directory-member-number,
 .member-profile-number {
   display: inline-block;
@@ -105,6 +154,8 @@
 
 .directory-profile-link {
   display: inline-flex;
+  align-items: center;
+  gap: .5rem;
   margin-top: .85rem;
   color: #165b46;
   font-weight: 800;
@@ -113,13 +164,19 @@
 .directory-profile-link:hover { text-decoration: underline; }
 
 .directory-empty,
-.member-profile-state {
+.member-profile-state,
+.directory-access-state {
   margin-top: 2rem;
   padding: 4rem 1rem;
   text-align: center;
   border-radius: 1rem;
   background: #f3f7f5;
 }
+
+.directory-access-state svg { color: #165b46; }
+.directory-access-state .eyebrow { margin-top: 1rem; }
+.directory-access-state h1 { margin: .35rem 0 .75rem; }
+.directory-access-state .secondary-button { display: inline-flex; margin-top: 1rem; }
 
 .member-profile-card {
   display: grid;
@@ -178,6 +235,7 @@
   .directory-toolbar { grid-template-columns: 1fr; }
   .directory-toolbar label { grid-column: auto; }
   .directory-grid { grid-template-columns: 1fr; }
+  .directory-member-portrait { height: 330px; }
   .member-profile-card { grid-template-columns: 1fr; padding: 1.25rem; }
   .member-profile-list { grid-template-columns: 1fr; }
 }
