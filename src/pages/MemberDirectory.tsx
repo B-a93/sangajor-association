@@ -35,12 +35,9 @@ export function MemberDirectory() {
 
       setSession(currentSession);
 
-      const { data: currentMember, error: authorizationError } = await supabase
-        .from('Members')
-        .select('id, status')
-        .eq('auth_user_id', currentSession.user.id)
-        .maybeSingle();
-      if (authorizationError || currentMember?.status?.toLowerCase() !== 'active') {
+      const { data: hasDirectoryAccess, error: authorizationError } = await supabase
+        .rpc('current_member_directory_access');
+      if (authorizationError || !hasDirectoryAccess) {
         setMessage('This directory is available only to active SANGAJOR members.');
         setLoading(false);
         return;
