@@ -11,9 +11,9 @@ test('member directory and profiles require an active internal member', async ()
     read('supabase/migrations/202607310051_members_source_of_truth.sql'),
   ]);
 
-  assert.match(directory, /rpc\('is_active_member'\)/);
+  assert.match(directory, /rpc\('is_active_member', \{[\s\S]*user_id: currentSession\.user\.id/);
   assert.match(directory, /if \(authorizationError \|\| !isActiveMember\)/);
-  assert.match(app, /rpc\('is_active_member'\)/);
+  assert.match(app, /rpc\('is_active_member', \{[\s\S]*user_id: currentSession\.user\.id/);
   assert.match(migration, /create policy "Active members can view the member directory"/);
   assert.match(migration, /public\.is_active_member\(\).*status, ''\)\) = 'active'/s);
 });
