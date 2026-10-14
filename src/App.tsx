@@ -93,10 +93,12 @@ function MemberProfile({ memberId }: { memberId: string }) {
 
       setSession(currentSession);
 
-      const { data: isActiveMember, error: authorizationError } = await supabase.rpc('is_active_member', {
-        user_id: currentSession.user.id,
-      });
-      if (authorizationError || !isActiveMember) {
+      const { data: currentMember, error: authorizationError } = await supabase
+        .from('Members')
+        .select('id, status')
+        .eq('auth_user_id', currentSession.user.id)
+        .maybeSingle();
+      if (authorizationError || currentMember?.status?.toLowerCase() !== 'active') {
         setMessage('Member profiles are available only to active SANGAJOR members.');
         setLoading(false);
         return;
