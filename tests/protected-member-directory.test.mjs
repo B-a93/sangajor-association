@@ -29,6 +29,7 @@ test('directory uses portrait cards without publishing static member records', a
   assert.match(directory, /directory-member-portrait/);
   assert.doesNotMatch(directory, /Internal members only/);
   assert.match(directory, /\.from\('Members'\)/);
+  assert.doesNotMatch(directory, /\.eq\('status', 'active'\)/);
   assert.match(styles, /\.directory-member-portrait[\s\S]*height: 285px/);
   assert.match(styles, /object-position: center top/);
 });

@@ -96,7 +96,6 @@ function MemberProfile({ memberId }: { memberId: string }) {
         .from('Members')
         .select('id, membership_number, first_name, last_name, country, occupation, profile_photo, status')
         .eq('id', memberId)
-        .eq('status', 'active')
         .maybeSingle();
 
       if (error) setMessage('This member profile could not be loaded. Please try again.');
