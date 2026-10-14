@@ -35,7 +35,9 @@ export function MemberDirectory() {
 
       setSession(currentSession);
 
-      const { data: isActiveMember, error: authorizationError } = await supabase.rpc('is_active_member');
+      const { data: isActiveMember, error: authorizationError } = await supabase.rpc('is_active_member', {
+        user_id: currentSession.user.id,
+      });
       if (authorizationError || !isActiveMember) {
         setMessage('This directory is available only to active SANGAJOR members.');
         setLoading(false);
