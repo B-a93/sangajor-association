@@ -7,6 +7,7 @@ import { AssistantErrorBoundary } from './components/AssistantErrorBoundary';
 import { executives } from './data/executives';
 import { useHashRoute } from './hooks/useHashRoute';
 import { supabase } from './lib/supabase';
+import { resolveMemberPhotoUrl } from './lib/memberPhoto';
 import { bakingCourse, cookingCourse } from './data/cookingBakingCourses';
 import { publicCourses } from './data/publicCourses';
 import './pages/MemberDirectory.css';
@@ -100,7 +101,7 @@ function MemberProfile({ memberId }: { memberId: string }) {
 
       if (error) setMessage('This member profile could not be loaded. Please try again.');
       else if (!data) setMessage('This member profile is unavailable or does not exist.');
-      else setMember(data);
+      else setMember({ ...data, profile_photo: await resolveMemberPhotoUrl(data.profile_photo) });
 
       setLoading(false);
     }
